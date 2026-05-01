@@ -23,7 +23,7 @@ function StatCard({
   label: string; value: string | number; icon: React.ComponentType<{ className?: string; strokeWidth?: number; style?: React.CSSProperties }>; accent?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#eaeaea]/80 p-3 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] hover:border-[#1ABC9C]/30 transition-all">
+    <div className="bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea]/80 p-3 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] hover:border-[#1ABC9C]/30 transition-all">
       <div className="flex items-center gap-2.5">
         <div
           className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0"
@@ -48,7 +48,7 @@ function StatCard({
 }
 
 const ChartCard: React.FC<{ title: string; children: React.ReactNode; right?: React.ReactNode }> = ({ title, children, right }) => (
-  <div className="bg-white rounded-xl border border-[#eaeaea]/80 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] overflow-hidden">
+  <div className="bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea]/80 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] overflow-hidden">
     <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#eaeaea]/60">
       <h3 className="text-[12.5px] font-semibold text-[#1f2937]" style={{ fontFamily: 'Poppins, sans-serif' }}>
         {title}
@@ -123,7 +123,7 @@ export function AdminAnalyticsPage() {
               ? <>Window: <span className="text-[#1f2937] font-semibold">last {data.window.days} days</span> · generated {new Date(data.window.generatedAt).toLocaleString()}</>
               : 'Loading…'}
           </p>
-          <div className="inline-flex items-center gap-0.5 bg-white border border-[#eaeaea] rounded-lg p-0.5">
+          <div className="inline-flex items-center gap-0.5 bg-white dark:bg-[#11151a] border border-[#eaeaea] rounded-lg p-0.5">
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}

@@ -29,10 +29,11 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
   ];
 
   return (
-    // Slimmer (h-12 vs h-16) + frosted-white so it visually pairs with the
-    // glass sidebar. The thin bottom border keeps the page divisions clean.
+    // Slimmer (h-12 vs h-16) + frosted so it visually pairs with the dark
+    // sidebar. Light theme: white/80; dark theme: slate/80 with a faint
+    // bottom border that picks up the page bg.
     <header
-      className="sticky top-0 z-30 h-12 border-b border-[#EAEAEA]/70 bg-white/80"
+      className="sticky top-0 z-30 h-12 border-b border-[#EAEAEA]/70 dark:border-white/8 bg-white/80 dark:bg-[#11151a]/85"
       style={{ backdropFilter: 'blur(14px) saturate(140%)', WebkitBackdropFilter: 'blur(14px) saturate(140%)' }}
     >
       <div className="flex h-full items-center justify-between pl-12 pr-5 lg:pl-6 lg:pr-6">
@@ -40,15 +41,15 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
         <div className="flex items-center gap-2 min-w-0">
           {breadcrumb && (
             <span
-              className="text-[11px] text-[#9aa0a6] uppercase tracking-[0.12em]"
+              className="text-[11px] text-[#9aa0a6] dark:text-white/45 uppercase tracking-[0.12em]"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               {breadcrumb}
             </span>
           )}
-          {breadcrumb && <span className="text-[#d4d4d8] text-[11px]">/</span>}
+          {breadcrumb && <span className="text-[#d4d4d8] dark:text-white/25 text-[11px]">/</span>}
           <h1
-            className="text-[14px] font-semibold text-[#1f2937] truncate"
+            className="text-[14px] font-semibold text-[#1f2937] dark:text-white truncate"
             style={{ fontFamily: 'Poppins, sans-serif' }}
           >
             {title}

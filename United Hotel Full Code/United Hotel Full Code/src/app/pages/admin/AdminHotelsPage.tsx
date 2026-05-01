@@ -92,11 +92,15 @@ export function AdminHotelsPage() {
             location_raw: h.location,
             location: h.location,
             address: h.address || null,
+            // The vendor endpoint returns the cover URL on `image`; pass it
+            // through both names so pickHotelImage finds it (it reads
+            // image_url / imageUrl / cover_image / images[]).
             image: h.image || null,
+            image_url: h.image || null,
             totalRooms: h.totalRooms ?? null,
             rooms: byHotel.get(h.id) || [],
             recommendedPrices: [],
-          } as PublicHotel));
+          } as any));
           if (!active) return;
           setHotels(mapped);
           if (mapped.length > 0) setActiveId((prev) => prev ?? mapped[0].id);
@@ -234,8 +238,8 @@ export function AdminHotelsPage() {
       <div className="space-y-4">
         {/* Toolbar — single tidy row, smaller search/button */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[12.5px] text-[#6b7280]" style={{ fontFamily: 'Inter, sans-serif' }}>
-            <span className="text-[#1f2937] font-semibold">{hotels.length}</span> properties · room inventory
+          <p className="text-[12.5px] text-[#6b7280] dark:text-white/55" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-[#1f2937] dark:text-white font-semibold">{hotels.length}</span> properties · room inventory
           </p>
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -244,7 +248,7 @@ export function AdminHotelsPage() {
                 placeholder="Search hotels…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] w-56 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C] transition-colors"
+                className="rounded-lg border border-[#eaeaea] dark:border-white/10 bg-white dark:bg-[#11151a] dark:text-white dark:placeholder-white/40 pl-8 pr-3 py-1.5 text-[12.5px] w-56 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C] transition-colors"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               />
             </div>
@@ -265,74 +269,126 @@ export function AdminHotelsPage() {
         )}
 
         {loading ? (
-          <p className="text-[12.5px] text-[#8c8c8c]">Loading hotels…</p>
+          <p className="text-[12.5px] text-[#8c8c8c] dark:text-white/55">Loading hotels…</p>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
-            {/* Hotel grid — denser cards (3 cols on wider screens), smaller image, tighter info */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-              {filtered.map((h) => {
-                const isActiveCard = activeId === h.id;
-                return (
-                  <div
-                    key={h.id}
-                    onClick={() => setActiveId(h.id)}
-                    className={`group text-left bg-white rounded-xl border overflow-hidden transition-all cursor-pointer ${
-                      isActiveCard
-                        ? 'border-[#1ABC9C] ring-1 ring-[#1ABC9C]/30 shadow-[0_8px_24px_-12px_rgba(26,188,156,0.45)]'
-                        : 'border-[#eaeaea] hover:border-[#1ABC9C]/40 hover:shadow-[0_6px_18px_-12px_rgba(15,23,42,0.18)]'
-                    }`}
-                  >
-                    {/* Image — slightly shorter, with vendor pill */}
-                    <div className="relative h-24 bg-[#f1f1f1]">
-                      <img src={h.image} alt={h.name} className="w-full h-full object-cover" />
-                      {h.vendorId ? (
-                        <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-[#1ABC9C]/95 text-white text-[10px] px-1.5 py-0.5 shadow-sm">
-                          <Tag className="w-2.5 h-2.5" /> #{h.vendorId}
-                        </span>
-                      ) : null}
-                    </div>
-                    {/* Body — name + minimal meta. Stars and price-range are inline so the card stays short */}
-                    <div className="p-2.5 space-y-1.5">
-                      <h3 className="text-[13px] font-semibold text-[#1f2937] line-clamp-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                        {h.name}
-                      </h3>
-                      <div className="flex items-center gap-1 text-[11px] text-[#8c8c8c]">
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        <span className="line-clamp-1">{h.location}</span>
+            {/* Hotel list — single-column horizontal row layout with a 96x72
+                thumbnail on the left and stats laid out in a column-based
+                grid. Reads like an industry partner-portal property list
+                (Booking, Cloudbeds, Hotelogix) instead of a Pinterest grid. */}
+            <div className="bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea] dark:border-white/8 overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+              <div className="hidden md:grid grid-cols-[96px_minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_88px] gap-3 px-3 py-2 bg-[#fafafa] dark:bg-[#0d1014] border-b border-[#eaeaea] dark:border-white/8 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6] dark:text-white/45" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <div></div>
+                <div>Property</div>
+                <div>Rating</div>
+                <div>Price band</div>
+                <div>Inventory</div>
+                <div className="text-right">Action</div>
+              </div>
+              <div className="divide-y divide-[#f1f1f1] dark:divide-white/5">
+                {filtered.map((h) => {
+                  const isActiveRow = activeId === h.id;
+                  return (
+                    <div
+                      key={h.id}
+                      onClick={() => setActiveId(h.id)}
+                      className={`group grid grid-cols-[96px_minmax(0,1fr)_72px] md:grid-cols-[96px_minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_88px] gap-3 px-3 py-2.5 transition-colors cursor-pointer ${
+                        isActiveRow
+                          ? 'bg-[#1ABC9C]/[0.06] hover:bg-[#1ABC9C]/[0.08]'
+                          : 'hover:bg-[#fafafa] dark:hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      {/* Thumbnail */}
+                      <div className="relative h-[72px] w-[96px] rounded-lg overflow-hidden bg-gradient-to-br from-[#1ABC9C]/15 to-[#2dd4bf]/10 dark:from-[#1ABC9C]/20 dark:to-[#2dd4bf]/15 shrink-0">
+                        {h.image ? (
+                          <img
+                            src={h.image}
+                            alt={h.name}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const img = e.currentTarget;
+                              if (img.dataset.fallback === '1') return;
+                              img.dataset.fallback = '1';
+                              img.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <BedDouble className="w-5 h-5 text-[#1ABC9C] opacity-60" />
+                          </div>
+                        )}
+                        {h.vendorId ? (
+                          <span className="absolute top-1 left-1 inline-flex items-center gap-0.5 rounded-full bg-[#1ABC9C] text-white text-[9px] px-1 py-px shadow-sm">
+                            <Tag className="w-2 h-2" /> {h.vendorId}
+                          </span>
+                        ) : null}
                       </div>
-                      <div className="flex items-center justify-between">
+
+                      {/* Property name + location */}
+                      <div className="min-w-0 flex flex-col justify-center">
+                        <h3 className="text-[13.5px] font-semibold text-[#1f2937] dark:text-white truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                          {h.name}
+                        </h3>
+                        <div className="flex items-center gap-1 text-[11.5px] text-[#8c8c8c] dark:text-white/55 mt-0.5">
+                          <MapPin className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{h.location}</span>
+                        </div>
+                      </div>
+
+                      {/* Rating — desktop only */}
+                      <div className="hidden md:flex items-center gap-1.5 text-[11.5px]">
                         <div className="flex items-center gap-0.5">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < h.starRating ? 'fill-[#FFA500] text-[#FFA500]' : 'fill-[#eaeaea] text-[#eaeaea]'}`} />
+                            <Star
+                              key={i}
+                              className={`w-3 h-3 ${
+                                i < h.starRating
+                                  ? 'fill-[#FFA500] text-[#FFA500]'
+                                  : 'fill-[#eaeaea] text-[#eaeaea] dark:fill-white/10 dark:text-white/10'
+                              }`}
+                            />
                           ))}
                         </div>
-                        <div className="text-[11px] font-semibold text-[#0f9b86]">
-                          {h.minPrice > 0 ? `${fmtUsd(h.minPrice)}–${fmtUsd(h.maxPrice)}` : '—'}
-                        </div>
+                        {h.reviewCount > 0 && (
+                          <span className="text-[10.5px] text-[#9aa0a6] dark:text-white/45">({h.reviewCount})</span>
+                        )}
                       </div>
-                      <div className="flex items-center justify-between text-[10.5px] text-[#9aa0a6] pt-1 border-t border-[#f1f1f1]">
-                        <span><BedDouble className="w-2.5 h-2.5 inline -mt-0.5 mr-1" />{h.rooms.length} types</span>
-                        <span>{h.totalRooms ? `${h.totalRooms} rooms` : '—'}</span>
+
+                      {/* Price band — desktop only */}
+                      <div className="hidden md:flex items-center text-[12px] font-semibold text-[#0f9b86] dark:text-[#2dd4bf]">
+                        {h.minPrice > 0 ? `${fmtUsd(h.minPrice)}–${fmtUsd(h.maxPrice)}` : '—'}
                       </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/admin/hotels/${h.id}`); }}
-                        className="w-full inline-flex items-center justify-center gap-1 rounded-md bg-[#1ABC9C]/10 hover:bg-[#1ABC9C] hover:text-white text-[#0f9b86] text-[11px] font-semibold py-1 transition-colors"
-                      >
-                        Open details <ChevronRight className="w-3 h-3" />
-                      </button>
+
+                      {/* Inventory — desktop only */}
+                      <div className="hidden md:flex items-center text-[11.5px] text-[#6b7280] dark:text-white/65">
+                        <BedDouble className="w-3.5 h-3.5 mr-1 text-[#9aa0a6]" />
+                        {h.rooms.length} {h.rooms.length === 1 ? 'type' : 'types'}
+                        {h.totalRooms ? ` · ${h.totalRooms} rms` : ''}
+                      </div>
+
+                      {/* Action */}
+                      <div className="flex items-center justify-end">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/hotels/${h.id}`); }}
+                          className="inline-flex items-center gap-1 rounded-md bg-[#1ABC9C]/10 hover:bg-[#1ABC9C] hover:text-white text-[#0f9b86] dark:text-[#2dd4bf] dark:hover:text-white text-[11px] font-semibold px-2 py-1.5 transition-colors"
+                        >
+                          Open <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <div className="px-6 py-12 text-center">
+                    <p className="text-[13px] text-[#9aa0a6]">No hotels match your search.</p>
                   </div>
-                );
-              })}
-              {filtered.length === 0 && (
-                <div className="col-span-full bg-white rounded-xl border border-dashed border-[#eaeaea] p-8 text-center">
-                  <p className="text-[13px] text-[#8c8c8c]">No hotels match your search.</p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Detail panel */}
-            <aside className="bg-white rounded-xl border border-[#eaeaea] p-6 sticky top-4 self-start">
+            <aside className="bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea] dark:border-white/8 p-5 sticky top-4 self-start shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
               {!active ? (
                 <p className="text-sm text-[#8c8c8c]">Select a hotel to inspect its rooms.</p>
               ) : (

@@ -119,7 +119,7 @@ export function AdminUsersPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') refresh(); }}
-                className="rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] w-60 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C] transition-colors"
+                className="rounded-lg border border-[#eaeaea] bg-white dark:bg-[#11151a] pl-8 pr-3 py-1.5 text-[12.5px] w-60 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C] transition-colors"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               />
             </div>
@@ -135,7 +135,7 @@ export function AdminUsersPage() {
         </div>
 
         {/* Filter tabs — segmented control style */}
-        <div className="inline-flex items-center gap-0.5 bg-white border border-[#eaeaea] rounded-lg p-0.5">
+        <div className="inline-flex items-center gap-0.5 bg-white dark:bg-[#11151a] border border-[#eaeaea] rounded-lg p-0.5">
           {(['all', 'user', 'vendor', 'admin'] as const).map((f) => (
             <button
               key={f}
@@ -161,7 +161,7 @@ export function AdminUsersPage() {
 
         {/* Create form — collapsible card */}
         {showCreate && (
-          <div className="rounded-xl border border-[#eaeaea] bg-white shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+          <div className="rounded-xl border border-[#eaeaea] bg-white dark:bg-[#11151a] shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
             <div className="px-4 py-3 border-b border-[#eaeaea] flex items-center justify-between">
               <div>
                 <h2 className="text-[13.5px] font-semibold text-[#1f2937]" style={{ fontFamily: 'Poppins, sans-serif' }}>
@@ -185,7 +185,7 @@ export function AdminUsersPage() {
                     placeholder="Full name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                    className="w-full rounded-lg border border-[#eaeaea] bg-white dark:bg-[#11151a] pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   />
                 </div>
@@ -203,7 +203,7 @@ export function AdminUsersPage() {
                     placeholder="name@example.com"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                    className="w-full rounded-lg border border-[#eaeaea] bg-white dark:bg-[#11151a] pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   />
                 </div>
@@ -219,7 +219,7 @@ export function AdminUsersPage() {
                     placeholder="+1 555 0100"
                     value={form.phoneNumber}
                     onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
-                    className="w-full rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                    className="w-full rounded-lg border border-[#eaeaea] bg-white dark:bg-[#11151a] pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   />
                 </div>
@@ -237,7 +237,7 @@ export function AdminUsersPage() {
                     placeholder="••••••••"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                    className="w-full rounded-lg border border-[#eaeaea] bg-white dark:bg-[#11151a] pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   />
                 </div>
@@ -252,7 +252,7 @@ export function AdminUsersPage() {
                     <select
                       value={form.role}
                       onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
-                      className="w-full appearance-none rounded-lg border border-[#eaeaea] bg-white pl-3 pr-7 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                      className="w-full appearance-none rounded-lg border border-[#eaeaea] bg-white dark:bg-[#11151a] pl-3 pr-7 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                       <option value="user">User</option>
@@ -267,7 +267,7 @@ export function AdminUsersPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreate(false)}
-                  className="rounded-lg border border-[#eaeaea] bg-white px-3 py-1.5 text-[12.5px] font-medium text-[#6b7280] hover:text-[#1f2937] hover:border-[#9aa0a6] transition-colors"
+                  className="rounded-lg border border-[#eaeaea] bg-white dark:bg-[#11151a] px-3 py-1.5 text-[12.5px] font-medium text-[#6b7280] hover:text-[#1f2937] hover:border-[#9aa0a6] transition-colors"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   Cancel
@@ -299,7 +299,7 @@ export function AdminUsersPage() {
         )}
 
         {/* Users table */}
-        <div className="rounded-xl border border-[#eaeaea] bg-white overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+        <div className="rounded-xl border border-[#eaeaea] bg-white dark:bg-[#11151a] overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
           {loading ? (
             <div className="p-6 text-center text-[12.5px] text-[#9aa0a6]">Loading users…</div>
           ) : error ? (

@@ -99,7 +99,7 @@ export function AdminEmailLogsPage() {
             <span className="text-[#1f2937] font-semibold">{logs.length}</span> recent attempts
           </p>
           <div className="flex items-center gap-2">
-            <div className="inline-flex items-center gap-0.5 bg-white border border-[#eaeaea] rounded-lg p-0.5">
+            <div className="inline-flex items-center gap-0.5 bg-white dark:bg-[#11151a] border border-[#eaeaea] rounded-lg p-0.5">
               {(['all', 'sent', 'logged', 'failed', 'skipped'] as const).map((f) => (
                 <button
                   key={f}
@@ -125,7 +125,7 @@ export function AdminEmailLogsPage() {
             <button
               onClick={refresh}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-[#eaeaea] px-2.5 py-1.5 text-[12px] text-[#6b7280] hover:text-[#1f2937] hover:border-[#9aa0a6] transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-[#11151a] border border-[#eaeaea] px-2.5 py-1.5 text-[12px] text-[#6b7280] hover:text-[#1f2937] hover:border-[#9aa0a6] transition-colors disabled:opacity-50"
               style={{ fontFamily: 'Inter, sans-serif' }}
               title="Refresh"
             >
@@ -139,7 +139,7 @@ export function AdminEmailLogsPage() {
         )}
 
         {/* Table */}
-        <div className="rounded-xl border border-[#eaeaea] bg-white overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+        <div className="rounded-xl border border-[#eaeaea] bg-white dark:bg-[#11151a] overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
           {loading ? (
             <div className="p-6 text-center text-[12.5px] text-[#9aa0a6]">Loading email logs…</div>
           ) : (

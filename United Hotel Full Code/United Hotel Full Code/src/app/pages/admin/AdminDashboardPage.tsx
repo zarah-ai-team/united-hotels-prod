@@ -146,7 +146,7 @@ export function AdminDashboardPage() {
           {statCards.map(({ label, value, Icon, accent }) => (
             <div
               key={label}
-              className="group relative bg-white/80 rounded-xl p-3.5 border border-[#EAEAEA]/80 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] hover:border-[#1ABC9C]/30 transition-all"
+              className="group relative bg-white/80 dark:bg-[#11151a]/85 rounded-xl p-3.5 border border-[#EAEAEA]/80 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] hover:border-[#1ABC9C]/30 transition-all"
               style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
             >
               <div className="flex items-center gap-3">
@@ -179,7 +179,7 @@ export function AdminDashboardPage() {
 
         {/* Recent Bookings Table — vendors only; admins see the country chart instead */}
         {currentRole !== 'admin' && (
-        <div className="bg-white/80 rounded-xl border border-[#EAEAEA]/80 overflow-hidden" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+        <div className="bg-white/80 dark:bg-[#11151a]/85 rounded-xl border border-[#EAEAEA]/80 overflow-hidden" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#EAEAEA]/60">
             <h3 className="text-[14px] font-semibold text-[#1f2937]" style={{ fontFamily: 'Poppins, sans-serif' }}>
               Recent Bookings
@@ -220,7 +220,7 @@ export function AdminDashboardPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-[#EAEAEA]">
+              <tbody className="bg-white dark:bg-[#11151a] divide-y divide-[#EAEAEA]">
                 {(liveRecent.length > 0
                   ? liveRecent.map((b) => ({
                       id: `BK-${b.id}`,
@@ -287,7 +287,7 @@ export function AdminDashboardPage() {
                 <button
                   key={index}
                   onClick={() => handleQuickAction(action.title)}
-                  className="group bg-white/80 rounded-xl p-3 border border-[#EAEAEA]/80 hover:border-[#1ABC9C]/40 hover:shadow-[0_8px_20px_-10px_rgba(26,188,156,0.25)] transition-all text-left"
+                  className="group bg-white/80 dark:bg-[#11151a]/85 rounded-xl p-3 border border-[#EAEAEA]/80 hover:border-[#1ABC9C]/40 hover:shadow-[0_8px_20px_-10px_rgba(26,188,156,0.25)] transition-all text-left"
                   style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
                 >
                   <div className="flex items-center gap-2.5">
@@ -494,7 +494,7 @@ function BookingsByCountryCard({ rows }: { rows: Array<{ country: string; bookin
   const total = rows.reduce((s, r) => s + r.bookings, 0);
   const top = rows.slice(0, 8);
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-[#EAEAEA] p-6">
+    <div className="bg-white dark:bg-[#11151a] rounded-xl shadow-sm border border-[#EAEAEA] p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-[#3B3B3B] flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
           <Globe2 className="w-5 h-5 text-[#1ABC9C]" /> Bookings by country

@@ -13,10 +13,13 @@ import {
   Tag,
   ChevronLeft,
   Mail,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRole } from './RoleSwitcher';
 import { authService } from '../../services/api';
+import { useTheme } from '../../context/ThemeContext';
 import svgPaths from '../../../imports/svg-nkrjt6kvoj';
 
 const navItems = [
@@ -65,6 +68,7 @@ export function AdminSidebar() {
     return localStorage.getItem(COLLAPSED_KEY) === '1';
   });
   const currentRole = useRole();
+  const { theme, toggleTheme } = useTheme();
 
   // Persist + broadcast width changes so AdminLayout can re-offset the main
   // content area (CSS only listens to its own width var).
@@ -127,8 +131,9 @@ export function AdminSidebar() {
         </button>
       )}
 
-      {/* Navigation */}
-      <nav className={`flex-1 space-y-0.5 py-3 overflow-y-auto ${collapsed ? 'px-2' : 'px-2.5'}`}>
+      {/* Navigation. Collapsed mode uses bigger icons + chunky 40x40 hit
+          targets so the vertical strip looks industry-grade, not cramped. */}
+      <nav className={`flex-1 overflow-y-auto ${collapsed ? 'space-y-1.5 px-2 py-3' : 'space-y-0.5 px-2.5 py-3'}`}>
         {navItems
           .filter((item) => currentRole && item.roles.includes(currentRole))
           .map((item) => {
@@ -142,7 +147,7 @@ export function AdminSidebar() {
                 onClick={() => setMobileOpen(false)}
                 title={collapsed ? item.label : undefined}
                 className={`group relative flex items-center rounded-lg text-[13px] font-medium transition-all ${
-                  collapsed ? 'justify-center px-0 py-2' : 'gap-2.5 px-2.5 py-2'
+                  collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-2.5 py-2'
                 } ${
                   isActive
                     ? 'bg-[#1ABC9C]/15 text-[#5eead4] shadow-[inset_0_0_0_1px_rgba(26,188,156,0.25)]'
@@ -153,13 +158,13 @@ export function AdminSidebar() {
                 {isActive && !collapsed && (
                   <span aria-hidden className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r-full bg-[#1ABC9C]" />
                 )}
-                <Icon className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+                <Icon className={collapsed ? 'h-[18px] w-[18px] shrink-0' : 'h-[15px] w-[15px] shrink-0'} strokeWidth={1.85} />
                 {!collapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
           })}
 
-        <div className={`my-3 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent ${collapsed ? 'mx-1' : 'mx-2'}`} />
+        <div className={`my-3 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent ${collapsed ? 'mx-2' : 'mx-2'}`} />
 
         <a
           href="/"
@@ -167,14 +172,56 @@ export function AdminSidebar() {
           rel="noopener noreferrer"
           title={collapsed ? 'View Live Site' : undefined}
           className={`flex items-center rounded-lg text-[13px] font-medium text-white/55 transition-all hover:bg-white/[0.06] hover:text-white ${
-            collapsed ? 'justify-center px-0 py-2' : 'gap-2.5 px-2.5 py-2'
+            collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-2.5 py-2'
           }`}
           style={{ fontFamily: 'Inter, sans-serif' }}
         >
-          <ExternalLink className="h-[15px] w-[15px] shrink-0" strokeWidth={1.75} />
+          <ExternalLink className={collapsed ? 'h-[18px] w-[18px] shrink-0' : 'h-[15px] w-[15px] shrink-0'} strokeWidth={1.85} />
           {!collapsed && <span>View Live Site</span>}
         </a>
       </nav>
+
+      {/* Theme toggle — segmented Light / Dark when expanded, single icon
+          button when collapsed. Persists via the existing ThemeContext. */}
+      <div className={`border-t border-white/8 ${collapsed ? 'px-2 py-2' : 'px-3 py-2.5'}`}>
+        {collapsed ? (
+          <button
+            onClick={toggleTheme}
+            className="h-10 w-10 mx-auto flex items-center justify-center rounded-lg text-white/55 hover:text-white hover:bg-white/[0.06] transition-colors"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark'
+              ? <Sun className="h-[18px] w-[18px]" strokeWidth={1.85} />
+              : <Moon className="h-[18px] w-[18px]" strokeWidth={1.85} />}
+          </button>
+        ) : (
+          <div className="flex items-center gap-1 bg-white/[0.04] rounded-lg p-0.5" role="tablist" aria-label="Color theme">
+            <button
+              onClick={() => theme !== 'light' && toggleTheme()}
+              className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-md py-1.5 text-[11.5px] font-medium transition-colors ${
+                theme === 'light' ? 'bg-white/15 text-white shadow-sm' : 'text-white/55 hover:text-white'
+              }`}
+              role="tab"
+              aria-selected={theme === 'light'}
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              <Sun className="w-3.5 h-3.5" strokeWidth={2} /> Light
+            </button>
+            <button
+              onClick={() => theme !== 'dark' && toggleTheme()}
+              className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-md py-1.5 text-[11.5px] font-medium transition-colors ${
+                theme === 'dark' ? 'bg-white/15 text-white shadow-sm' : 'text-white/55 hover:text-white'
+              }`}
+              role="tab"
+              aria-selected={theme === 'dark'}
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              <Moon className="w-3.5 h-3.5" strokeWidth={2} /> Dark
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* User Section */}
       <div className={`border-t border-white/8 ${collapsed ? 'px-2 py-3' : 'px-3 py-3'}`}>

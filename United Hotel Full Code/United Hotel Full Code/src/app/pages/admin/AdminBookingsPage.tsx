@@ -101,7 +101,7 @@ export function AdminBookingsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="rounded-lg border border-[#eaeaea] px-3 py-2 text-sm bg-white"
+              className="rounded-lg border border-[#eaeaea] px-3 py-2 text-sm bg-white dark:bg-[#11151a]"
             >
               <option value="all">All statuses</option>
               <option value="confirmed">Confirmed</option>
@@ -118,7 +118,7 @@ export function AdminBookingsPage() {
         )}
 
         {/* Table */}
-        <div className="bg-white rounded-xl border border-[#eaeaea] overflow-hidden">
+        <div className="bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea] overflow-hidden">
           {loading ? (
             <p className="p-6 text-sm text-[#8c8c8c]">Loading bookings…</p>
           ) : filtered.length === 0 ? (
@@ -138,7 +138,7 @@ export function AdminBookingsPage() {
                     <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-xs">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#eaeaea] bg-white">
+                <tbody className="divide-y divide-[#eaeaea] bg-white dark:bg-[#11151a]">
                   {filtered.map((b) => (
                     <tr
                       key={b.id}
@@ -171,7 +171,7 @@ export function AdminBookingsPage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <aside
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md bg-white shadow-2xl h-full overflow-y-auto p-6"
+            className="relative w-full max-w-md bg-white dark:bg-[#11151a] shadow-2xl h-full overflow-y-auto p-6"
           >
             <button onClick={() => setSelected(null)} className="absolute top-4 right-4 text-[#8c8c8c] hover:text-[#3b3b3b]">
               <X className="w-5 h-5" />

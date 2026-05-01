@@ -109,10 +109,10 @@ export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: 
   const sidebarWidth = sidebarCollapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded;
 
   return (
-    // Plain neutral background — the previous teal-aurora gradient was making
-    // the page feel busy. Light grey reads as a clean canvas the cards float
-    // on top of.
-    <div className="relative flex h-screen overflow-hidden bg-[#f5f6f8]">
+    // Plain neutral background that flips with the global ThemeContext.
+    // Light: #f5f6f8 (cool grey canvas). Dark: #0b0d10 (near-black slate
+    // that lets the teal accent + glass cards pop).
+    <div className="relative flex h-screen overflow-hidden bg-[#f5f6f8] dark:bg-[#0b0d10]">
       <AdminSidebar />
 
       <div
