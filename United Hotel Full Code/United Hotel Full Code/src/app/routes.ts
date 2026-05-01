@@ -21,6 +21,9 @@ import { AdminBookingsPage } from './pages/admin/AdminBookingsPage';
 import { AdminHotelsPage } from './pages/admin/AdminHotelsPage';
 import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
+import { AdminUsersPage } from './pages/admin/AdminUsersPage';
+import { VendorPortalPage } from './pages/admin/VendorPortalPage';
+import { AdminHotelDetailPage } from './pages/admin/AdminHotelDetailPage';
 import { RequireAdmin } from './components/admin/RequireAdmin';
 import { RouteErrorBoundary } from './components/ErrorBoundary';
 
@@ -112,7 +115,7 @@ export const router = createBrowserRouter([
     Component: SupportPage,
     errorElement,
   },
-  // Admin routes
+  // Admin routes (all guarded except login)
   {
     path: '/admin/login',
     Component: AdminLoginPage,
@@ -134,6 +137,11 @@ export const router = createBrowserRouter([
     errorElement,
   },
   {
+    path: '/admin/hotels/:id',
+    element: guarded(AdminHotelDetailPage),
+    errorElement,
+  },
+  {
     path: '/admin/analytics',
     element: guarded(AdminAnalyticsPage),
     errorElement,
@@ -141,6 +149,17 @@ export const router = createBrowserRouter([
   {
     path: '/admin/settings',
     element: guarded(AdminSettingsPage),
+    errorElement,
+  },
+  {
+    path: '/admin/users',
+    element: guarded(AdminUsersPage),
+    errorElement,
+  },
+  // Vendor portal (separate role — not admin-guarded)
+  {
+    path: '/vendor',
+    Component: VendorPortalPage,
     errorElement,
   },
 ]);

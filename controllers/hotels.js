@@ -142,23 +142,105 @@ const getDeterministicDiscountPercent = (hotelId, category) => {
   return clamp(5 + (normalized * 5), 5, 10);
 };
 
-const computeRecommendedPrice = ({ basePrice, hotelId, roomCategory, minPrice = null, maxPrice = null }) => {
+// Market-competitive, date-aware price computation.
+//
+//   recommendedPrice = clamp(base × demand × leadTime × weekend × season,
+//                            vendorMin or 0.85·base,
+//                            vendorMax or 1.45·base)
+//
+// where each multiplier reflects a real-world signal:
+//   • demand     : hotel-wide occupancy ratio (0.95–1.20 swing).
+//   • leadTime   : >30d out → discount (-6%); <3d out → premium (+8%).
+//   • weekend    : Fri/Sat night → +6%; Sun-Thu → 0.
+//   • season     : Jun-Aug & Dec → +5%; shoulder months → -2%.
+//   • length     : 4+ nights → -3% (longer stays absorb fixed costs).
+//
+// The result is bounded by the vendor-set price band (`min_price`/`max_price`)
+// and the small-group hash variance (±1.5%) keeps neighbouring rooms from
+// publishing identical numbers when seed inputs are identical.
+const SHOULDER_MONTHS = new Set([1, 2, 3, 10, 11]); // Jan-Mar, Oct-Nov
+const PEAK_MONTHS = new Set([5, 6, 7, 8, 11]);      // Jun-Aug, Dec (0-indexed: 11=Dec)
+
+const dateToObj = (d) => {
+  if (!d) return null;
+  const obj = new Date(d);
+  return Number.isNaN(obj.getTime()) ? null : obj;
+};
+
+const daysBetween = (a, b) => {
+  if (!a || !b) return 1;
+  return Math.max(1, Math.round((b.getTime() - a.getTime()) / 86400000));
+};
+
+const computeRecommendedPrice = ({
+  basePrice,
+  hotelId,
+  roomCategory,
+  minPrice = null,
+  maxPrice = null,
+  checkInDate = null,
+  checkOutDate = null,
+  occupancyRatio = 0.65,
+}) => {
   const base = Number(basePrice);
-  if (!Number.isFinite(base) || base <= 0) {
-    return null;
+  if (!Number.isFinite(base) || base <= 0) return null;
+
+  const checkIn = dateToObj(checkInDate);
+  const checkOut = dateToObj(checkOutDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // 1. Demand multiplier — high occupancy lifts price up to +20%.
+  const occ = clamp(Number(occupancyRatio) || 0.65, 0, 1);
+  const demand = 0.95 + occ * 0.25;
+
+  // 2. Lead-time — last-minute is premium; far-out is discounted.
+  let leadTime = 1.0;
+  if (checkIn) {
+    const lead = Math.max(0, Math.round((checkIn - today) / 86400000));
+    if (lead <= 2) leadTime = 1.08;
+    else if (lead <= 7) leadTime = 1.04;
+    else if (lead >= 60) leadTime = 0.92;
+    else if (lead >= 30) leadTime = 0.94;
   }
 
-  const discountPercent = getDeterministicDiscountPercent(hotelId, roomCategory);
-  let recommended = base * (1 - (discountPercent / 100));
+  // 3. Weekend premium — average across the stay.
+  let weekend = 1.0;
+  if (checkIn && checkOut) {
+    const nights = daysBetween(checkIn, checkOut);
+    let weekendNights = 0;
+    for (let i = 0; i < nights; i++) {
+      const dow = new Date(checkIn.getTime() + i * 86400000).getDay();
+      if (dow === 5 || dow === 6) weekendNights++; // Fri / Sat
+    }
+    weekend = 1 + (weekendNights / nights) * 0.06;
+  }
 
-  // Hotel-defined floor: recommended price must not go below minPrice (loss prevention)
-  // If no minPrice is set, use 90% of base (max 10% discount) as implicit safety floor
-  const floor = Number.isFinite(minPrice) && minPrice > 0 ? minPrice : base * 0.90;
-  // Hotel-defined ceiling: recommended price must not exceed maxPrice
-  const ceiling = Number.isFinite(maxPrice) && maxPrice > floor ? maxPrice : Infinity;
+  // 4. Seasonality — Istanbul peak is summer + Christmas/NYE.
+  let season = 1.0;
+  if (checkIn) {
+    const m = checkIn.getMonth();
+    if (PEAK_MONTHS.has(m)) season = 1.05;
+    else if (SHOULDER_MONTHS.has(m)) season = 0.98;
+  }
 
-  recommended = Math.max(recommended, floor);
-  if (Number.isFinite(ceiling)) recommended = Math.min(recommended, ceiling);
+  // 5. Length-of-stay — light discount for 4+ nights.
+  let lengthMul = 1.0;
+  if (checkIn && checkOut) {
+    const nights = daysBetween(checkIn, checkOut);
+    if (nights >= 7) lengthMul = 0.95;
+    else if (nights >= 4) lengthMul = 0.97;
+  }
+
+  // 6. Tiny per-room jitter so two identical rooms don't show the same price.
+  const jitter = 1 + ((getDeterministicDiscountPercent(hotelId, roomCategory) - 7.5) / 100) * 0.20; // ±1.5%
+
+  let recommended = base * demand * leadTime * weekend * season * lengthMul * jitter;
+
+  // Vendor-set price band acts as a hard clamp; otherwise use ±15-45% of base.
+  const floor = Number.isFinite(minPrice) && minPrice > 0 ? minPrice : base * 0.85;
+  const ceiling = Number.isFinite(maxPrice) && maxPrice > floor ? maxPrice : base * 1.45;
+  recommended = clamp(recommended, floor, ceiling);
 
   const effectiveDiscount = base > 0 ? ((base - recommended) / base) * 100 : 0;
 
@@ -172,8 +254,15 @@ const computeRecommendedPrice = ({ basePrice, hotelId, roomCategory, minPrice = 
     priceBounds: {
       minPrice: Number.isFinite(minPrice) && minPrice > 0 ? Number(minPrice.toFixed(2)) : null,
       maxPrice: Number.isFinite(maxPrice) && maxPrice > 0 ? Number(maxPrice.toFixed(2)) : null,
-      floorApplied: Number(floor.toFixed(2))
-    }
+      floorApplied: Number(floor.toFixed(2)),
+    },
+    factors: {
+      demand: Number(demand.toFixed(3)),
+      leadTime: Number(leadTime.toFixed(3)),
+      weekend: Number(weekend.toFixed(3)),
+      season: Number(season.toFixed(3)),
+      lengthMul: Number(lengthMul.toFixed(3)),
+    },
   };
 };
 
@@ -316,16 +405,18 @@ const getBasePriceIndex = async () => {
   return index;
 };
 
-const buildAllHotelsRecommendedPricing = async ({ status = 'active', forceRefresh = false }) => {
+const buildAllHotelsRecommendedPricing = async ({
+  status = 'active',
+  forceRefresh = false,
+  checkInDate = null,
+  checkOutDate = null,
+}) => {
   const now = Date.now();
-  if (!forceRefresh && recommendedPricesCache.payload && recommendedPricesCache.expiresAt > now) {
-    return {
-      ...recommendedPricesCache.payload,
-      cache: {
-        hit: true,
-        expiresAt: recommendedPricesCache.expiresAt
-      }
-    };
+  // Cache key is per-date so different stay windows don't share results.
+  const cacheKey = `${status}|${checkInDate || 'no-in'}|${checkOutDate || 'no-out'}`;
+  const cached = recommendedPricesCache.byKey?.get(cacheKey);
+  if (!forceRefresh && cached && cached.expiresAt > now) {
+    return { ...cached.payload, cache: { hit: true, expiresAt: cached.expiresAt } };
   }
 
   const hotelResult = await fetchHotels({ status, limit: 10000, offset: 0 });
@@ -371,7 +462,9 @@ const buildAllHotelsRecommendedPricing = async ({ status = 'active', forceRefres
         hotelId,
         roomCategory,
         minPrice: toNumber(room.min_price, null),
-        maxPrice: toNumber(room.max_price, null)
+        maxPrice: toNumber(room.max_price, null),
+        checkInDate,
+        checkOutDate,
       });
 
       const otherPrices = pricedRooms
@@ -417,21 +510,24 @@ const buildAllHotelsRecommendedPricing = async ({ status = 'active', forceRefres
     status,
     generatedAt: now,
     ttlMs: RECOMMENDED_PRICES_CACHE_TTL_MS,
+    checkInDate,
+    checkOutDate,
     hotels: hotelsWithRecommendations,
     count: hotelsWithRecommendations.length
   };
 
-  recommendedPricesCache = {
+  if (!recommendedPricesCache.byKey) recommendedPricesCache.byKey = new Map();
+  recommendedPricesCache.byKey.set(cacheKey, {
     payload,
-    expiresAt: now + RECOMMENDED_PRICES_CACHE_TTL_MS
-  };
+    expiresAt: now + RECOMMENDED_PRICES_CACHE_TTL_MS,
+  });
+  // Backwards-compat: keep the legacy single-payload slot in sync.
+  recommendedPricesCache.payload = payload;
+  recommendedPricesCache.expiresAt = now + RECOMMENDED_PRICES_CACHE_TTL_MS;
 
   return {
     ...payload,
-    cache: {
-      hit: false,
-      expiresAt: recommendedPricesCache.expiresAt
-    }
+    cache: { hit: false, expiresAt: now + RECOMMENDED_PRICES_CACHE_TTL_MS },
   };
 };
 
@@ -1343,12 +1439,17 @@ const getPublicHotelById = async (req, res) => {
       check_out_time: hotelRow.check_out_time || mapped.checkOutTime
     };
 
-    // Attach recommended pricing
-    const pricing = await buildAllHotelsRecommendedPricing({ status: 'active', forceRefresh: false });
+    // Attach recommended pricing — date-aware when query params are provided.
+    const { checkInDate = null, checkOutDate = null } = req.query || {};
+    const pricing = await buildAllHotelsRecommendedPricing({
+      status: 'active',
+      forceRefresh: false,
+      checkInDate: checkInDate || null,
+      checkOutDate: checkOutDate || null,
+    });
     const recommendedPrices = pricing.hotels.find((h) => String(h.hotelId) === String(hotelRow.id))?.recommendedPrices || [];
     hotel.recommendedPrices = recommendedPrices;
     attachImageKitUrls(hotel);
-
     return res.json({ hotel });
   } catch (error) {
     console.error('Error fetching hotel by id:', error);
@@ -1559,7 +1660,7 @@ const adminUpdateHotel = async (req, res) => {
       updates.push(`"${meta.hotelIdCol}" = $${values.length}`);
     }
 
-    if (meta.statusCol && typeof status !== 'undefined') {
+    if (meta.statusCol && typeof status !== 'undefined' && status !== null) {
       values.push(status);
       updates.push(`"${meta.statusCol}" = $${values.length}`);
     }

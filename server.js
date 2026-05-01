@@ -14,7 +14,13 @@ const bookingRoute = require("./routes/bookingsRoute");
 const hotelsRoute = require("./routes/hotelsRoute");
 const paymentsRoute = require("./routes/paymentsRoute");
 const translateRoute = require("./routes/translateRoute");
+const adminRoute = require("./routes/adminRoute");
+const vendorRoute = require("./routes/vendorRoute");
 
+
+// Trust the proxy chain so req.ip uses x-forwarded-for and the geoip util
+// can read the real client address behind Render/Cloudflare/etc.
+app.set('trust proxy', true);
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
@@ -60,6 +66,8 @@ app.use("/api/bookings", bookingRoute);
 app.use("/api/hotels", hotelsRoute);
 app.use("/api/payments", paymentsRoute);
 app.use("/api/translate", translateRoute);
+app.use("/api/admin", adminRoute);
+app.use("/api/vendor", vendorRoute);
 
 // Keep health checks independent from database state.
 app.get('/api/health', (_request, response) => {

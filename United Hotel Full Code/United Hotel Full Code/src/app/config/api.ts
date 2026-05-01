@@ -69,6 +69,27 @@ export const API_ENDPOINTS = {
     GET_BY_USER: '/api/bookings/getbookingsbyuserid',
     BOOK_ROOM: '/api/bookings/bookroom',
   },
+
+  // Admin (admin-only)
+  ADMIN: {
+    STATS: '/api/admin/stats',
+    ANALYTICS: '/api/admin/analytics',
+    BOOKINGS_BY_COUNTRY: '/api/admin/bookings-by-country',
+    USERS: '/api/admin/users',
+    USER_ROLE: (id: string) => `/api/admin/users/${id}/role`,
+    USER_DELETE: (id: string) => `/api/admin/users/${id}`,
+    ASSIGN_VENDOR: (hotelId: string) => `/api/admin/hotels/${hotelId}/assign-vendor`,
+    ROOM_PRICE: (id: string) => `/api/admin/rooms/${id}/price`,
+  },
+
+  // Vendor (vendor + admin)
+  VENDOR: {
+    STATS: '/api/vendor/stats',
+    HOTELS: '/api/vendor/hotels',
+    ROOMS: '/api/vendor/rooms',
+    ROOM_PRICE_BAND: (id: string) => `/api/vendor/rooms/${id}/price-band`,
+    BOOKINGS: '/api/vendor/bookings',
+  },
 };
 
 // Headers configuration

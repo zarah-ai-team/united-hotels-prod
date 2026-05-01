@@ -1,198 +1,165 @@
-import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
-import { Lock, Mail, Eye, EyeOff, ShieldCheck, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router';
+import { ShieldCheck, Loader2, AlertCircle, Building2, Users, Tag, BarChart3 } from 'lucide-react';
 import { authService } from '../../services/api';
-import { STORAGE_KEYS } from '../../config/api';
-
-const SEEDED_DEMO_EMAIL = 'admin@unitedhotels.com';
-const SEEDED_DEMO_PASSWORD = 'admin123';
 
 export function AdminLoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (submitting) return;
+  // If already logged in as admin, jump straight to the dashboard.
+  useEffect(() => {
+    let active = true;
+    authService.getCurrentUser()
+      .then((user) => {
+        if (!active) return;
+        if (user?.isAdmin || user?.role === 'admin') navigate('/admin', { replace: true });
+      })
+      .catch(() => { /* not logged in — stay on form */ });
+    return () => { active = false; };
+  }, [navigate]);
 
-    setErrorMessage(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setSubmitting(true);
-
+    setError(null);
     try {
-      const response = await authService.login({ email: email.trim(), password });
-      const user = (response as unknown as { user?: { isAdmin?: boolean; isManager?: boolean; name?: string; email?: string } }).user;
-
-      if (!user || (!user.isAdmin && !user.isManager)) {
-        // Non-admin account — refuse and wipe the token authService just stored.
-        localStorage.removeItem(STORAGE_KEYS.TOKEN);
-        setErrorMessage('This account does not have admin access.');
+      const res = await authService.login({ email: email.trim(), password });
+      const user: any = (res as any).user;
+      const isAdmin = Boolean(user?.isAdmin || user?.role === 'admin');
+      if (!isAdmin) {
+        // Token is stored, but this account isn't an admin — clear and reject.
+        authService.logout();
+        setError('This account does not have admin access.');
         return;
       }
-
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-      // RoleSwitcher reads this flag to decide whether the role-toggle is unlocked.
-      localStorage.setItem('userActualRole', 'admin');
-      localStorage.setItem('adminRole', 'admin');
-
       navigate('/admin', { replace: true });
-    } catch (error: unknown) {
-      const message =
-        (error as { message?: string; data?: { error?: string } } | null)?.data?.error ||
-        (error as { message?: string } | null)?.message ||
-        'Unable to sign in. Please try again.';
-      setErrorMessage(message);
+    } catch (e: any) {
+      setError(e?.data?.error || e?.message || 'Login failed');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const fillDemoCreds = () => {
-    setEmail(SEEDED_DEMO_EMAIL);
-    setPassword(SEEDED_DEMO_PASSWORD);
-    setErrorMessage(null);
-  };
-
   return (
-    <div className="min-h-screen bg-linear-to-br from-[#FAFAFA] via-white to-[#E0F7F1] dark:from-[#0a0a0a] dark:via-[#111] dark:to-[#0a1f1a] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="rounded-2xl shadow-[0_24px_60px_-24px_rgba(15,23,42,0.35)] overflow-hidden bg-white dark:bg-white/[0.04] dark:backdrop-blur-xl dark:ring-1 dark:ring-white/[0.08]">
-          {/* Header strip */}
-          <div className="bg-[#3B3B3B] dark:bg-black/60 px-6 py-5 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-[#1ABC9C]/15 flex items-center justify-center">
-              <ShieldCheck className="h-5 w-5 text-[#1ABC9C]" />
+    <div className="min-h-screen bg-gradient-to-br from-[#0f766e] via-[#1ABC9C] to-[#22d3ee] flex items-center justify-center p-4">
+      <div className="w-full max-w-5xl grid md:grid-cols-2 gap-0 rounded-3xl overflow-hidden shadow-2xl bg-white">
+        {/* Left: feature panel */}
+        <div className="hidden md:flex flex-col justify-between bg-gradient-to-br from-[#0f766e] to-[#1ABC9C] text-white p-10">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <ShieldCheck className="w-7 h-7" />
+              <span className="font-['Poppins'] font-bold text-[20px]">United Hotels Admin</span>
             </div>
-            <div>
-              <h1
-                className="text-lg font-semibold text-white"
-                style={{ fontFamily: 'Poppins, sans-serif' }}
-              >
-                United Hotels
-              </h1>
-              <p
-                className="text-xs text-white/70"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                Admin Portal
-              </p>
-            </div>
+            <h2 className="font-['Poppins'] font-bold text-[28px] leading-tight">
+              Operate every property from one console.
+            </h2>
+            <p className="text-white/85 mt-3 text-[15px] leading-relaxed">
+              Sign in to manage hotels, vendors, room categories and live pricing with bookings and revenue at a glance.
+            </p>
           </div>
 
-          <div className="p-8">
-            <h2
-              className="text-xl font-semibold text-[#3B3B3B] dark:text-white mb-1"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
-              Sign in to continue
-            </h2>
-            <p
-              className="text-sm text-[#8C8C8C] dark:text-white/60 mb-6"
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
-              Use your admin or manager credentials.
-            </p>
-
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <ul className="space-y-3 mt-10">
+            <li className="flex items-start gap-3">
+              <Building2 className="w-5 h-5 mt-0.5 text-white/90" />
               <div>
-                <label
-                  htmlFor="admin-email"
-                  className="block text-sm font-medium text-[#3B3B3B] dark:text-white/85 mb-1.5"
-                  style={{ fontFamily: 'Inter, sans-serif' }}
-                >
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8C8C8C] dark:text-white/45" />
-                  <input
-                    id="admin-email"
-                    type="email"
-                    autoComplete="username"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@unitedhotels.com"
-                    className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-[#EAEAEA] dark:border-white/[0.12] bg-white dark:bg-white/[0.03] text-[#3B3B3B] dark:text-white placeholder:text-[#B0B0B0] dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/40 focus:border-[#1ABC9C]"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                    required
-                    autoFocus
-                  />
-                </div>
+                <div className="font-semibold">Hotels & Rooms</div>
+                <div className="text-white/80 text-sm">Add properties, categories, amenities and images.</div>
               </div>
-
+            </li>
+            <li className="flex items-start gap-3">
+              <Users className="w-5 h-5 mt-0.5 text-white/90" />
               <div>
-                <label
-                  htmlFor="admin-password"
-                  className="block text-sm font-medium text-[#3B3B3B] dark:text-white/85 mb-1.5"
-                  style={{ fontFamily: 'Inter, sans-serif' }}
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8C8C8C] dark:text-white/45" />
-                  <input
-                    id="admin-password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-[#EAEAEA] dark:border-white/[0.12] bg-white dark:bg-white/[0.03] text-[#3B3B3B] dark:text-white placeholder:text-[#B0B0B0] dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/40 focus:border-[#1ABC9C]"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8C8C8C] dark:text-white/50 hover:text-[#3B3B3B] dark:hover:text-white"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+                <div className="font-semibold">Users & Vendors</div>
+                <div className="text-white/80 text-sm">Register accounts, assign roles, and link vendors to hotels.</div>
               </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Tag className="w-5 h-5 mt-0.5 text-white/90" />
+              <div>
+                <div className="font-semibold">Live Pricing</div>
+                <div className="text-white/80 text-sm">Vendor min/max bands feed the dynamic pricing engine.</div>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <BarChart3 className="w-5 h-5 mt-0.5 text-white/90" />
+              <div>
+                <div className="font-semibold">Analytics</div>
+                <div className="text-white/80 text-sm">Total bookings, revenue, and per-hotel performance.</div>
+              </div>
+            </li>
+          </ul>
 
-              {errorMessage && (
-                <div
-                  className="rounded-lg border border-[#EF4444]/40 bg-[#FEE2E2] dark:bg-[#7f1d1d]/30 px-3 py-2 text-sm text-[#B91C1C] dark:text-[#fecaca]"
-                  style={{ fontFamily: 'Inter, sans-serif' }}
-                  role="alert"
-                >
-                  {errorMessage}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {submitting ? 'Signing in…' : 'Sign in'}
-              </button>
-            </form>
-
-            <button
-              type="button"
-              onClick={fillDemoCreds}
-              className="mt-4 w-full text-xs text-[#1ABC9C] hover:text-[#16A085] underline-offset-2 hover:underline"
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
-              Use seeded demo credentials
-            </button>
+          <div className="text-xs text-white/70">
+            © {new Date().getFullYear()} United Hotels. Internal use only.
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <a
-            href="/auth"
-            className="text-sm text-[#8C8C8C] dark:text-white/55 hover:text-[#3B3B3B] dark:hover:text-white transition-colors"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-          >
-            ← Back to guest login
-          </a>
+        {/* Right: login form */}
+        <div className="p-8 md:p-12 flex flex-col justify-center">
+          <div className="md:hidden flex items-center gap-2 mb-8">
+            <ShieldCheck className="w-6 h-6 text-[#1ABC9C]" />
+            <span className="font-['Poppins'] font-bold text-[18px] text-[#3b3b3b]">United Hotels Admin</span>
+          </div>
+
+          <h1 className="font-['Poppins'] font-bold text-[28px] text-[#3b3b3b] mb-1">Sign in</h1>
+          <p className="text-[#6b7280] text-[14px] mb-8">Use your admin credentials to access the portal.</p>
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700 mb-5">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-[#3b3b3b] mb-1.5">Email</label>
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                placeholder="admin@unitedhotels.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-[#eaeaea] px-4 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/30 focus:border-[#1ABC9C]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#3b3b3b] mb-1.5">Password</label>
+              <input
+                type="password"
+                required
+                autoComplete="current-password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-lg border border-[#eaeaea] px-4 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/30 focus:border-[#1ABC9C]"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 transition-colors"
+            >
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+              {submitting ? 'Signing in…' : 'Sign in to Admin'}
+            </button>
+          </form>
+
+          <div className="mt-8 pt-6 border-t border-[#eaeaea] flex items-center justify-between text-sm">
+            <Link to="/auth" className="text-[#6b7280] hover:text-[#3b3b3b] transition-colors">
+              ← Guest login
+            </Link>
+            <Link to="/" className="text-[#6b7280] hover:text-[#3b3b3b] transition-colors">
+              Back to home
+            </Link>
+          </div>
         </div>
       </div>
     </div>

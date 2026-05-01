@@ -1,338 +1,242 @@
-import { AdminLayout } from '../../components/admin/AdminLayout';
-import { DollarSign, TrendingUp, BarChart2, Globe } from 'lucide-react';
-import { 
-  PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid
+import { useEffect, useMemo, useState } from 'react';
+import {
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import { memo } from 'react';
+import { TrendingUp, DollarSign, CalendarCheck, Building2, Users } from 'lucide-react';
+import { AdminLayout } from '../../components/admin/AdminLayout';
+import { adminService, type AdminAnalytics } from '../../services/api';
 
-// Mock data for channel comparison donut chart - stable module-level constant
-const channelDataStatic = [
-  { id: 'ch1', name: 'Direct', value: 64, color: '#1ABC9C' },
-  { id: 'ch2', name: 'OTA', value: 36, color: '#8C8C8C' },
+const COLORS = ['#1ABC9C', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981', '#6B7280'];
+const RANGE_OPTIONS = [
+  { label: '7 days', value: 7 },
+  { label: '30 days', value: 30 },
+  { label: '90 days', value: 90 },
 ];
 
-// Mock data for monthly comparison - stable module-level constant
-const monthlyDataStatic = [
-  { id: 'm1', month: 'Jan', direct: 98000, ota: 52000 },
-  { id: 'm2', month: 'Feb', direct: 105000, ota: 48000 },
-  { id: 'm3', month: 'Mar', direct: 118000, ota: 66000 },
-];
+const fmtUsd = (n: number) => `$${Math.round(Number(n) || 0).toLocaleString()}`;
 
-// Channel breakdown table data
-const channelBreakdown = [
-  { channel: 'Direct', bookings: 798, revenue: '$118,080', avgValue: '$148', commission: '$0', savings: '$24,750', color: '#1ABC9C' },
-  { channel: 'Booking.com', bookings: 312, revenue: '$46,800', avgValue: '$150', commission: '$7,020', savings: '-', color: '#8C8C8C' },
-  { channel: 'Expedia', bookings: 137, revenue: '$19,620', avgValue: '$143', commission: '$3,924', savings: '-', color: '#8C8C8C' },
-];
+function StatCard({
+  label, value, icon: Icon, accent = '#1ABC9C',
+}: {
+  label: string; value: string | number; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; accent?: string;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-[#eaeaea] p-5 shadow-sm">
+      <div className="flex items-start justify-between">
+        <div className="h-11 w-11 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accent}1a` }}>
+          <Icon className="h-5 w-5" strokeWidth={1.7} />
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-[#8c8c8c] uppercase tracking-wider">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-[#3b3b3b]">{value}</p>
+    </div>
+  );
+}
 
 export function AdminAnalyticsPage() {
+  const [days, setDays] = useState<number>(30);
+  const [data, setData] = useState<AdminAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    adminService
+      .getAnalytics(days)
+      .then((d) => { if (active) setData(d); })
+      .catch((e: any) => { if (active) setError(e?.data?.error || e?.message || 'Failed to load analytics'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [days]);
+
+  const totals = useMemo(() => {
+    if (!data) return { bookings: 0, revenue: 0, avgValue: 0, topHotelName: '—' };
+    const bookings = data.bookingTrend.reduce((s, d) => s + d.bookings, 0);
+    const revenue = data.bookingTrend.reduce((s, d) => s + d.revenue, 0);
+    return {
+      bookings,
+      revenue,
+      avgValue: data.avgBookingValue.value,
+      topHotelName: data.topHotels[0]?.hotelName || '—',
+    };
+  }, [data]);
+
+  const trendChartData = useMemo(() => {
+    if (!data) return [];
+    return data.bookingTrend.map((d, i) => ({
+      date: d.date.slice(5),
+      bookings: d.bookings,
+      direct: data.revenueTrend[i]?.direct ?? 0,
+      ota: data.revenueTrend[i]?.ota ?? 0,
+      revenue: d.revenue,
+    }));
+  }, [data]);
+
+  const usersByRoleChartData = useMemo(() => {
+    if (!data) return [];
+    return [
+      { name: 'Users', value: data.usersByRole.user },
+      { name: 'Vendors', value: data.usersByRole.vendor },
+      { name: 'Admins', value: data.usersByRole.admin },
+    ].filter((r) => r.value > 0);
+  }, [data]);
+
   return (
-    <AdminLayout title="Analytics & Reports" breadcrumb="Admin > Analytics">
-      <div className="space-y-8">
-        {/* Hero Stat Card - OTA Savings */}
-        <div className="bg-gradient-to-br from-[#1ABC9C] to-[#16A085] rounded-2xl p-8 shadow-lg text-white">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-white/90 text-sm mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                This Month's OTA Commission Savings
-              </p>
-              <h2 className="text-5xl font-bold mb-3" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                $24,750
-              </h2>
-              <p className="text-white/80 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
-                By driving <strong>64%</strong> of bookings through your direct channel
-              </p>
-            </div>
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20">
-              <TrendingUp className="h-8 w-8" strokeWidth={2} />
-            </div>
+    <AdminLayout title="Analytics" breadcrumb="Admin / Analytics" adminOnly>
+      <div className="space-y-6">
+        {/* Range selector */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-[#6b7280]">
+            {data ? `Window: last ${data.window.days} days · generated ${new Date(data.window.generatedAt).toLocaleString()}` : 'Loading…'}
+          </p>
+          <div className="flex gap-2">
+            {RANGE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setDays(opt.value)}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  days === opt.value ? 'bg-[#1ABC9C] text-white' : 'bg-[#eaeaea] text-[#3b3b3b] hover:bg-[#d4d4d4]'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Revenue KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="admin-card p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10 mb-4">
-              <DollarSign className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
-            </div>
-            <p className="text-sm text-[#8C8C8C] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Total Revenue
-            </p>
-            <p className="text-3xl font-bold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              $184,500
-            </p>
-          </div>
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
+        )}
 
-          <div className="admin-card p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10 mb-4">
-              <BarChart2 className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
-            </div>
-            <p className="text-sm text-[#8C8C8C] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Average Daily Rate (ADR)
-            </p>
-            <p className="text-3xl font-bold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              $148
-            </p>
-          </div>
+        {/* KPI strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label={`Bookings (last ${days}d)`} value={totals.bookings.toLocaleString()} icon={CalendarCheck} accent="#1ABC9C" />
+          <StatCard label="Revenue" value={fmtUsd(totals.revenue)} icon={DollarSign} accent="#3B82F6" />
+          <StatCard label="Avg booking value" value={fmtUsd(totals.avgValue)} icon={TrendingUp} accent="#F59E0B" />
+          <StatCard label="Top hotel" value={totals.topHotelName} icon={Building2} accent="#8B5CF6" />
+        </div>
 
-          <div className="admin-card p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10 mb-4">
-              <TrendingUp className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
-            </div>
-            <p className="text-sm text-[#8C8C8C] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-              RevPAR
-            </p>
-            <p className="text-3xl font-bold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              $115
-            </p>
-          </div>
-
-          <div className="admin-card p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10 mb-4">
-              <Globe className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
-            </div>
-            <p className="text-sm text-[#8C8C8C] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Avg Booking Value
-            </p>
-            <p className="text-3xl font-bold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              $148
-            </p>
+        {/* Revenue trend */}
+        <div className="bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
+          <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Revenue · Direct vs OTA</h3>
+          <div style={{ width: '100%', height: 320 }}>
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={trendChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+                <XAxis dataKey="date" stroke="#8c8c8c" tickLine={false} axisLine={{ stroke: '#eaeaea' }} />
+                <YAxis stroke="#8c8c8c" tickLine={false} axisLine={{ stroke: '#eaeaea' }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
+                <Legend />
+                <Line type="monotone" dataKey="direct" name="Direct" stroke="#1ABC9C" strokeWidth={2} dot={false} isAnimationActive={false} />
+                <Line type="monotone" dataKey="ota" name="OTA" stroke="#8c8c8c" strokeWidth={2} dot={false} isAnimationActive={false} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Channel Comparison Section */}
-        <div className="admin-card p-6">
-          <h3 className="text-xl font-semibold text-[#3B3B3B] mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Channel Performance
-          </h3>
+        {/* Bookings/day + Status breakdown side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
+            <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Daily bookings</h3>
+            <div style={{ width: '100%', height: 280 }}>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={trendChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+                  <XAxis dataKey="date" stroke="#8c8c8c" tickLine={false} />
+                  <YAxis stroke="#8c8c8c" tickLine={false} allowDecimals={false} />
+                  <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
+                  <Bar dataKey="bookings" name="Bookings" fill="#1ABC9C" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            {/* Donut Chart */}
-            <div key="pie-chart-container">
-              <h4 className="text-sm font-semibold text-[#3B3B3B] mb-4 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Booking Distribution
-              </h4>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
+          <div className="bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
+            <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Bookings by status</h3>
+            {data && data.bookingsByStatus.length > 0 ? (
+              <div style={{ width: '100%', height: 280 }}>
+                <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
-                    <Pie
-                      data={channelDataStatic}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={5}
-                      dataKey="value"
-                      isAnimationActive={false}
-                    >
-                      {channelDataStatic.map((entry, index) => (
-                        <Cell key={`cell-${entry.id}`} fill={entry.color} />
+                    <Pie data={data.bookingsByStatus} dataKey="count" nameKey="status" outerRadius={90} label isAnimationActive={false}>
+                      {data.bookingsByStatus.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #EAEAEA',
-                        borderRadius: '8px',
-                        fontFamily: 'Inter, sans-serif'
-                      }}
-                      formatter={(value: number) => `${value}%`}
-                    />
-                    <Legend 
-                      wrapperStyle={{
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: '14px'
-                      }}
-                    />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+            ) : (
+              <p className="text-sm text-[#8c8c8c]">{loading ? 'Loading…' : 'No bookings yet.'}</p>
+            )}
+          </div>
+        </div>
 
-            {/* Bar Chart */}
-            <div key="bar-chart-container">
-              <h4 className="text-sm font-semibold text-[#3B3B3B] mb-4 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Monthly Revenue Comparison
-              </h4>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyDataStatic} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#EAEAEA" vertical={false} />
-                    <XAxis 
-                      dataKey="month" 
-                      stroke="#8C8C8C"
-                      style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px' }}
-                      tick={{ fill: '#8C8C8C' }}
-                      tickLine={false}
-                      axisLine={{ stroke: '#EAEAEA' }}
-                    />
-                    <YAxis 
-                      stroke="#8C8C8C"
-                      style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px' }}
-                      tick={{ fill: '#8C8C8C' }}
-                      tickLine={false}
-                      axisLine={{ stroke: '#EAEAEA' }}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #EAEAEA',
-                        borderRadius: '8px',
-                        fontFamily: 'Inter, sans-serif'
-                      }}
-                    />
-                    <Legend 
-                      wrapperStyle={{
-                        fontFamily: 'Inter, sans-serif',
-                        fontSize: '14px'
-                      }}
-                    />
-                    <Bar dataKey="direct" fill="#1ABC9C" name="Direct" radius={[8, 8, 0, 0]} isAnimationActive={false} />
-                    <Bar dataKey="ota" fill="#8C8C8C" name="OTA" radius={[8, 8, 0, 0]} isAnimationActive={false} />
+        {/* Top hotels + Users by role */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
+            <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Top hotels (revenue)</h3>
+            {data && data.topHotels.length > 0 ? (
+              <div style={{ width: '100%', height: 320 }}>
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={data.topHotels} layout="vertical" margin={{ left: 10, right: 30 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" horizontal={false} />
+                    <XAxis type="number" stroke="#8c8c8c" tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                    <YAxis dataKey="hotelName" type="category" stroke="#8c8c8c" tickLine={false} width={140} />
+                    <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
+                    <Bar dataKey="revenue" name="Revenue" fill="#3B82F6" radius={[0, 4, 4, 0]} isAnimationActive={false} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+            ) : (
+              <p className="text-sm text-[#8c8c8c]">{loading ? 'Loading…' : 'No data yet.'}</p>
+            )}
           </div>
 
-          {/* Channel Breakdown Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[#FAFAFA]">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Channel
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Bookings
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Revenue
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Avg Value
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Commission
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Net Savings
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-[#EAEAEA]">
-                {channelBreakdown.map((row, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: row.color }}
-                        />
-                        <span className="text-sm font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          {row.channel}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {row.bookings}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {row.revenue}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {row.avgValue}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#EF4444] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {row.commission}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {row.savings === '-' ? (
-                        <span className="text-[#8C8C8C]">-</span>
-                      ) : (
-                        <span className="text-[#22C55E]">{row.savings}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4 text-[#1abc9c]" />
+              <h3 className="text-base font-semibold text-[#3b3b3b]">Users by role</h3>
+            </div>
+            {usersByRoleChartData.length > 0 ? (
+              <div style={{ width: '100%', height: 280 }}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart>
+                    <Pie data={usersByRoleChartData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} label isAnimationActive={false}>
+                      {usersByRoleChartData.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-sm text-[#8c8c8c]">{loading ? 'Loading…' : 'No users yet.'}</p>
+            )}
           </div>
         </div>
 
-        {/* Booking Trends */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="admin-card p-6">
-            <h3 className="text-lg font-semibold text-[#3B3B3B] mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Top Guest Countries
-            </h3>
-            <div className="space-y-3">
-              {[
-                { country: 'United States', percentage: 32, count: 398 },
-                { country: 'United Kingdom', percentage: 24, count: 299 },
-                { country: 'Germany', percentage: 18, count: 224 },
-                { country: 'France', percentage: 15, count: 187 },
-                { country: 'Others', percentage: 11, count: 137 },
-              ].map((item, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-1.5 text-sm">
-                    <span className="text-[#3B3B3B] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {item.country}
-                    </span>
-                    <span className="text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {item.count} bookings ({item.percentage}%)
-                    </span>
-                  </div>
-                  <div className="w-full bg-[#EAEAEA] rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="bg-[#1ABC9C] h-full rounded-full transition-all"
-                      style={{ width: `${item.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+        {/* Revenue by district */}
+        {data && data.revenueByDistrict.length > 0 && (
+          <div className="bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
+            <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Revenue by district</h3>
+            <div style={{ width: '100%', height: 280 }}>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={data.revenueByDistrict}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+                  <XAxis dataKey="district" stroke="#8c8c8c" tickLine={false} />
+                  <YAxis stroke="#8c8c8c" tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
+                  <Bar dataKey="revenue" name="Revenue" fill="#F59E0B" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
-
-          <div className="admin-card p-6">
-            <h3 className="text-lg font-semibold text-[#3B3B3B] mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Booking Insights
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-[#FAFAFA] rounded-lg">
-                <div>
-                  <p className="text-sm text-[#8C8C8C] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Average Booking Lead Time
-                  </p>
-                  <p className="text-2xl font-bold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                    18 days
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-4 bg-[#FAFAFA] rounded-lg">
-                <div>
-                  <p className="text-sm text-[#8C8C8C] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Average Length of Stay
-                  </p>
-                  <p className="text-2xl font-bold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                    3.2 nights
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-4 bg-[#FAFAFA] rounded-lg">
-                <div>
-                  <p className="text-sm text-[#8C8C8C] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    Peak Booking Day
-                  </p>
-                  <p className="text-2xl font-bold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                    Thursday
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </AdminLayout>
   );

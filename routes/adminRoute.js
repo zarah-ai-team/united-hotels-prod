@@ -1,0 +1,31 @@
+const express = require('express');
+const router = express.Router();
+const { authenticate } = require('../middleware/authMiddleware');
+const { authorizeAdmin } = require('../middleware/rbacMiddleware');
+const {
+  getDashboardStats,
+  getAnalytics,
+  getBookingsByCountry,
+  listUsers,
+  adminRegisterUser,
+  updateUserRole,
+  deleteUser,
+  assignVendorToHotel,
+  updateRoomPrice,
+} = require('../controllers/admin');
+
+router.use(authenticate, authorizeAdmin);
+
+router.get('/stats', getDashboardStats);
+router.get('/analytics', getAnalytics);
+router.get('/bookings-by-country', getBookingsByCountry);
+
+router.get('/users', listUsers);
+router.post('/users', adminRegisterUser);
+router.patch('/users/:id/role', updateUserRole);
+router.delete('/users/:id', deleteUser);
+
+router.patch('/hotels/:id/assign-vendor', assignVendorToHotel);
+router.patch('/rooms/:id/price', updateRoomPrice);
+
+module.exports = router;

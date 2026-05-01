@@ -10,7 +10,10 @@
 // doesn't exist on ImageKit, the <img onError> fallback (see hotelImages.ts)
 // swaps in a local pool image so the user never sees a broken-image icon.
 
-const ENDPOINT = (import.meta.env.VITE_IMAGEKIT_ENDPOINT || "").replace(/\/+$/, "");
+// Default to the production United Hotels ImageKit account so the gallery
+// works out-of-the-box without a frontend `.env`. Override via VITE_IMAGEKIT_*
+// when targeting a different bucket.
+const ENDPOINT = (import.meta.env.VITE_IMAGEKIT_ENDPOINT || "https://ik.imagekit.io/UnitedHotels").replace(/\/+$/, "");
 const FOLDER = (import.meta.env.VITE_IMAGEKIT_FOLDER || "/hotels").replace(/\/+$/, "");
 
 // Per-hotel ImageKit configuration: which folder slug exists and how many
@@ -167,5 +170,17 @@ export function resolveHotelGallery(hotel: HotelKeyInput, count = 3): string[] {
   // Only request pictures we know exist for this hotel; default to `count`.
   const available = pictureCountFor(hotel, count);
   const total = Math.max(1, Math.min(count, available));
+  return Array.from({ length: total }, (_, i) => buildPictureUrl(slug, i + 1));
+}
+
+// Build N picture URLs purely from the hotel name (kebab-case slug). Used by
+// the detail page where we always want exactly `count` images derived from
+// `{slug}/picture-{N}.png`, regardless of the per-id override map. Missing
+// pictures fall back via the <img onError> handler.
+export function hotelGalleryByName(name: string, count = 3): string[] {
+  if (!ENDPOINT || !name) return [];
+  const slug = hotelSlug(name);
+  if (!slug) return [];
+  const total = Math.max(1, count);
   return Array.from({ length: total }, (_, i) => buildPictureUrl(slug, i + 1));
 }

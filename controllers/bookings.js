@@ -2,6 +2,9 @@ const moment = require("moment");
 const pool = require("../db");
 const sendMail = require("../utils/mailer");
 const { sendBookingConfirmationEmail: sendBookingConfirmationEmailResend } = require('../utils/emails/bookingConfirmationEmail');
+// Resolve the guest's country via the priority chain in utils/geoip.js
+// (explicit body → Cloudflare/Vercel header → IP lookup → Accept-Language).
+const { detectCountry } = require('../utils/geoip');
 
 const FRONTEND_URL = () => (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
 
@@ -513,6 +516,23 @@ const BookRoom = async (req, res) => {
         });
         const booking = normalizeBookingRecord(bookingResult.rows[0]);
         const persistedRoomId = booking.roomId || roomData.id;
+
+        // Tag the booking with the guest's country for the admin world map.
+        // detectCountry walks: explicit → CDN header → IP geo lookup → locale.
+        try {
+            const country = await detectCountry(req);
+            if (country) {
+                await client.query(
+                    `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS country text`
+                ).catch(() => {});
+                await client.query(
+                    `UPDATE bookings SET country = $1 WHERE id = $2`,
+                    [country, booking.id ?? booking._id ?? bookingResult.rows[0].id],
+                ).catch(() => {});
+            }
+        } catch (_e) {
+            // Non-fatal — booking already persisted; just skip the geo tag.
+        }
 
         // Update room's currentbookings
         let currentbookings = roomData.currentbookings || [];

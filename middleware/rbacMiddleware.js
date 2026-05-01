@@ -1,17 +1,34 @@
 const pool = require('../db');
 
+// Legacy role aliases → canonical names from the new RBAC scheme
+// (user / vendor / admin). Older accounts created before the migration
+// still pass new-style authorize checks.
+const ROLE_ALIASES = {
+  super_admin: 'admin',
+  manager: 'vendor',
+  hotel_manager: 'vendor',
+};
+
+const canonicalRole = (user) => {
+  if (!user) return null;
+  if (user.isAdmin || user.role === 'admin') return 'admin';
+  if (user.role === 'vendor' || user.isManager) return 'vendor';
+  return ROLE_ALIASES[user.role] || user.role || 'user';
+};
+
 const authorizeRoles = (...allowedRoles) => (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ error: 'User information missing from request' });
   }
 
-  // If admin, allow all access
-  if (req.user.isAdmin) {
+  // Admin gets a free pass on every authorize-by-role check.
+  if (req.user.isAdmin || req.user.role === 'admin') {
     return next();
   }
 
-  // For non-admin users, check if role is in allowed list
-  if (!allowedRoles.includes(req.user.role)) {
+  const role = canonicalRole(req.user);
+  const normalised = allowedRoles.map((r) => ROLE_ALIASES[r] || r);
+  if (!normalised.includes(role)) {
     return res.status(403).json({ error: 'Access denied: insufficient permissions' });
   }
 
@@ -22,7 +39,7 @@ const authorizeRoles = (...allowedRoles) => (req, res, next) => {
  * Authorize only admins
  */
 const authorizeAdmin = (req, res, next) => {
-  if (!req.user?.isAdmin) {
+  if (!req.user?.isAdmin && req.user?.role !== 'admin') {
     return res.status(403).json({ error: 'Only admins can access this resource' });
   }
   next();

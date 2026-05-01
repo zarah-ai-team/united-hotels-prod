@@ -67,6 +67,10 @@ export interface PublicHotelRoom {
   max_count?: number | null;
   available_rooms?: number | null;
   images?: string[];
+  min_price?: number | null;
+  max_price?: number | null;
+  hotel_id?: number | null;
+  description?: string | null;
 }
 
 export interface PublicHotel {
@@ -383,12 +387,17 @@ export const hotelService = {
     return Array.isArray(response.hotels) ? response.hotels : [];
   },
 
-  async getById(id: string): Promise<PublicHotel | null> {
+  async getById(
+    id: string,
+    params: { checkInDate?: string; checkOutDate?: string } = {},
+  ): Promise<PublicHotel | null> {
+    const qs = new URLSearchParams();
+    if (params.checkInDate) qs.set('checkInDate', params.checkInDate);
+    if (params.checkOutDate) qs.set('checkOutDate', params.checkOutDate);
+    const query = qs.toString();
+    const url = `${API_ENDPOINTS.HOTELS.GET_BY_ID(id)}${query ? `?${query}` : ''}`;
     try {
-      const response = await apiCall<{ hotel: PublicHotel }>(
-        API_ENDPOINTS.HOTELS.GET_BY_ID(id),
-        { method: 'GET' }
-      );
+      const response = await apiCall<{ hotel: PublicHotel }>(url, { method: 'GET' });
       return response.hotel || null;
     } catch (err: any) {
       // Fallback: scan the public list if single endpoint not yet deployed
@@ -694,6 +703,207 @@ export const bookingService = {
 };
 
 // ─────────────────────────────────────────────
+// Admin Service (admin-only routes)
+// ─────────────────────────────────────────────
+
+export interface AdminStats {
+  totals: {
+    hotels: number;
+    rooms: number;
+    bookings: number;
+    revenue: number;
+    payments: number;
+  };
+  usersByRole: { user: number; vendor: number; admin: number };
+  perHotel: Array<{
+    hotelId: number;
+    hotelName: string;
+    location: string;
+    bookings: number;
+    revenue: number;
+  }>;
+  recentBookings: Array<{
+    id: number;
+    checkIn: string;
+    checkOut: string;
+    totalPrice: number;
+    status: string;
+    userName?: string;
+    userEmail?: string;
+    hotelName?: string;
+  }>;
+}
+
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber?: string | null;
+  role: 'user' | 'vendor' | 'admin';
+  isAdmin: boolean;
+  isManager: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface AdminAnalytics {
+  window: { days: number; generatedAt: string };
+  bookingTrend: Array<{ date: string; bookings: number; revenue: number }>;
+  revenueTrend: Array<{ date: string; direct: number; ota: number }>;
+  topHotels: Array<{ hotelId: number; hotelName: string; location: string; bookings: number; revenue: number }>;
+  bookingsByStatus: Array<{ status: string; count: number }>;
+  usersByRole: { user: number; vendor: number; admin: number };
+  revenueByDistrict: Array<{ district: string; bookings: number; revenue: number }>;
+  avgBookingValue: { value: number; sampleSize: number };
+}
+
+export const adminService = {
+  async getStats(): Promise<AdminStats> {
+    const token = getStoredToken() || undefined;
+    return apiCall<AdminStats>(API_ENDPOINTS.ADMIN.STATS, { method: 'GET' }, token);
+  },
+
+  async getAnalytics(days = 30): Promise<AdminAnalytics> {
+    const token = getStoredToken() || undefined;
+    return apiCall<AdminAnalytics>(`${API_ENDPOINTS.ADMIN.ANALYTICS}?days=${days}`, { method: 'GET' }, token);
+  },
+
+  async getBookingsByCountry(): Promise<{
+    total: number;
+    countries: Array<{ country: string; bookings: number; revenue: number; share: number }>;
+  }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.BOOKINGS_BY_COUNTRY, { method: 'GET' }, token);
+  },
+
+  async listUsers(params: { role?: 'user' | 'vendor' | 'admin'; search?: string } = {}): Promise<{ users: AdminUser[]; count: number }> {
+    const token = getStoredToken() || undefined;
+    const query = new URLSearchParams();
+    if (params.role) query.set('role', params.role);
+    if (params.search) query.set('search', params.search);
+    const qs = query.toString();
+    return apiCall(`${API_ENDPOINTS.ADMIN.USERS}${qs ? `?${qs}` : ''}`, { method: 'GET' }, token);
+  },
+
+  async createUser(data: {
+    name: string;
+    email: string;
+    password: string;
+    phoneNumber?: string;
+    role: 'user' | 'vendor' | 'admin';
+  }): Promise<{ message: string; user: AdminUser }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.USERS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, token);
+  },
+
+  async updateUserRole(id: string | number, role: 'user' | 'vendor' | 'admin'): Promise<{ user: AdminUser }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.USER_ROLE(String(id)), {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    }, token);
+  },
+
+  async deleteUser(id: string | number): Promise<{ message: string }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.USER_DELETE(String(id)), { method: 'DELETE' }, token);
+  },
+
+  async assignVendor(hotelId: string | number, vendorId: number | null): Promise<{ hotel: PublicHotel }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.ASSIGN_VENDOR(String(hotelId)), {
+      method: 'PATCH',
+      body: JSON.stringify({ vendorId }),
+    }, token);
+  },
+
+  async updateRoomPrice(
+    roomId: string | number,
+    data: { basePrice?: number; minPrice?: number; maxPrice?: number },
+  ): Promise<{ room: PublicHotelRoom }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.ROOM_PRICE(String(roomId)), {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }, token);
+  },
+};
+
+// ─────────────────────────────────────────────
+// Vendor Service (vendor-only routes)
+// ─────────────────────────────────────────────
+
+export interface VendorHotel {
+  id: number;
+  name: string;
+  location: string;
+  address?: string | null;
+  image?: string | null;
+  totalRooms?: number | null;
+  room_count: number;
+}
+
+export interface VendorRoom extends PublicHotelRoom {
+  hotel_name?: string;
+}
+
+export const vendorService = {
+  async getStats(): Promise<AdminStats> {
+    const token = getStoredToken() || undefined;
+    return apiCall<AdminStats>(API_ENDPOINTS.VENDOR.STATS, { method: 'GET' }, token);
+  },
+
+  async getMyHotels(): Promise<{ hotels: VendorHotel[]; count: number }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.VENDOR.HOTELS, { method: 'GET' }, token);
+  },
+
+  async getMyRooms(hotelId?: string | number): Promise<{ rooms: VendorRoom[]; count: number }> {
+    const token = getStoredToken() || undefined;
+    const qs = hotelId ? `?hotelId=${encodeURIComponent(String(hotelId))}` : '';
+    return apiCall(`${API_ENDPOINTS.VENDOR.ROOMS}${qs}`, { method: 'GET' }, token);
+  },
+
+  async setRoomPriceBand(roomId: string | number, minPrice: number, maxPrice: number): Promise<{ room: VendorRoom }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.VENDOR.ROOM_PRICE_BAND(String(roomId)), {
+      method: 'PATCH',
+      body: JSON.stringify({ minPrice, maxPrice }),
+    }, token);
+  },
+
+  async addRoom(data: {
+    hotelId: number; name: string; category?: string; occupancyType?: string;
+    maxGuests?: number; basePrice: number; minPrice?: number; maxPrice?: number;
+    totalRooms?: number; image?: string | null;
+  }): Promise<{ room: VendorRoom }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.VENDOR.ROOMS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, token);
+  },
+
+  async getBookings(): Promise<{
+    bookings: Array<{
+      id: number; user_id: number | null; room_id: number | null;
+      check_in_date: string; check_out_date: string; total_price: number;
+      status: string; special_request: string | null; created_at: string;
+      user_name: string | null; user_email: string | null;
+      room_name: string | null; room_category: string | null;
+      hotel_id: number | null; hotel_name: string | null; hotel_location: string | null;
+    }>;
+    count: number;
+  }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.VENDOR.BOOKINGS, { method: 'GET' }, token);
+  },
+};
+
+// ─────────────────────────────────────────────
 // Utility exports
 // ─────────────────────────────────────────────
 
@@ -705,4 +915,6 @@ export default {
   roomItineraries: roomItineraryService,
   pricing: pricingService,
   bookings: bookingService,
+  admin: adminService,
+  vendor: vendorService,
 };

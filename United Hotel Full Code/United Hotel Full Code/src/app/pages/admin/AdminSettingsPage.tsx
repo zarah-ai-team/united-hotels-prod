@@ -25,7 +25,7 @@ export function AdminSettingsPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Tabs Sidebar */}
         <div className="lg:w-64 flex-shrink-0">
-          <div className="admin-card p-2 space-y-1">
+          <div className="bg-white rounded-xl shadow-sm border border-[#EAEAEA] p-2 space-y-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -53,7 +53,7 @@ export function AdminSettingsPage() {
         <div className="flex-1">
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <div className="admin-card p-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
               <h3 className="text-lg font-semibold text-[#3B3B3B] mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
                 Profile Settings
               </h3>
@@ -162,7 +162,7 @@ export function AdminSettingsPage() {
 
           {/* Team & Roles Tab */}
           {activeTab === 'team' && (
-            <div className="admin-card p-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
                   Team Members
@@ -239,7 +239,7 @@ export function AdminSettingsPage() {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <div className="admin-card p-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
               <h3 className="text-lg font-semibold text-[#3B3B3B] mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
                 Notification Preferences
               </h3>
@@ -278,7 +278,7 @@ export function AdminSettingsPage() {
 
           {/* Payment & Billing Tab */}
           {activeTab === 'payment' && (
-            <div className="admin-card p-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
               <h3 className="text-lg font-semibold text-[#3B3B3B] mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
                 Payment & Billing
               </h3>
@@ -344,7 +344,7 @@ export function AdminSettingsPage() {
 
           {/* General Tab */}
           {activeTab === 'general' && (
-            <div className="admin-card p-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
               <h3 className="text-lg font-semibold text-[#3B3B3B] mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
                 General Settings
               </h3>
@@ -442,7 +442,7 @@ export function AdminSettingsPage() {
 
           {/* Appearance Tab */}
           {activeTab === 'appearance' && (
-            <div className="admin-card p-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
               <h3 className="text-lg font-semibold text-[#3B3B3B] mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
                 Appearance
               </h3>

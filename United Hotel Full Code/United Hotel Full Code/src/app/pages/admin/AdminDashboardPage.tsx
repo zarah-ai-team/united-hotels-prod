@@ -1,20 +1,20 @@
 import { AdminLayout } from '../../components/admin/AdminLayout';
-import { CalendarCheck, DollarSign, Percent, TrendingUp, Building2, Tag, FileDown, Calendar, ShieldCheck, User as UserIcon } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useEffect, useState, useMemo } from 'react';
+import { CalendarCheck, DollarSign, Percent, TrendingUp, Building2, Tag, FileDown, Calendar, Info, Globe2 } from 'lucide-react';
+import { useState, useMemo, memo, useEffect } from 'react';
 import { Modal } from '../../components/admin/Modal';
 import { useNavigate } from 'react-router';
-import { useRole, setUserActualRole } from '../../components/admin/RoleSwitcher';
-import { bookingService, hotelService, type BookingRecord, type PublicHotel } from '../../services/api';
-import {
-  computeKpis,
-  buildRecentBookings,
-  buildWeeklyRevenue,
-  formatKpiCurrency,
-  type RecentBookingRow,
-  type WeeklyRevenuePoint,
-  type AdminKpis,
-} from '../../utils/adminMetrics';
+import { useRole } from '../../components/admin/RoleSwitcher';
+import { adminService, vendorService, type AdminStats } from '../../services/api';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+
+// Mock recent bookings
+const recentBookings = [
+  { id: 'BK-1247', guest: 'John Smith', hotel: 'Grand Palace Hotel', room: 'Deluxe Suite', checkIn: '2026-04-15', status: 'confirmed', amount: '$450' },
+  { id: 'BK-1246', guest: 'Emma Johnson', hotel: 'Bosphorus View Hotel', room: 'Standard Room', checkIn: '2026-04-10', status: 'pending', amount: '$280' },
+  { id: 'BK-1245', guest: 'Michael Brown', hotel: 'Sultanahmet Inn', room: 'Family Room', checkIn: '2026-04-08', status: 'checked-in', amount: '$380' },
+  { id: 'BK-1244', guest: 'Sarah Davis', hotel: 'Grand Palace Hotel', room: 'Executive Suite', checkIn: '2026-04-05', status: 'checked-out', amount: '$520' },
+  { id: 'BK-1243', guest: 'Robert Wilson', hotel: 'Bosphorus View Hotel', room: 'Deluxe Room', checkIn: '2026-04-01', status: 'cancelled', amount: '$320' },
+];
 
 type DateFilter = '7days' | '30days' | '90days' | 'today' | 'custom';
 
@@ -24,44 +24,35 @@ export function AdminDashboardPage() {
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
-  const [showRoleInfo, setShowRoleInfo] = useState(true);
   const navigate = useNavigate();
   const currentRole = useRole();
-
-  // Live data
-  const [bookings, setBookings] = useState<BookingRecord[]>([]);
-  const [hotels, setHotels] = useState<PublicHotel[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  const [byCountry, setByCountry] = useState<Array<{ country: string; bookings: number; revenue: number; share: number }>>([]);
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      setLoading(true);
-      try {
-        const [bookingsResp, hotelsList] = await Promise.all([
-          bookingService.getAll().catch(() => ({ bookings: [], count: 0 })),
-          hotelService.getAll().catch(() => [] as PublicHotel[]),
-        ]);
-        if (cancelled) return;
-        setBookings(bookingsResp.bookings || []);
-        setHotels(hotelsList);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    let active = true;
+    const isAdmin = currentRole === 'admin';
+    const statsPromise = isAdmin ? adminService.getStats() : vendorService.getStats();
+    statsPromise
+      .then((s) => { if (active) setStats(s); })
+      .catch((e: any) => { if (active) setStatsError(e?.data?.error || e?.message || 'Failed to load stats'); });
 
-  const kpis: AdminKpis = useMemo(() => computeKpis(bookings, hotels), [bookings, hotels]);
-  const recentBookings: RecentBookingRow[] = useMemo(
-    () => buildRecentBookings(bookings, hotels, 5),
-    [bookings, hotels],
-  );
-  const revenueData: WeeklyRevenuePoint[] = useMemo(() => buildWeeklyRevenue(bookings), [bookings]);
-  const hasRevenue = revenueData.some((r) => r.direct > 0 || r.ota > 0);
+    if (isAdmin) {
+      adminService.getBookingsByCountry()
+        .then((r) => { if (active) setByCountry(r.countries || []); })
+        .catch(() => { if (active) setByCountry([]); });
+    }
+    return () => { active = false; };
+  }, [currentRole]);
+
+  const liveBookings = stats ? stats.totals.bookings.toLocaleString() : '—';
+  const liveRevenue = stats ? `$${Math.round(stats.totals.revenue).toLocaleString()}` : '—';
+  const liveHotels = stats ? stats.totals.hotels.toLocaleString() : '—';
+  const liveUsers = stats
+    ? (stats.usersByRole.user + stats.usersByRole.vendor + stats.usersByRole.admin).toLocaleString()
+    : '—';
+  const liveRecent = stats?.recentBookings ?? [];
 
   const handleQuickAction = (actionTitle: string) => {
     switch(actionTitle) {
@@ -100,46 +91,19 @@ export function AdminDashboardPage() {
 
   return (
     <AdminLayout title="Dashboard" breadcrumb="Admin">
-      <div className="space-y-6">
-        {/* Welcome bar — compact role pill instead of bulky banner */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div>
-              <h2
-                className="text-[22px] md:text-[26px] font-semibold text-[#1f2937] dark:text-white leading-tight"
-                style={{ fontFamily: 'Poppins, sans-serif' }}
-              >
-                Welcome back, {currentRole === 'admin' ? 'Admin' : 'Team'}
-              </h2>
-              <p
-                className="text-[13px] text-[#6b7280] dark:text-white/55 mt-0.5"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                Grand Palace Hotel · here&rsquo;s how things look today
-              </p>
-            </div>
-            {showRoleInfo && (
-              <button
-                onClick={() => setShowRoleInfo(false)}
-                className={`hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[12px] font-medium border transition-colors ${
-                  currentRole === 'admin'
-                    ? 'bg-[#1ABC9C]/10 border-[#1ABC9C]/30 text-[#16A085] dark:bg-[#2dd4bf]/15 dark:border-[#2dd4bf]/40 dark:text-[#5eead4]'
-                    : 'bg-[#8C8C8C]/10 border-[#8C8C8C]/30 text-[#4b5563] dark:bg-white/[0.06] dark:border-white/[0.12] dark:text-white/75'
-                }`}
-                style={{ fontFamily: 'Inter, sans-serif' }}
-                title="Click to dismiss"
-              >
-                {currentRole === 'admin' ? (
-                  <ShieldCheck className="h-3.5 w-3.5" strokeWidth={2} />
-                ) : (
-                  <UserIcon className="h-3.5 w-3.5" strokeWidth={2} />
-                )}
-                {currentRole === 'admin' ? 'Admin view' : 'Staff view'}
-              </button>
-            )}
+      <div className="space-y-8">
+        {/* Welcome Bar + Date Filter */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              Welcome back, Admin
+            </h2>
+            <p className="text-sm text-[#8C8C8C] mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Grand Palace Hotel
+            </p>
           </div>
-
-          {/* Date filter pills */}
+          
+          {/* Date Filter Pills */}
           <div className="flex flex-wrap gap-2">
             {[
               { label: 'Today', value: 'today' as DateFilter },
@@ -151,7 +115,13 @@ export function AdminDashboardPage() {
               <button
                 key={filter.value}
                 onClick={() => setDateFilter(filter.value)}
-                className={`admin-pill ${dateFilter === filter.value ? 'is-active' : ''}`}
+                className={`
+                  rounded-full px-4 py-2 text-sm font-medium transition-colors
+                  ${dateFilter === filter.value
+                    ? 'bg-[#1ABC9C] text-white'
+                    : 'bg-[#EAEAEA] text-[#3B3B3B] hover:bg-[#EAEAEA]/80'
+                  }
+                `}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {filter.label}
@@ -161,364 +131,199 @@ export function AdminDashboardPage() {
         </div>
 
         {/* KPI Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Bookings */}
-          <div className="admin-card p-5">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
             <div className="flex items-start justify-between">
-              <div className="admin-kpi-icon">
-                <CalendarCheck className="h-5 w-5" strokeWidth={1.7} />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10">
+                <CalendarCheck className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
               </div>
-              <span className="text-[11px] font-medium tracking-wide uppercase text-[#8C8C8C] dark:text-white/45">
-                Bookings
-              </span>
             </div>
-            <p
-              className="text-[28px] font-bold text-[#1f2937] dark:text-white mt-4 leading-none"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
-              {loading ? '—' : kpis.totalBookings.toLocaleString()}
-            </p>
-            <div className="flex items-center gap-1 mt-2 min-h-[18px]">
-              <span className="text-[11px] text-[#8C8C8C] dark:text-white/45">
-                {loading ? 'loading…' : kpis.totalBookings === 0 ? 'no bookings yet' : 'all-time total'}
-              </span>
+            <div className="mt-4">
+              <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Total Bookings
+              </p>
+              <p className="text-3xl font-bold text-[#3B3B3B] mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                {liveBookings}
+              </p>
             </div>
           </div>
 
           {/* Revenue */}
-          <div className="admin-card p-5">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
             <div className="flex items-start justify-between">
-              <div className="admin-kpi-icon">
-                <DollarSign className="h-5 w-5" strokeWidth={1.7} />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10">
+                <DollarSign className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
               </div>
-              <span className="text-[11px] font-medium tracking-wide uppercase text-[#8C8C8C] dark:text-white/45">
-                Revenue
-              </span>
             </div>
-            <p
-              className="text-[28px] font-bold text-[#1f2937] dark:text-white mt-4 leading-none"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
-              {loading ? '—' : formatKpiCurrency(kpis.totalRevenue)}
-            </p>
-            <div className="flex items-center gap-1 mt-2 min-h-[18px]">
-              <span className="text-[11px] text-[#8C8C8C] dark:text-white/45">
-                {loading ? 'loading…' : kpis.totalBookings === 0 ? 'awaiting first booking' : 'across all bookings'}
-              </span>
+            <div className="mt-4">
+              <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Revenue
+              </p>
+              <p className="text-3xl font-bold text-[#3B3B3B] mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                {liveRevenue}
+              </p>
             </div>
           </div>
 
           {/* Occupancy Rate */}
-          <div className="admin-card p-5">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
             <div className="flex items-start justify-between">
-              <div className="admin-kpi-icon">
-                <Percent className="h-5 w-5" strokeWidth={1.7} />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10">
+                <Percent className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
               </div>
-              <span className="text-[11px] font-medium tracking-wide uppercase text-[#8C8C8C] dark:text-white/45">
-                Occupancy
-              </span>
             </div>
-            <p
-              className="text-[28px] font-bold text-[#1f2937] dark:text-white mt-4 leading-none"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
-              {loading ? '—' : kpis.occupancyPct == null ? '—' : `${kpis.occupancyPct}%`}
-            </p>
-            <div className="flex items-center gap-1 mt-2 min-h-[18px]">
-              <span className="text-[11px] text-[#8C8C8C] dark:text-white/45">
-                {loading
-                  ? 'loading…'
-                  : kpis.occupancyPct == null
-                  ? 'add room counts to compute'
-                  : 'last 30 days'}
-              </span>
+            <div className="mt-4">
+              <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Hotels (Active)
+              </p>
+              <p className="text-3xl font-bold text-[#3B3B3B] mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                {liveHotels}
+              </p>
             </div>
           </div>
 
           {/* Direct Booking % */}
-          <div className="admin-card p-5">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
             <div className="flex items-start justify-between">
-              <div className="admin-kpi-icon">
-                <TrendingUp className="h-5 w-5" strokeWidth={1.7} />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10">
+                <TrendingUp className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
               </div>
-              <span className="text-[11px] font-medium tracking-wide uppercase text-[#8C8C8C] dark:text-white/45">
-                Direct
-              </span>
             </div>
-            <p
-              className="text-[28px] font-bold text-[#1f2937] dark:text-white mt-4 leading-none"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
-              {loading ? '—' : kpis.directBookingPct == null ? '—' : `${kpis.directBookingPct}%`}
-            </p>
-            <div className="flex items-center gap-1 mt-2 min-h-[18px]">
-              <span className="text-[11px] text-[#8C8C8C] dark:text-white/45">
-                {loading
-                  ? 'loading…'
-                  : kpis.directBookingPct == null
-                  ? 'awaiting first booking'
-                  : `${100 - kpis.directBookingPct}% via OTA`}
-              </span>
+            <div className="mt-4">
+              <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Total Users
+              </p>
+              <p className="text-3xl font-bold text-[#3B3B3B] mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                {liveUsers}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Revenue Chart */}
-        <div className="admin-card p-5 md:p-6" key="revenue-chart-container">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3
-                className="text-[16px] font-semibold text-[#1f2937] dark:text-white"
-                style={{ fontFamily: 'Poppins, sans-serif' }}
-              >
-                Revenue Overview
-              </h3>
-              <p
-                className="text-[12px] text-[#8C8C8C] dark:text-white/55 mt-0.5"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                Direct vs OTA bookings, last 7 weeks
-              </p>
-            </div>
-            <div className="hidden sm:flex items-center gap-3 text-[12px]">
-              <span className="inline-flex items-center gap-1.5 text-[#3B3B3B] dark:text-white/75">
-                <span className="h-2 w-2 rounded-full bg-[#1ABC9C]" /> Direct
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[#3B3B3B] dark:text-white/75">
-                <span className="h-2 w-2 rounded-full bg-[#8C8C8C]" /> OTA
-              </span>
-            </div>
-          </div>
-          {!loading && !hasRevenue ? (
-            <div className="flex flex-col items-center justify-center text-center py-12">
-              <div className="admin-kpi-icon mb-3">
-                <DollarSign className="h-5 w-5" strokeWidth={1.7} />
-              </div>
-              <p
-                className="text-[13.5px] font-semibold text-[#1f2937] dark:text-white"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                No revenue yet
-              </p>
-              <p
-                className="text-[12px] text-[#6b7280] dark:text-white/55 mt-1 max-w-sm"
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                Once bookings are created, weekly direct vs OTA revenue will plot here automatically.
-              </p>
-            </div>
-          ) : (
-          <div style={{ width: '100%', height: '300px' }}>
-            <ResponsiveContainer width="100%" height={300} minHeight={300}>
-              <LineChart data={revenueData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(140,140,140,0.18)" vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  stroke="#8C8C8C"
-                  style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px' }}
-                  tick={{ fill: '#8C8C8C' }}
-                  tickLine={false}
-                  axisLine={{ stroke: 'rgba(140,140,140,0.25)' }}
-                />
-                <YAxis
-                  stroke="#8C8C8C"
-                  style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px' }}
-                  tick={{ fill: '#8C8C8C' }}
-                  tickLine={false}
-                  axisLine={{ stroke: 'rgba(140,140,140,0.25)' }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'rgba(255,255,255,0.92)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(15,23,42,0.08)',
-                    borderRadius: '10px',
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: '12px',
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="direct"
-                  stroke="#1ABC9C"
-                  strokeWidth={2.4}
-                  name="Direct Bookings"
-                  dot={{ fill: '#1ABC9C', r: 3.5 }}
-                  activeDot={{ r: 6 }}
-                  isAnimationActive={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="ota"
-                  stroke="#8C8C8C"
-                  strokeWidth={2}
-                  name="OTA Bookings"
-                  dot={{ fill: '#8C8C8C', r: 3.5 }}
-                  activeDot={{ r: 6 }}
-                  isAnimationActive={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          )}
-        </div>
+        {/* Bookings by country (admin only) */}
+        {currentRole === 'admin' && (
+          <BookingsByCountryCard rows={byCountry} />
+        )}
 
-        {/* Recent Bookings Table */}
-        <div className="admin-card overflow-hidden">
-          <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.06]">
-            <h3
-              className="text-[16px] font-semibold text-[#1f2937] dark:text-white"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
+        {/* Recent Bookings Table — vendors only; admins see the country chart instead */}
+        {currentRole !== 'admin' && (
+        <div className="bg-white rounded-xl shadow-sm border border-[#EAEAEA] overflow-hidden">
+          <div className="flex items-center justify-between p-6 border-b border-[#EAEAEA]">
+            <h3 className="text-lg font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
               Recent Bookings
             </h3>
-            <a
+            <a 
               href="/admin/bookings"
-              className="text-[12.5px] font-medium text-[#1ABC9C] hover:text-[#16A085] transition-colors"
+              className="text-sm font-medium text-[#1ABC9C] hover:text-[#16A085] transition-colors"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               View All →
             </a>
           </div>
-
+          
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-white/40 dark:bg-white/[0.03]">
+              <thead className="bg-[#FAFAFA]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-[10.5px] font-semibold text-[#8C8C8C] dark:text-white/45 uppercase tracking-[0.12em]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Booking ID
                   </th>
-                  <th className="px-6 py-3 text-left text-[10.5px] font-semibold text-[#8C8C8C] dark:text-white/45 uppercase tracking-[0.12em]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Guest
                   </th>
-                  <th className="px-6 py-3 text-left text-[10.5px] font-semibold text-[#8C8C8C] dark:text-white/45 uppercase tracking-[0.12em]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Hotel
                   </th>
-                  <th className="px-6 py-3 text-left text-[10.5px] font-semibold text-[#8C8C8C] dark:text-white/45 uppercase tracking-[0.12em]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Room
                   </th>
-                  <th className="px-6 py-3 text-left text-[10.5px] font-semibold text-[#8C8C8C] dark:text-white/45 uppercase tracking-[0.12em]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Check-in
                   </th>
-                  <th className="px-6 py-3 text-left text-[10.5px] font-semibold text-[#8C8C8C] dark:text-white/45 uppercase tracking-[0.12em]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-[10.5px] font-semibold text-[#8C8C8C] dark:text-white/45 uppercase tracking-[0.12em]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Amount
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
-                {loading ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <tr key={i}>
-                      <td className="px-6 py-4" colSpan={7}>
-                        <div className="h-3.5 w-full rounded bg-black/[0.04] dark:bg-white/[0.04] animate-pulse" />
-                      </td>
-                    </tr>
-                  ))
-                ) : recentBookings.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="admin-kpi-icon">
-                          <CalendarCheck className="h-5 w-5" strokeWidth={1.7} />
-                        </div>
-                        <p
-                          className="text-[13px] font-semibold text-[#1f2937] dark:text-white"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
-                        >
-                          No bookings yet
-                        </p>
-                        <p
-                          className="text-[12px] text-[#6b7280] dark:text-white/55 max-w-sm"
-                          style={{ fontFamily: 'Inter, sans-serif' }}
-                        >
-                          New reservations will appear in this list as guests book.
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  recentBookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-white/45 dark:hover:bg-white/[0.03] transition-colors">
-                    <td className="px-6 py-3.5 whitespace-nowrap">
+              <tbody className="bg-white divide-y divide-[#EAEAEA]">
+                {(liveRecent.length > 0
+                  ? liveRecent.map((b) => ({
+                      id: `BK-${b.id}`,
+                      guest: b.userName || b.userEmail || 'Guest',
+                      hotel: b.hotelName || '—',
+                      room: '—',
+                      checkIn: b.checkIn ? String(b.checkIn).slice(0, 10) : '',
+                      status: b.status || 'pending',
+                      amount: `$${Math.round(Number(b.totalPrice) || 0).toLocaleString()}`,
+                    }))
+                  : recentBookings
+                ).map((booking) => (
+                  <tr key={booking.id} className="hover:bg-[#FAFAFA] transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <a
-                        href={`/admin/bookings`}
-                        className="text-[12.5px] font-mono text-[#1ABC9C] hover:text-[#16A085]"
+                        href={`/admin/bookings/${booking.id}`}
+                        className="text-sm font-mono text-[#1ABC9C] hover:text-[#16A085]"
                       >
                         {booking.id}
                       </a>
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap text-[13px] text-[#1f2937] dark:text-white/85" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {booking.guest}
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap text-[13px] text-[#1f2937] dark:text-white/85 max-w-[220px] truncate" style={{ fontFamily: 'Inter, sans-serif' }} title={booking.hotelName}>
-                      {booking.hotelName}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {booking.hotel}
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap text-[13px] text-[#6b7280] dark:text-white/55" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {booking.roomName}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {booking.room}
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap text-[13px] text-[#1f2937] dark:text-white/85" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {booking.checkIn}
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={getStatusBadgeClass(booking.status)}>
                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1).replace('-', ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 whitespace-nowrap text-[13px] font-semibold text-[#1f2937] dark:text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {booking.amount}
                     </td>
                   </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
+        )}
 
         {/* Quick Actions */}
-        <div>
-          <h3
-            className="text-[14px] font-semibold text-[#1f2937] dark:text-white/85 mb-3 uppercase tracking-[0.12em]"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-          >
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { icon: Building2, title: 'Add New Hotel', description: 'Create a property listing' },
-              { icon: Tag, title: 'Manage Pricing', description: 'Update room rates' },
-              { icon: FileDown, title: 'Generate Report', description: 'Export analytics data' },
-              { icon: Calendar, title: 'View Calendar', description: 'Check availability' },
-            ].map((action, index) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={index}
-                  onClick={() => handleQuickAction(action.title)}
-                  className="admin-card is-interactive p-5 text-left group"
-                >
-                  <div className="admin-kpi-icon mb-3 transition-transform group-hover:scale-105">
-                    <Icon className="h-5 w-5" strokeWidth={1.7} />
-                  </div>
-                  <h4
-                    className="text-[14px] font-semibold text-[#1f2937] dark:text-white mb-1"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                  >
-                    {action.title}
-                  </h4>
-                  <p
-                    className="text-[12px] text-[#6b7280] dark:text-white/55"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                  >
-                    {action.description}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { icon: Building2, title: 'Add New Hotel', description: 'Create a new property listing', color: '#1ABC9C' },
+            { icon: Tag, title: 'Manage Pricing', description: 'Update room rates', color: '#1ABC9C' },
+            { icon: FileDown, title: 'Generate Report', description: 'Export analytics data', color: '#1ABC9C' },
+            { icon: Calendar, title: 'View Calendar', description: 'Check availability', color: '#1ABC9C' },
+          ].map((action, index) => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={index}
+                onClick={() => handleQuickAction(action.title)}
+                className="group bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA] hover:border-[#1ABC9C] transition-all text-left"
+              >
+                <Icon className="h-6 w-6 text-[#1ABC9C] mb-3" strokeWidth={1.5} />
+                <h4 className="text-base font-semibold text-[#3B3B3B] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  {action.title}
+                </h4>
+                <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  {action.description}
+                </p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -685,5 +490,68 @@ export function AdminDashboardPage() {
         </div>
       </Modal>
     </AdminLayout>
+  );
+}
+
+const COUNTRY_FLAGS: Record<string, string> = {
+  US: '🇺🇸', GB: '🇬🇧', UK: '🇬🇧', TR: '🇹🇷', DE: '🇩🇪', FR: '🇫🇷', ES: '🇪🇸',
+  IT: '🇮🇹', AE: '🇦🇪', SA: '🇸🇦', RU: '🇷🇺', CN: '🇨🇳', JP: '🇯🇵', IN: '🇮🇳',
+  BR: '🇧🇷', NL: '🇳🇱', CH: '🇨🇭', SE: '🇸🇪', NO: '🇳🇴', AU: '🇦🇺', CA: '🇨🇦',
+};
+
+const COUNTRY_COLORS = ['#1ABC9C', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981', '#EC4899', '#14B8A6'];
+
+function BookingsByCountryCard({ rows }: { rows: Array<{ country: string; bookings: number; revenue: number; share: number }> }) {
+  const total = rows.reduce((s, r) => s + r.bookings, 0);
+  const top = rows.slice(0, 8);
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-[#EAEAEA] p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-[#3B3B3B] flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <Globe2 className="w-5 h-5 text-[#1ABC9C]" /> Bookings by country
+        </h3>
+        <span className="text-xs text-[#8C8C8C]">{total} bookings · top {top.length} countries</span>
+      </div>
+
+      {top.length === 0 ? (
+        <div className="py-12 text-center text-sm text-[#8C8C8C]">
+          No bookings yet. Country distribution will populate as guests book.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+          <div style={{ width: '100%', height: 260 }}>
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={top} dataKey="bookings" nameKey="country" innerRadius={50} outerRadius={90} isAnimationActive={false} label>
+                  {top.map((_, i) => (
+                    <Cell key={i} fill={COUNTRY_COLORS[i % COUNTRY_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #EAEAEA' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div style={{ width: '100%', height: 260 }}>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={top} layout="vertical" margin={{ left: 10, right: 30 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EAEAEA" horizontal={false} />
+                <XAxis type="number" stroke="#8C8C8C" tickLine={false} allowDecimals={false} />
+                <YAxis
+                  dataKey="country"
+                  type="category"
+                  stroke="#8C8C8C"
+                  tickLine={false}
+                  width={120}
+                  tickFormatter={(c: string) => `${COUNTRY_FLAGS[c] || '🌐'} ${c}`}
+                />
+                <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #EAEAEA' }} />
+                <Bar dataKey="bookings" name="Bookings" fill="#1ABC9C" radius={[0, 4, 4, 0]} isAnimationActive={false} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

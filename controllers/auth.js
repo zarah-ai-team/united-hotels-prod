@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const sendMail = require('../utils/mailer');
 const { sendWelcomeEmail } = require('../utils/emails/welcomeEmail');
 const { sendPasswordResetEmail } = require('../utils/emails/passwordResetEmail');
+const { detectCountry } = require('../utils/geoip');
 
 const FRONTEND_URL = () => (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
 
@@ -229,6 +230,17 @@ const registerUser = async (req, res) => {
     , values);
 
     const id = insertResult.rows[0].id;
+
+    // Tag the new user with their country (CDN header → IP geo → locale).
+    // Non-blocking: failure to look up never breaks registration.
+    detectCountry(req)
+      .then(async (country) => {
+        if (!country) return;
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS country text`).catch(() => {});
+        await pool.query(`UPDATE users SET country = $1 WHERE id = $2`, [country, id]).catch(() => {});
+      })
+      .catch(() => { /* swallow — registration already succeeded */ });
+
     const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
     const user = mapUser(userResult.rows[0], meta);
     const token = generateToken(user.id, user.isAdmin, user.isManager);
