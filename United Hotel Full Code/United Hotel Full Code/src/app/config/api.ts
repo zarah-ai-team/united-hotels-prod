@@ -80,6 +80,7 @@ export const API_ENDPOINTS = {
     USER_DELETE: (id: string) => `/api/admin/users/${id}`,
     ASSIGN_VENDOR: (hotelId: string) => `/api/admin/hotels/${hotelId}/assign-vendor`,
     ROOM_PRICE: (id: string) => `/api/admin/rooms/${id}/price`,
+    EMAIL_LOGS: '/api/admin/email-logs',
   },
 
   // Vendor (vendor + admin)

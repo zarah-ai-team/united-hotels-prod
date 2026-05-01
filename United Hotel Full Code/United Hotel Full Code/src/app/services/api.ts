@@ -839,6 +839,29 @@ export const adminService = {
       body: JSON.stringify(data),
     }, token);
   },
+
+  async listEmailLogs(params: { type?: string; status?: string; limit?: number } = {}): Promise<{
+    logs: Array<{
+      id: number;
+      type: string;
+      recipient: string;
+      subject: string | null;
+      status: 'sent' | 'logged' | 'failed' | 'skipped' | 'pending';
+      providerId: string | null;
+      errorMessage: string | null;
+      createdAt: string | null;
+    }>;
+    count: number;
+    resendConfigured: boolean;
+  }> {
+    const token = getStoredToken() || undefined;
+    const qs = new URLSearchParams();
+    if (params.type) qs.set('type', params.type);
+    if (params.status) qs.set('status', params.status);
+    if (params.limit) qs.set('limit', String(params.limit));
+    const q = qs.toString();
+    return apiCall(`${API_ENDPOINTS.ADMIN.EMAIL_LOGS}${q ? `?${q}` : ''}`, { method: 'GET' }, token);
+  },
 };
 
 // ─────────────────────────────────────────────

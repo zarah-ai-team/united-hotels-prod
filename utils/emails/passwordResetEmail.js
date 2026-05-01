@@ -44,6 +44,7 @@ const buildResetText = ({ name, resetUrl, expiresInMinutes = 30 }) =>
 
 const sendPasswordResetEmail = async ({ to, name, resetUrl, expiresInMinutes }) => {
   return sendEmail({
+    type: 'password-reset',
     to,
     subject: 'Reset your United Hotels password',
     html: buildResetHtml({ name, resetUrl, expiresInMinutes }),
@@ -51,4 +52,48 @@ const sendPasswordResetEmail = async ({ to, name, resetUrl, expiresInMinutes }) 
   });
 };
 
-module.exports = { sendPasswordResetEmail, buildResetHtml };
+// "Your password was changed" notification — sent right after a successful
+// reset so the legitimate account owner can act if it wasn't them.
+const buildPasswordChangedHtml = ({ name }) => {
+  const greeting = name ? `Hi ${escapeHtml(name)},` : 'Hi there,';
+  const body = `
+    ${heading('Your password was changed')}
+    ${paragraph(greeting)}
+    ${paragraph(
+      "This is a confirmation that the password on your United Hotels account was just changed. You can sign in with your new password right away."
+    )}
+    ${muted(
+      "If you didn&rsquo;t make this change, please reset your password immediately and contact our support team — your account may be compromised."
+    )}
+  `;
+  return renderEmail({
+    title: 'Password changed',
+    preview: 'The password on your United Hotels account has been updated.',
+    body,
+  });
+};
+
+const buildPasswordChangedText = ({ name }) =>
+  [
+    `Hi ${name || 'there'},`,
+    '',
+    'This is a confirmation that the password on your United Hotels account was just changed.',
+    "If you didn't make this change, reset your password immediately and contact support.",
+  ].join('\n');
+
+const sendPasswordChangedEmail = async ({ to, name }) => {
+  return sendEmail({
+    type: 'password-changed',
+    to,
+    subject: 'Your United Hotels password was changed',
+    html: buildPasswordChangedHtml({ name }),
+    text: buildPasswordChangedText({ name }),
+  });
+};
+
+module.exports = {
+  sendPasswordResetEmail,
+  sendPasswordChangedEmail,
+  buildResetHtml,
+  buildPasswordChangedHtml,
+};

@@ -134,6 +134,7 @@ const sendBookingConfirmationEmail = async (booking) => {
     return { id: null, skipped: true };
   }
   return sendEmail({
+    type: 'booking-confirmation',
     to: booking.to,
     subject: `Booking confirmed at ${booking.hotelName} (BK-${booking.bookingId})`,
     html: buildBookingHtml(booking),

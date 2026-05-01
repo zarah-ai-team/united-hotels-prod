@@ -42,6 +42,7 @@ const buildWelcomeText = ({ name, verifyUrl }) =>
 
 const sendWelcomeEmail = async ({ to, name, verifyUrl }) => {
   return sendEmail({
+    type: 'welcome',
     to,
     subject: 'Welcome to United Hotels — confirm your email',
     html: buildWelcomeHtml({ name, verifyUrl }),

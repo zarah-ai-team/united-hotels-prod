@@ -12,6 +12,7 @@ import {
   Users,
   Tag,
   ChevronLeft,
+  Mail,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRole } from './RoleSwitcher';
@@ -25,6 +26,7 @@ const navItems = [
   { icon: Users, label: 'Users', path: '/admin/users', roles: ['admin'] },
   { icon: Tag, label: 'Vendor Pricing', path: '/vendor', roles: ['admin'] },
   { icon: BarChart3, label: 'Analytics', path: '/admin/analytics', roles: ['admin'] },
+  { icon: Mail, label: 'Email Logs', path: '/admin/email-logs', roles: ['admin'] },
   { icon: Settings, label: 'Settings', path: '/admin/settings', roles: ['admin', 'vendor'] },
 ];
 

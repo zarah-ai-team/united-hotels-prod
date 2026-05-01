@@ -12,6 +12,7 @@ const {
   deleteUser,
   assignVendorToHotel,
   updateRoomPrice,
+  listEmailLogs,
 } = require('../controllers/admin');
 
 router.use(authenticate, authorizeAdmin);
@@ -27,5 +28,7 @@ router.delete('/users/:id', deleteUser);
 
 router.patch('/hotels/:id/assign-vendor', assignVendorToHotel);
 router.patch('/rooms/:id/price', updateRoomPrice);
+
+router.get('/email-logs', listEmailLogs);
 
 module.exports = router;

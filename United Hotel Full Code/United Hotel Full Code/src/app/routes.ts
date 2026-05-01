@@ -24,6 +24,7 @@ import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { VendorPortalPage } from './pages/admin/VendorPortalPage';
 import { AdminHotelDetailPage } from './pages/admin/AdminHotelDetailPage';
+import { AdminEmailLogsPage } from './pages/admin/AdminEmailLogsPage';
 import { RequireAdmin } from './components/admin/RequireAdmin';
 import { RouteErrorBoundary } from './components/ErrorBoundary';
 
@@ -154,6 +155,11 @@ export const router = createBrowserRouter([
   {
     path: '/admin/users',
     element: guarded(AdminUsersPage),
+    errorElement,
+  },
+  {
+    path: '/admin/email-logs',
+    element: guarded(AdminEmailLogsPage),
     errorElement,
   },
   // Vendor portal (separate role — not admin-guarded)

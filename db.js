@@ -35,6 +35,21 @@ db.exec(`
     updated_at    TEXT    NOT NULL DEFAULT (datetime('now'))
   );
 
+  -- Audit log for every transactional email attempt (welcome / verify /
+  -- reset / booking confirmation / password changed). Populated by
+  -- utils/emails/client.js so we can show the most recent sends in the
+  -- admin panel and debug Resend failures without scraping logs.
+  CREATE TABLE IF NOT EXISTS email_logs (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    type          TEXT    NOT NULL,
+    recipient     TEXT    NOT NULL,
+    subject       TEXT,
+    status        TEXT    NOT NULL DEFAULT 'pending',
+    provider_id   TEXT,
+    error_message TEXT,
+    created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS hotels (
     id                 INTEGER PRIMARY KEY AUTOINCREMENT,
     hotel_name         TEXT    NOT NULL,

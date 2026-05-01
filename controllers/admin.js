@@ -492,6 +492,54 @@ const updateRoomPrice = async (req, res) => {
   }
 };
 
+// ─── Email logs ────────────────────────────────────────────────────────────
+//
+// Returns the most recent transactional email send attempts (welcome,
+// password-reset, password-changed, booking-confirmation, etc.) so the
+// admin can audit what the system actually emailed out, see Resend message
+// IDs for delivery investigation, and spot failures fast.
+
+const listEmailLogs = async (req, res) => {
+  try {
+    const limit = Math.max(1, Math.min(500, parseInt(req.query.limit, 10) || 100));
+    const type = req.query.type || null;
+    const status = req.query.status || null;
+
+    const filters = [];
+    const params = [];
+    if (type) { params.push(type); filters.push(`type = $${params.length}`); }
+    if (status) { params.push(status); filters.push(`status = $${params.length}`); }
+    const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+
+    params.push(limit);
+    const result = await pool.query(
+      `SELECT id, type, recipient, subject, status, provider_id, error_message, created_at
+       FROM email_logs ${where}
+       ORDER BY id DESC
+       LIMIT $${params.length}`,
+      params,
+    ).catch(() => ({ rows: [] }));
+
+    return res.json({
+      logs: result.rows.map((r) => ({
+        id: r.id,
+        type: r.type,
+        recipient: r.recipient,
+        subject: r.subject,
+        status: r.status,
+        providerId: r.provider_id,
+        errorMessage: r.error_message,
+        createdAt: r.created_at,
+      })),
+      count: result.rows.length,
+      resendConfigured: Boolean(process.env.RESEND_API_KEY),
+    });
+  } catch (error) {
+    console.error('listEmailLogs error', error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAnalytics,
@@ -502,4 +550,5 @@ module.exports = {
   deleteUser,
   assignVendorToHotel,
   updateRoomPrice,
+  listEmailLogs,
 };

@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sendMail = require('../utils/mailer');
 const { sendWelcomeEmail } = require('../utils/emails/welcomeEmail');
-const { sendPasswordResetEmail } = require('../utils/emails/passwordResetEmail');
+const { sendPasswordResetEmail, sendPasswordChangedEmail } = require('../utils/emails/passwordResetEmail');
 const { detectCountry } = require('../utils/geoip');
 
 const FRONTEND_URL = () => (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
@@ -364,13 +364,20 @@ const resetPassword = async (req, res) => {
       return res.status(401).json({ error: 'Invalid reset token' });
     }
 
-    const userResult = await pool.query('SELECT id FROM users WHERE id = $1', [decoded.userId]);
+    const userResult = await pool.query('SELECT * FROM users WHERE id = $1', [decoded.userId]);
     if (!userResult.rowCount) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, decoded.userId]);
+
+    // Notify the account owner that the password just changed — gives a
+    // chance to react fast if it wasn't them. Fire-and-forget so a flaky
+    // email provider doesn't block the success response.
+    const row = userResult.rows[0];
+    sendPasswordChangedEmail({ to: row.email, name: row.name })
+      .catch((err) => console.error('[auth] password-changed email failed:', err));
 
     return res.json({ message: 'Password reset successfully. You can now sign in with your new password.' });
   } catch (err) {
