@@ -89,22 +89,35 @@ export function AdminDashboardPage() {
     }
   };
 
+  // Compact stat-card config so the four KPIs share one tidy markup block.
+  const statCards: Array<{
+    label: string;
+    value: string;
+    Icon: typeof CalendarCheck;
+    accent: string;
+  }> = [
+    { label: 'Total Bookings', value: liveBookings, Icon: CalendarCheck, accent: '#1ABC9C' },
+    { label: 'Revenue',        value: liveRevenue,  Icon: DollarSign,    accent: '#10b981' },
+    { label: 'Hotels (Active)',value: liveHotels,   Icon: Percent,       accent: '#0ea5e9' },
+    { label: 'Total Users',    value: liveUsers,    Icon: TrendingUp,    accent: '#8b5cf6' },
+  ];
+
   return (
     <AdminLayout title="Dashboard" breadcrumb="Admin">
-      <div className="space-y-8">
-        {/* Welcome Bar + Date Filter */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="space-y-5">
+        {/* Welcome Bar + Date Filter — slimmer typography, tighter spacing */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h2 className="text-[18px] font-semibold text-[#1f2937] leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
               Welcome back, Admin
             </h2>
-            <p className="text-sm text-[#8C8C8C] mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-              Grand Palace Hotel
+            <p className="text-[12px] text-[#8C8C8C] mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+              United Hotels Partner Network
             </p>
           </div>
-          
+
           {/* Date Filter Pills */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {[
               { label: 'Today', value: 'today' as DateFilter },
               { label: '7 Days', value: '7days' as DateFilter },
@@ -115,13 +128,11 @@ export function AdminDashboardPage() {
               <button
                 key={filter.value}
                 onClick={() => setDateFilter(filter.value)}
-                className={`
-                  rounded-full px-4 py-2 text-sm font-medium transition-colors
-                  ${dateFilter === filter.value
-                    ? 'bg-[#1ABC9C] text-white'
-                    : 'bg-[#EAEAEA] text-[#3B3B3B] hover:bg-[#EAEAEA]/80'
-                  }
-                `}
+                className={`rounded-full px-3 py-1 text-[11.5px] font-medium transition-all ${
+                  dateFilter === filter.value
+                    ? 'bg-[#1ABC9C] text-white shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]'
+                    : 'bg-white/70 border border-[#EAEAEA] text-[#6b7280] hover:text-[#1f2937] hover:border-[#1ABC9C]/40'
+                }`}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {filter.label}
@@ -130,75 +141,35 @@ export function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* KPI Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Total Bookings */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
-            <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10">
-                <CalendarCheck className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
+        {/* KPI Stat Cards — compact (p-4, smaller icons + numbers) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {statCards.map(({ label, value, Icon, accent }) => (
+            <div
+              key={label}
+              className="group relative bg-white/80 rounded-xl p-3.5 border border-[#EAEAEA]/80 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] hover:border-[#1ABC9C]/30 transition-all"
+              style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-9 w-9 items-center justify-center rounded-lg shrink-0"
+                  style={{
+                    background: `linear-gradient(135deg, ${accent}1a, ${accent}33)`,
+                    boxShadow: `inset 0 0 0 1px ${accent}22`,
+                  }}
+                >
+                  <Icon className="h-[16px] w-[16px]" style={{ color: accent }} strokeWidth={1.85} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10.5px] text-[#8C8C8C] uppercase tracking-[0.08em] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {label}
+                  </p>
+                  <p className="text-[20px] font-bold text-[#1f2937] mt-0.5 leading-none truncate" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                    {value}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="mt-4">
-              <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Total Bookings
-              </p>
-              <p className="text-3xl font-bold text-[#3B3B3B] mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                {liveBookings}
-              </p>
-            </div>
-          </div>
-
-          {/* Revenue */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
-            <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10">
-                <DollarSign className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Revenue
-              </p>
-              <p className="text-3xl font-bold text-[#3B3B3B] mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                {liveRevenue}
-              </p>
-            </div>
-          </div>
-
-          {/* Occupancy Rate */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
-            <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10">
-                <Percent className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Hotels (Active)
-              </p>
-              <p className="text-3xl font-bold text-[#3B3B3B] mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                {liveHotels}
-              </p>
-            </div>
-          </div>
-
-          {/* Direct Booking % */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA]">
-            <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1ABC9C]/10">
-                <TrendingUp className="h-6 w-6 text-[#1ABC9C]" strokeWidth={1.5} />
-              </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Total Users
-              </p>
-              <p className="text-3xl font-bold text-[#3B3B3B] mt-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                {liveUsers}
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Bookings by country (admin only) */}
@@ -208,14 +179,14 @@ export function AdminDashboardPage() {
 
         {/* Recent Bookings Table — vendors only; admins see the country chart instead */}
         {currentRole !== 'admin' && (
-        <div className="bg-white rounded-xl shadow-sm border border-[#EAEAEA] overflow-hidden">
-          <div className="flex items-center justify-between p-6 border-b border-[#EAEAEA]">
-            <h3 className="text-lg font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+        <div className="bg-white/80 rounded-xl border border-[#EAEAEA]/80 overflow-hidden" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#EAEAEA]/60">
+            <h3 className="text-[14px] font-semibold text-[#1f2937]" style={{ fontFamily: 'Poppins, sans-serif' }}>
               Recent Bookings
             </h3>
-            <a 
+            <a
               href="/admin/bookings"
-              className="text-sm font-medium text-[#1ABC9C] hover:text-[#16A085] transition-colors"
+              className="text-[12px] font-medium text-[#1ABC9C] hover:text-[#16A085] transition-colors"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               View All →
@@ -226,25 +197,25 @@ export function AdminDashboardPage() {
             <table className="w-full">
               <thead className="bg-[#FAFAFA]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Booking ID
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Guest
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Hotel
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Room
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Check-in
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <th className="px-3 py-2 text-left text-[10.5px] font-semibold text-[#8C8C8C] uppercase tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Amount
                   </th>
                 </tr>
@@ -263,7 +234,7 @@ export function AdminDashboardPage() {
                   : recentBookings
                 ).map((booking) => (
                   <tr key={booking.id} className="hover:bg-[#FAFAFA] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <a
                         href={`/admin/bookings/${booking.id}`}
                         className="text-sm font-mono text-[#1ABC9C] hover:text-[#16A085]"
@@ -271,24 +242,24 @@ export function AdminDashboardPage() {
                         {booking.id}
                       </a>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <td className="px-3 py-2 whitespace-nowrap text-[12.5px] text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {booking.guest}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <td className="px-3 py-2 whitespace-nowrap text-[12.5px] text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {booking.hotel}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <td className="px-3 py-2 whitespace-nowrap text-[12.5px] text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {booking.room}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <td className="px-3 py-2 whitespace-nowrap text-[12.5px] text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {booking.checkIn}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <span className={getStatusBadgeClass(booking.status)}>
                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1).replace('-', ' ')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <td className="px-3 py-2 whitespace-nowrap text-[12.5px] font-semibold text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {booking.amount}
                     </td>
                   </tr>
@@ -299,31 +270,49 @@ export function AdminDashboardPage() {
         </div>
         )}
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { icon: Building2, title: 'Add New Hotel', description: 'Create a new property listing', color: '#1ABC9C' },
-            { icon: Tag, title: 'Manage Pricing', description: 'Update room rates', color: '#1ABC9C' },
-            { icon: FileDown, title: 'Generate Report', description: 'Export analytics data', color: '#1ABC9C' },
-            { icon: Calendar, title: 'View Calendar', description: 'Check availability', color: '#1ABC9C' },
-          ].map((action, index) => {
-            const Icon = action.icon;
-            return (
-              <button
-                key={index}
-                onClick={() => handleQuickAction(action.title)}
-                className="group bg-white rounded-xl p-6 shadow-sm border border-[#EAEAEA] hover:border-[#1ABC9C] transition-all text-left"
-              >
-                <Icon className="h-6 w-6 text-[#1ABC9C] mb-3" strokeWidth={1.5} />
-                <h4 className="text-base font-semibold text-[#3B3B3B] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {action.title}
-                </h4>
-                <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {action.description}
-                </p>
-              </button>
-            );
-          })}
+        {/* Quick Actions — compact row of icon-led buttons */}
+        <div>
+          <h3 className="text-[12px] font-semibold text-[#6b7280] uppercase tracking-[0.1em] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+            Quick Actions
+          </h3>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { icon: Building2, title: 'Add New Hotel', description: 'Create a new property', accent: '#1ABC9C' },
+              { icon: Tag, title: 'Manage Pricing', description: 'Update room rates', accent: '#10b981' },
+              { icon: FileDown, title: 'Generate Report', description: 'Export analytics', accent: '#0ea5e9' },
+              { icon: Calendar, title: 'View Calendar', description: 'Check availability', accent: '#8b5cf6' },
+            ].map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleQuickAction(action.title)}
+                  className="group bg-white/80 rounded-xl p-3 border border-[#EAEAEA]/80 hover:border-[#1ABC9C]/40 hover:shadow-[0_8px_20px_-10px_rgba(26,188,156,0.25)] transition-all text-left"
+                  style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
+                      style={{
+                        background: `linear-gradient(135deg, ${action.accent}1a, ${action.accent}30)`,
+                        boxShadow: `inset 0 0 0 1px ${action.accent}22`,
+                      }}
+                    >
+                      <Icon className="h-[15px] w-[15px]" style={{ color: action.accent }} strokeWidth={1.85} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-[12.5px] font-semibold text-[#1f2937] leading-tight truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {action.title}
+                      </h4>
+                      <p className="text-[10.5px] text-[#8C8C8C] mt-0.5 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {action.description}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

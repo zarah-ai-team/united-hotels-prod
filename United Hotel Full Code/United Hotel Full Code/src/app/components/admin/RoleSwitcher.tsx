@@ -60,21 +60,28 @@ export function RoleSwitcher() {
   const label = isAdmin ? 'Admin' : 'Vendor';
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-1.5">
       <div
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#eaeaea]"
-        style={{ borderColor: `${accent}33` }}
+        className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/70 border"
+        style={{
+          borderColor: `${accent}33`,
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}
       >
-        <Icon className="w-4 h-4" style={{ color: accent }} strokeWidth={2} />
-        <span className="text-sm font-semibold text-[#3b3b3b]">{label}</span>
-        {name && <span className="text-xs text-[#8c8c8c]">· {name}</span>}
+        <Icon className="w-3 h-3" style={{ color: accent }} strokeWidth={2.2} />
+        <span className="text-[11.5px] font-semibold text-[#3b3b3b] leading-none" style={{ fontFamily: 'Inter, sans-serif' }}>
+          {label}
+        </span>
+        {name && <span className="text-[10.5px] text-[#8c8c8c] leading-none">· {name}</span>}
       </div>
       <button
         onClick={handleLogout}
-        className="inline-flex items-center gap-1.5 text-sm text-[#6b7280] hover:text-[#3b3b3b] transition-colors"
+        className="inline-flex items-center gap-1 text-[11.5px] text-[#6b7280] hover:text-[#3b3b3b] transition-colors px-1.5 py-1 rounded-md hover:bg-[#fafafa]"
         title="Sign out"
+        style={{ fontFamily: 'Inter, sans-serif' }}
       >
-        <LogOut className="w-4 h-4" /> Sign out
+        <LogOut className="w-3 h-3" strokeWidth={2} /> Sign out
       </button>
     </div>
   );

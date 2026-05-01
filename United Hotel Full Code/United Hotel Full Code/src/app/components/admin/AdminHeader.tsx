@@ -29,74 +29,86 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-[#EAEAEA] bg-white">
-      <div className="flex h-full items-center justify-between px-8">
-        {/* Page Title & Breadcrumb */}
-        <div>
+    // Slimmer (h-12 vs h-16) + frosted-white so it visually pairs with the
+    // glass sidebar. The thin bottom border keeps the page divisions clean.
+    <header
+      className="sticky top-0 z-30 h-12 border-b border-[#EAEAEA]/70 bg-white/80"
+      style={{ backdropFilter: 'blur(14px) saturate(140%)', WebkitBackdropFilter: 'blur(14px) saturate(140%)' }}
+    >
+      <div className="flex h-full items-center justify-between pl-12 pr-5 lg:pl-6 lg:pr-6">
+        {/* Page Title & Breadcrumb — single line, smaller */}
+        <div className="flex items-center gap-2 min-w-0">
           {breadcrumb && (
-            <p className="text-xs text-[#8C8C8C] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <span
+              className="text-[11px] text-[#9aa0a6] uppercase tracking-[0.12em]"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
               {breadcrumb}
-            </p>
+            </span>
           )}
-          <h1 
-            className="text-xl font-semibold text-[#3B3B3B]" 
+          {breadcrumb && <span className="text-[#d4d4d8] text-[11px]">/</span>}
+          <h1
+            className="text-[14px] font-semibold text-[#1f2937] truncate"
             style={{ fontFamily: 'Poppins, sans-serif' }}
           >
             {title}
           </h1>
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center gap-4">
-          {/* Role Switcher */}
+        {/* Right Section — denser controls */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Role Switcher (smaller now via its own component) */}
           <RoleSwitcher />
 
-          {/* Search Input */}
-          <div className="hidden md:flex items-center gap-2 rounded-xl border border-[#EAEAEA] bg-[#FAFAFA] px-3 py-2 w-64">
-            <Search className="h-4 w-4 text-[#8C8C8C]" strokeWidth={1.5} />
+          {/* Search Input — narrower, slimmer */}
+          <div className="hidden lg:flex items-center gap-1.5 rounded-lg border border-[#EAEAEA] bg-white/60 px-2.5 py-1 w-52 hover:border-[#1ABC9C]/40 transition-colors">
+            <Search className="h-3.5 w-3.5 text-[#9aa0a6]" strokeWidth={1.75} />
             <input
               type="text"
               placeholder="Search bookings, hotels..."
-              className="flex-1 bg-transparent text-sm text-[#3B3B3B] placeholder:text-[#8C8C8C] focus:outline-none"
+              className="flex-1 bg-transparent text-[12.5px] text-[#3B3B3B] placeholder:text-[#9aa0a6] focus:outline-none"
               style={{ fontFamily: 'Inter, sans-serif' }}
             />
           </div>
 
           {/* Notification Bell */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative rounded-lg p-2 hover:bg-[#FAFAFA] transition-colors"
+              className="relative rounded-lg p-1.5 hover:bg-[#FAFAFA] transition-colors"
+              aria-label="Notifications"
             >
-              <Bell className="h-5 w-5 text-[#8C8C8C]" strokeWidth={1.5} />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#EF4444]" />
+              <Bell className="h-[15px] w-[15px] text-[#6b7280]" strokeWidth={1.75} />
+              <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[#EF4444] ring-2 ring-white" />
             </button>
 
-            {/* Notifications Dropdown */}
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-[#EAEAEA] py-2 z-50">
-                <div className="px-4 py-2 border-b border-[#EAEAEA]">
-                  <h3 className="font-semibold text-sm text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <div
+                className="absolute right-0 mt-2 w-72 bg-white/95 rounded-xl shadow-xl border border-[#EAEAEA] py-1 z-50"
+                style={{ backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
+              >
+                <div className="px-3 py-2 border-b border-[#EAEAEA]">
+                  <h3 className="font-semibold text-[12.5px] text-[#3B3B3B]" style={{ fontFamily: 'Poppins, sans-serif' }}>
                     Notifications
                   </h3>
                 </div>
-                <div className="max-h-96 overflow-y-auto">
+                <div className="max-h-80 overflow-y-auto">
                   {notifications.map((notif) => (
                     <button
                       key={notif.id}
-                      className={`w-full px-4 py-3 text-left hover:bg-[#FAFAFA] transition-colors border-b border-[#EAEAEA] last:border-0 ${
-                        notif.unread ? 'bg-[#1ABC9C]/5' : ''
+                      className={`w-full px-3 py-2 text-left hover:bg-[#FAFAFA] transition-colors border-b border-[#EAEAEA]/60 last:border-0 ${
+                        notif.unread ? 'bg-[#1ABC9C]/[0.04]' : ''
                       }`}
                     >
-                      <p className="text-sm text-[#3B3B3B] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      <p className="text-[12.5px] text-[#3B3B3B] mb-0.5 leading-snug" style={{ fontFamily: 'Inter, sans-serif' }}>
                         {notif.text}
                       </p>
-                      <p className="text-xs text-[#8C8C8C]">{notif.time}</p>
+                      <p className="text-[10.5px] text-[#9aa0a6]">{notif.time}</p>
                     </button>
                   ))}
                 </div>
-                <div className="px-4 py-2 border-t border-[#EAEAEA]">
-                  <button className="text-sm text-[#1ABC9C] font-medium hover:text-[#16A085]">
+                <div className="px-3 py-2 border-t border-[#EAEAEA]">
+                  <button className="text-[12px] text-[#1ABC9C] font-medium hover:text-[#16A085]">
                     View all notifications
                   </button>
                 </div>
@@ -104,47 +116,54 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
             )}
           </div>
 
-          {/* User Avatar with Dropdown */}
+          {/* User Avatar — smaller (28px vs 36px) */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1ABC9C] text-white text-sm font-semibold hover:bg-[#16A085] transition-colors"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-white text-[11px] font-semibold transition-all hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #1ABC9C, #16A085)',
+                boxShadow: '0 4px 10px -4px rgba(26,188,156,0.55)',
+              }}
+              aria-label="Account menu"
             >
               AH
             </button>
 
-            {/* User Dropdown Menu */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-[#EAEAEA] py-2 z-50">
-                <div className="px-4 py-2 border-b border-[#EAEAEA]">
-                  <p className="font-semibold text-sm text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div
+                className="absolute right-0 mt-2 w-52 bg-white/95 rounded-xl shadow-xl border border-[#EAEAEA] py-1 z-50"
+                style={{ backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
+              >
+                <div className="px-3 py-2 border-b border-[#EAEAEA]">
+                  <p className="font-semibold text-[12.5px] text-[#3B3B3B]" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Admin User
                   </p>
-                  <p className="text-xs text-[#8C8C8C]">admin@unitedhotels.com</p>
+                  <p className="text-[10.5px] text-[#9aa0a6] truncate">admin@unitedhotels.com</p>
                 </div>
                 <Link
                   to="/"
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#3B3B3B] hover:bg-[#FAFAFA] transition-colors"
+                  className="flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#3B3B3B] hover:bg-[#FAFAFA] transition-colors"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  <Home className="h-4 w-4" strokeWidth={1.5} />
+                  <Home className="h-[14px] w-[14px]" strokeWidth={1.75} />
                   View Live Site
                 </Link>
                 <Link
                   to="/admin/settings"
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#3B3B3B] hover:bg-[#FAFAFA] transition-colors"
+                  className="flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#3B3B3B] hover:bg-[#FAFAFA] transition-colors"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  <User className="h-4 w-4" strokeWidth={1.5} />
+                  <User className="h-[14px] w-[14px]" strokeWidth={1.75} />
                   Profile Settings
                 </Link>
-                <div className="border-t border-[#EAEAEA] my-1" />
+                <div className="border-t border-[#EAEAEA] my-0.5" />
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#EF4444] hover:bg-[#FAFAFA] transition-colors w-full text-left"
+                  className="flex items-center gap-2.5 px-3 py-2 text-[12.5px] text-[#EF4444] hover:bg-[#FAFAFA] transition-colors w-full text-left"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                  <LogOut className="h-[14px] w-[14px]" strokeWidth={1.75} />
                   Sign Out
                 </button>
               </div>
