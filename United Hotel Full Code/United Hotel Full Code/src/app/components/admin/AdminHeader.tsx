@@ -2,6 +2,7 @@ import { Search, Bell, User, LogOut, Home } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { RoleSwitcher } from './RoleSwitcher';
+import { authService } from '../../services/api';
 
 interface AdminHeaderProps {
   title: string;
@@ -14,8 +15,10 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear any auth tokens/session
-    navigate('/admin/login');
+    authService.logout();
+    localStorage.removeItem('uh_role');
+    localStorage.removeItem('uh_admin_name');
+    navigate('/admin/login', { replace: true });
   };
 
   const notifications = [

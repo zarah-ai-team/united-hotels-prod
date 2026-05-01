@@ -159,6 +159,20 @@ addColumn('rooms', 'currency_code',  'TEXT DEFAULT \'USD\'');
 addColumn('rooms', 'description',    'TEXT');
 
 addColumn('users', 'role',           'TEXT NOT NULL DEFAULT \'user\'');
+addColumn('users', 'country',        'TEXT');
+
+// Mayank's admin/dashboard expects a `payments` table for revenue rollups.
+// The mock skips it normally; create it here so the dashboard query succeeds.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS payments (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    booking_id    INTEGER REFERENCES bookings(id) ON DELETE CASCADE,
+    amount        REAL    NOT NULL DEFAULT 0,
+    status        TEXT    NOT NULL DEFAULT 'paid',
+    created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
+    updated_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+  );
+`);
 
 // ─── Seed from frontendHotels.json (Mayank's 39-hotel dataset) ────────────────
 //
@@ -308,13 +322,94 @@ if (fs.existsSync(frontendHotelsPath)) {
 
 try {
   const bcrypt  = require('bcrypt');
-  const hash    = bcrypt.hashSync('admin123', 10);
+  const adminHash  = bcrypt.hashSync('admin123', 10);
+  const vendorHash = bcrypt.hashSync('vendor123', 10);
+  const userHash   = bcrypt.hashSync('user123', 10);
+
+  // Seed the canonical admin so the dashboard's role tally has an admin in it.
   db.prepare(`
-    INSERT OR IGNORE INTO users (name, email, password, "isAdmin", "isManager")
-    VALUES ('Admin', 'admin@unitedhotels.com', ?, 1, 1)
-  `).run(hash);
+    INSERT OR IGNORE INTO users (name, email, password, "isAdmin", "isManager", role)
+    VALUES ('Admin User', 'admin@unitedhotels.com', ?, 1, 1, 'admin')
+  `).run(adminHash);
+
+  // A demo vendor + a regular user so usersByRole shows non-zero counts on
+  // first boot. Real signups via /auth/register replace these as needed.
+  db.prepare(`
+    INSERT OR IGNORE INTO users (name, email, password, "isAdmin", "isManager", role)
+    VALUES ('Demo Vendor', 'vendor@unitedhotels.com', ?, 0, 1, 'vendor')
+  `).run(vendorHash);
+
+  db.prepare(`
+    INSERT OR IGNORE INTO users (name, email, password, "isAdmin", "isManager", role)
+    VALUES ('Demo Guest', 'guest@unitedhotels.com', ?, 0, 0, 'user')
+  `).run(userHash);
 } catch (_e) {
   // bcrypt unavailable — seed a placeholder; login won't work but other routes will
+}
+
+// ─── Seed demo bookings so the admin dashboard shows non-empty revenue/recent
+// bookings on first boot. Each booking points at a real seeded room and uses
+// realistic check-in/out windows spread across the last few weeks.
+
+try {
+  addColumn('bookings', 'country', 'TEXT');
+
+  const guestId = db.prepare(`SELECT id FROM users WHERE email = 'guest@unitedhotels.com'`).get()?.id;
+  const insertBooking = db.prepare(`
+    INSERT INTO bookings (
+      room, roomid, hotelid, userid, fromdate, todate,
+      totalamount, totaldays, status, transactionid, payment_mode, country
+    ) VALUES (
+      @room, @roomid, @hotelid, @userid, @fromdate, @todate,
+      @totalamount, @totaldays, 'confirmed', @txn, 'card', @country
+    )
+  `);
+
+  const insertPayment = db.prepare(`
+    INSERT INTO payments (booking_id, amount, status)
+    VALUES (@booking_id, @amount, 'paid')
+  `);
+
+  // Seed 6 bookings across a few hotels and countries.
+  const sampleBookings = [
+    { hotelSlug: 'royan-hotel',         country: 'United States',  daysAgo: 2,  nights: 3 },
+    { hotelSlug: 'amiral-palace',       country: 'Germany',         daysAgo: 5,  nights: 2 },
+    { hotelSlug: 'sirkeci-golden-horn', country: 'United Kingdom',  daysAgo: 8,  nights: 4 },
+    { hotelSlug: 'the-galata-istanbul-hotel', country: 'France',    daysAgo: 12, nights: 5 },
+    { hotelSlug: 'wings-hotel-pera',    country: 'United States',  daysAgo: 18, nights: 2 },
+    { hotelSlug: 'walton-hotels-galata', country: 'Saudi Arabia',  daysAgo: 25, nights: 3 },
+  ];
+
+  const findRoom = db.prepare(`
+    SELECT r.id AS room_id, r.hotel_id, r.name AS room_name, r.price_per_night
+    FROM rooms r JOIN hotels h ON h.id = r.hotel_id
+    WHERE h.slug = ? AND r.category = 'superior'
+    LIMIT 1
+  `);
+
+  for (const sb of sampleBookings) {
+    const room = findRoom.get(sb.hotelSlug);
+    if (!room) continue;
+    const checkIn = new Date(Date.now() - sb.daysAgo * 86400000);
+    const checkOut = new Date(checkIn.getTime() + sb.nights * 86400000);
+    const total = Number(room.price_per_night) * sb.nights;
+    const result = insertBooking.run({
+      room: room.room_name,
+      roomid: String(room.room_id),
+      hotelid: room.hotel_id,
+      userid: guestId ? String(guestId) : null,
+      fromdate: checkIn.toISOString().slice(0, 10),
+      todate: checkOut.toISOString().slice(0, 10),
+      totalamount: total,
+      totaldays: sb.nights,
+      txn: `BOOK-DEMO-${sb.hotelSlug}`,
+      country: sb.country,
+    });
+    insertPayment.run({ booking_id: result.lastInsertRowid, amount: total });
+  }
+  console.log(`[Mock DB] Seeded ${sampleBookings.length} demo bookings + payments`);
+} catch (e) {
+  console.warn('[Mock DB] demo bookings seed skipped:', e.message);
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -501,9 +596,6 @@ function runQuery(sql, params = []) {
   // ── Translate $N → ? ─────────────────────────────────────────────────────
   let s = trim.replace(/\$(\d+)/g, '?');
 
-  // Alias COUNT(*) so controllers can do rows[0].count
-  s = s.replace(/COUNT\(\*\)(?!\s+OVER)/gi, 'COUNT(*) AS count');
-
   // COALESCE with json cast arg — simplify to just first arg for SQLite
   // e.g. COALESCE(room_data.rooms, '[]'::json) → room_data.rooms
   s = s.replace(/COALESCE\s*\([^,]+,\s*'[^']*'::[a-zA-Z]+\)/gi, (m) => {
@@ -511,11 +603,26 @@ function runQuery(sql, params = []) {
     return first;
   });
 
-  // Strip Postgres-specific casts
+  // Strip Postgres-specific casts BEFORE aliasing so we don't end up with
+  // `COUNT(*)::int AS count` becoming `COUNT(*) AS count AS count`.
   s = s.replace(/::[a-zA-Z_]+(\([^)]*\))?/g, '');
+
+  // Alias COUNT(*) so controllers can do rows[0].count — only when the
+  // expression isn't already aliased (e.g. `COUNT(*) AS bookings`).
+  s = s.replace(/COUNT\(\*\)(?!\s+(OVER|AS))/gi, 'COUNT(*) AS count');
 
   // NOW() → SQLite equivalent
   s = s.replace(/\bNOW\(\)/gi, "datetime('now')");
+
+  // Postgres camelCase identifiers → snake_case for the SQLite mock.
+  // The Neon production schema uses "createdAt"/"updatedAt"; the mock seeds
+  // them as created_at/updated_at, so silently rewrite the references.
+  s = s.replace(/"createdAt"/g, 'created_at');
+  s = s.replace(/"updatedAt"/g, 'updated_at');
+
+  // Postgres `NULLS LAST` ordering → SQLite handles natively from 3.30+,
+  // but strip it just in case the embedded library is older.
+  s = s.replace(/\bNULLS\s+(FIRST|LAST)\b/gi, '');
 
   // FOR UPDATE (no-op in SQLite)
   s = s.replace(/\bFOR\s+UPDATE\b/gi, '');

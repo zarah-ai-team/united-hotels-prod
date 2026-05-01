@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useRole } from './RoleSwitcher';
+import { authService } from '../../services/api';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin', roles: ['admin', 'vendor'] },
@@ -32,8 +33,10 @@ export function AdminSidebar() {
   const currentRole = useRole();
 
   const handleLogout = () => {
-    // Clear any auth tokens/session
-    navigate('/admin/login');
+    authService.logout();
+    localStorage.removeItem('uh_role');
+    localStorage.removeItem('uh_admin_name');
+    navigate('/admin/login', { replace: true });
   };
 
   const SidebarContent = () => (
