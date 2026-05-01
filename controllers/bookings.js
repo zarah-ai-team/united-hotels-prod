@@ -554,6 +554,30 @@ const BookRoom = async (req, res) => {
         await adjustRoomCategoryAvailability(client, roomData, -bookedCount);
 
         await adjustHotelRoomCount(client, roomData.hotel_id, -bookedCount);
+
+        // Record a payment row so the admin dashboard's revenue rollup
+        // (which sums payments.amount) reflects this booking. On schemas
+        // without a payments table the catch keeps the booking from rolling
+        // back — the table is optional.
+        try {
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS payments (
+                    id            SERIAL PRIMARY KEY,
+                    booking_id    integer REFERENCES bookings(id) ON DELETE CASCADE,
+                    amount        numeric(12,2) NOT NULL DEFAULT 0,
+                    status        text NOT NULL DEFAULT 'paid',
+                    created_at    timestamptz NOT NULL DEFAULT NOW(),
+                    updated_at    timestamptz NOT NULL DEFAULT NOW()
+                )
+            `).catch(() => {});
+            await client.query(
+                `INSERT INTO payments (booking_id, amount, status) VALUES ($1, $2, 'paid')`,
+                [booking.id ?? bookingResult.rows[0].id, totalamount]
+            );
+        } catch (paymentErr) {
+            console.warn('[bookings] payment row skipped:', paymentErr.message);
+        }
+
         await client.query('COMMIT');
 
         const hotelName = await getHotelDisplayName(client, roomData.hotel_id || room.hotelid || room.hotel_id || null);

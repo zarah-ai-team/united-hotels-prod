@@ -42,7 +42,10 @@ const mapHotel = (h: PublicHotel): HotelRow => {
     rooms,
     minPrice: prices.length ? Math.min(...prices) : 0,
     maxPrice: prices.length ? Math.max(...prices) : 0,
-    image: pickHotelImage({ id: h.id, name: h.hotel_name || h.name }),
+    // Backend serves the cover URL on `image_url` (mapHotelRecord +
+    // attachImageKitUrls). Pass it through so pickHotelImage finds it
+    // instead of falling back to the empty string.
+    image: pickHotelImage(h as any),
   };
 };
 

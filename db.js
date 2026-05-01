@@ -347,70 +347,9 @@ try {
   // bcrypt unavailable — seed a placeholder; login won't work but other routes will
 }
 
-// ─── Seed demo bookings so the admin dashboard shows non-empty revenue/recent
-// bookings on first boot. Each booking points at a real seeded room and uses
-// realistic check-in/out windows spread across the last few weeks.
-
-try {
-  addColumn('bookings', 'country', 'TEXT');
-
-  const guestId = db.prepare(`SELECT id FROM users WHERE email = 'guest@unitedhotels.com'`).get()?.id;
-  const insertBooking = db.prepare(`
-    INSERT INTO bookings (
-      room, roomid, hotelid, userid, fromdate, todate,
-      totalamount, totaldays, status, transactionid, payment_mode, country
-    ) VALUES (
-      @room, @roomid, @hotelid, @userid, @fromdate, @todate,
-      @totalamount, @totaldays, 'confirmed', @txn, 'card', @country
-    )
-  `);
-
-  const insertPayment = db.prepare(`
-    INSERT INTO payments (booking_id, amount, status)
-    VALUES (@booking_id, @amount, 'paid')
-  `);
-
-  // Seed 6 bookings across a few hotels and countries.
-  const sampleBookings = [
-    { hotelSlug: 'royan-hotel',         country: 'United States',  daysAgo: 2,  nights: 3 },
-    { hotelSlug: 'amiral-palace',       country: 'Germany',         daysAgo: 5,  nights: 2 },
-    { hotelSlug: 'sirkeci-golden-horn', country: 'United Kingdom',  daysAgo: 8,  nights: 4 },
-    { hotelSlug: 'the-galata-istanbul-hotel', country: 'France',    daysAgo: 12, nights: 5 },
-    { hotelSlug: 'wings-hotel-pera',    country: 'United States',  daysAgo: 18, nights: 2 },
-    { hotelSlug: 'walton-hotels-galata', country: 'Saudi Arabia',  daysAgo: 25, nights: 3 },
-  ];
-
-  const findRoom = db.prepare(`
-    SELECT r.id AS room_id, r.hotel_id, r.name AS room_name, r.price_per_night
-    FROM rooms r JOIN hotels h ON h.id = r.hotel_id
-    WHERE h.slug = ? AND r.category = 'superior'
-    LIMIT 1
-  `);
-
-  for (const sb of sampleBookings) {
-    const room = findRoom.get(sb.hotelSlug);
-    if (!room) continue;
-    const checkIn = new Date(Date.now() - sb.daysAgo * 86400000);
-    const checkOut = new Date(checkIn.getTime() + sb.nights * 86400000);
-    const total = Number(room.price_per_night) * sb.nights;
-    const result = insertBooking.run({
-      room: room.room_name,
-      roomid: String(room.room_id),
-      hotelid: room.hotel_id,
-      userid: guestId ? String(guestId) : null,
-      fromdate: checkIn.toISOString().slice(0, 10),
-      todate: checkOut.toISOString().slice(0, 10),
-      totalamount: total,
-      totaldays: sb.nights,
-      txn: `BOOK-DEMO-${sb.hotelSlug}`,
-      country: sb.country,
-    });
-    insertPayment.run({ booking_id: result.lastInsertRowid, amount: total });
-  }
-  console.log(`[Mock DB] Seeded ${sampleBookings.length} demo bookings + payments`);
-} catch (e) {
-  console.warn('[Mock DB] demo bookings seed skipped:', e.message);
-}
+// `country` column is needed by getBookingsByCountry. Add it lazily so the
+// real booking flow can populate it without errors.
+addColumn('bookings', 'country', 'TEXT');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

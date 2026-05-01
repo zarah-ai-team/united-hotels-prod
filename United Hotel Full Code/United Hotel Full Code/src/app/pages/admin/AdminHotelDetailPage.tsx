@@ -129,8 +129,11 @@ export function AdminHotelDetailPage() {
   }, [id, refreshKey]);
 
   const hotelName = hotel?.hotel_name || hotel?.name || 'Hotel';
-  const heroImages = useMemo(() => pickHotelGallery({ id: hotel?.id, name: hotelName }, 4), [hotel?.id, hotelName]);
-  const heroImage = pickHotelImage({ id: hotel?.id, name: hotelName });
+  const heroImages = useMemo(
+    () => pickHotelGallery((hotel || { id: undefined, name: hotelName }) as any, 4),
+    [hotel, hotelName],
+  );
+  const heroImage = pickHotelImage((hotel || { id: undefined, name: hotelName }) as any);
 
   const totalInventory = useMemo(() => {
     let total = 0; let avail = 0;

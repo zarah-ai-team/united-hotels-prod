@@ -371,6 +371,13 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Disable horizontal rubber-band/bounce scroll (Chromium / WebKit /
+     * trackpad-momentum / D-pad arrow keys). Without these, off-canvas
+     * decorative elements briefly slide the whole layout sideways. */
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    /* Prevent any descendant from forcing a wider-than-viewport layout. */
+    max-width: 100vw;
   }
 
   /**
@@ -381,6 +388,8 @@
   html {
     font-size: var(--font-size);
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
   }
 
   h1 {
