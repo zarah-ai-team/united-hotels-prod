@@ -227,7 +227,7 @@ export function Navigation() {
                     <Link
                       to="/portal"
                       role="menuitem"
-                      className="uh-dropdown-item flex items-center gap-3"
+                      className="uh-dropdown-item !justify-start gap-3"
                       onClick={() => setIsLoginOpen(false)}
                     >
                       <span
@@ -248,7 +248,7 @@ export function Navigation() {
                     <Link
                       to="/admin/login"
                       role="menuitem"
-                      className="uh-dropdown-item flex items-center gap-3"
+                      className="uh-dropdown-item !justify-start gap-3"
                       onClick={() => setIsLoginOpen(false)}
                     >
                       <span
