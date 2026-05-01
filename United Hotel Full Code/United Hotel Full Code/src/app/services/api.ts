@@ -888,6 +888,11 @@ export const vendorService = {
     return apiCall<AdminStats>(API_ENDPOINTS.VENDOR.STATS, { method: 'GET' }, token);
   },
 
+  async getAnalytics(days = 30): Promise<AdminAnalytics> {
+    const token = getStoredToken() || undefined;
+    return apiCall<AdminAnalytics>(`${API_ENDPOINTS.VENDOR.ANALYTICS}?days=${days}`, { method: 'GET' }, token);
+  },
+
   async getMyHotels(): Promise<{ hotels: VendorHotel[]; count: number }> {
     const token = getStoredToken() || undefined;
     return apiCall(API_ENDPOINTS.VENDOR.HOTELS, { method: 'GET' }, token);

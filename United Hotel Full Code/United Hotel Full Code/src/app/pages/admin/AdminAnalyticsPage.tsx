@@ -5,7 +5,8 @@ import {
 } from 'recharts';
 import { TrendingUp, DollarSign, CalendarCheck, Building2, Users } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
-import { adminService, type AdminAnalytics } from '../../services/api';
+import { adminService, vendorService, type AdminAnalytics } from '../../services/api';
+import { useRole } from '../../components/admin/RoleSwitcher';
 
 const COLORS = ['#1ABC9C', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981', '#6B7280'];
 const RANGE_OPTIONS = [
@@ -63,18 +64,22 @@ export function AdminAnalyticsPage() {
   const [data, setData] = useState<AdminAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const role = useRole();
+  const isVendor = role === 'vendor';
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
-    adminService
-      .getAnalytics(days)
+    // Staff (vendor) → scoped /api/vendor/analytics; admin → /api/admin/analytics.
+    // Identical response shape, so the rendering below doesn't branch.
+    const fetcher = isVendor ? vendorService.getAnalytics(days) : adminService.getAnalytics(days);
+    fetcher
       .then((d) => { if (active) setData(d); })
       .catch((e: any) => { if (active) setError(e?.data?.error || e?.message || 'Failed to load analytics'); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [days]);
+  }, [days, isVendor]);
 
   const totals = useMemo(() => {
     if (!data) return { bookings: 0, revenue: 0, avgValue: 0, topHotelName: '—' };
@@ -109,7 +114,7 @@ export function AdminAnalyticsPage() {
   }, [data]);
 
   return (
-    <AdminLayout title="Analytics" breadcrumb="Admin / Analytics" adminOnly>
+    <AdminLayout title="Analytics" breadcrumb={isVendor ? 'Staff / Analytics' : 'Admin / Analytics'}>
       <div className="space-y-4">
         {/* Range + meta — single tidy row */}
         <div className="flex flex-wrap items-center justify-between gap-2">

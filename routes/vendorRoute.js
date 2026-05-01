@@ -3,7 +3,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/rbacMiddleware');
 const {
-  getMyHotels, getMyRooms, updateRoomPriceBand, addRoom, getMyBookings, getVendorStats,
+  getMyHotels, getMyRooms, updateRoomPriceBand, addRoom, getMyBookings, getVendorStats, getVendorAnalytics,
 } = require('../controllers/vendor');
 
 // Admins can hit the vendor endpoints too (returns all data instead of just
@@ -11,6 +11,7 @@ const {
 router.use(authenticate, authorizeRoles('vendor', 'admin'));
 
 router.get('/stats', getVendorStats);
+router.get('/analytics', getVendorAnalytics);
 router.get('/hotels', getMyHotels);
 router.get('/rooms', getMyRooms);
 router.post('/rooms', addRoom);

@@ -275,4 +275,146 @@ const getVendorStats = async (req, res) => {
   }
 };
 
-module.exports = { getMyHotels, getMyRooms, updateRoomPriceBand, addRoom, getMyBookings, getVendorStats };
+// ─── Vendor analytics ──────────────────────────────────────────────────────
+// Same response shape as adminController.getAnalytics so the existing
+// AdminAnalyticsPage can render either side without branching, but every
+// query is filtered to the staff member's hotels via h.vendor_id.
+
+const getVendorAnalytics = async (req, res) => {
+  try {
+    const days = Math.max(7, Math.min(365, parseInt(req.query.days, 10) || 30));
+    const userId = req.user.id;
+
+    const [bookingTrend, revenueTrend, topHotels, bookingsByStatus, revenueByDistrict, avgBookingValueRow] = await Promise.all([
+      // Daily booking + revenue trend over the last N days for the vendor's hotels
+      pool.query(
+        `WITH days AS (
+           SELECT generate_series(
+             (CURRENT_DATE - ($1 || ' days')::interval)::date,
+             CURRENT_DATE,
+             '1 day'::interval
+           )::date AS day
+         )
+         SELECT s.day::text AS date,
+                COALESCE(COUNT(b.id), 0)::int AS bookings,
+                COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
+           FROM days s
+           LEFT JOIN bookings b ON b."createdAt"::date = s.day
+           LEFT JOIN rooms r ON r.id::text = b.roomid
+           LEFT JOIN hotels h ON h.id = r.hotel_id AND h.vendor_id = $2
+          GROUP BY s.day
+          ORDER BY s.day ASC`,
+        [days, userId],
+      ).catch(() => ({ rows: [] })),
+      // Direct/OTA breakdown — we don't track source, so push everything to direct.
+      pool.query(
+        `WITH days AS (
+           SELECT generate_series(
+             (CURRENT_DATE - ($1 || ' days')::interval)::date,
+             CURRENT_DATE,
+             '1 day'::interval
+           )::date AS day
+         )
+         SELECT s.day::text AS date,
+                COALESCE(SUM(b.totalamount), 0)::numeric AS direct,
+                0::numeric AS ota
+           FROM days s
+           LEFT JOIN bookings b ON b."createdAt"::date = s.day
+           LEFT JOIN rooms r ON r.id::text = b.roomid
+           LEFT JOIN hotels h ON h.id = r.hotel_id AND h.vendor_id = $2
+          GROUP BY s.day
+          ORDER BY s.day ASC`,
+        [days, userId],
+      ).catch(() => ({ rows: [] })),
+      // Top hotels by revenue (typically just 1 for a single-property vendor)
+      pool.query(
+        `SELECT h.id, h.name, h.location,
+                COUNT(b.id)::int AS bookings,
+                COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
+           FROM hotels h
+           LEFT JOIN rooms r ON r.hotel_id = h.id
+           LEFT JOIN bookings b ON b.roomid = r.id::text
+          WHERE h.vendor_id = $1
+          GROUP BY h.id
+          ORDER BY revenue DESC, h.name ASC
+          LIMIT 10`,
+        [userId],
+      ).catch(() => ({ rows: [] })),
+      // Bookings grouped by status
+      pool.query(
+        `SELECT COALESCE(status, 'unknown') AS status, COUNT(*)::int AS count
+           FROM bookings b
+           JOIN rooms r ON r.id::text = b.roomid
+           JOIN hotels h ON h.id = r.hotel_id
+          WHERE h.vendor_id = $1
+          GROUP BY status
+          ORDER BY count DESC`,
+        [userId],
+      ).catch(() => ({ rows: [] })),
+      // Revenue by district (just for completeness — typically a single district)
+      pool.query(
+        `SELECT COALESCE(h.district, 'Unknown') AS district,
+                COUNT(b.id)::int AS bookings,
+                COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
+           FROM hotels h
+           LEFT JOIN rooms r ON r.hotel_id = h.id
+           LEFT JOIN bookings b ON b.roomid = r.id::text
+          WHERE h.vendor_id = $1
+          GROUP BY h.district
+          ORDER BY revenue DESC`,
+        [userId],
+      ).catch(() => ({ rows: [] })),
+      // Average booking value
+      pool.query(
+        `SELECT COALESCE(AVG(b.totalamount), 0)::numeric AS value,
+                COUNT(*)::int AS sample_size
+           FROM bookings b
+           JOIN rooms r ON r.id::text = b.roomid
+           JOIN hotels h ON h.id = r.hotel_id
+          WHERE h.vendor_id = $1`,
+        [userId],
+      ).catch(() => ({ rows: [{ value: 0, sample_size: 0 }] })),
+    ]);
+
+    return res.json({
+      window: { days, generatedAt: new Date().toISOString() },
+      bookingTrend: bookingTrend.rows.map((r) => ({
+        date: r.date,
+        bookings: Number(r.bookings) || 0,
+        revenue: Number(r.revenue) || 0,
+      })),
+      revenueTrend: revenueTrend.rows.map((r) => ({
+        date: r.date,
+        direct: Number(r.direct) || 0,
+        ota: Number(r.ota) || 0,
+      })),
+      topHotels: topHotels.rows.map((r) => ({
+        hotelId: r.id,
+        hotelName: r.name,
+        location: r.location,
+        bookings: Number(r.bookings) || 0,
+        revenue: Number(r.revenue) || 0,
+      })),
+      bookingsByStatus: bookingsByStatus.rows.map((r) => ({
+        status: r.status,
+        count: Number(r.count) || 0,
+      })),
+      // Vendor doesn't see system-wide users — return zeros so the chart hides gracefully.
+      usersByRole: { user: 0, vendor: 0, admin: 0 },
+      revenueByDistrict: revenueByDistrict.rows.map((r) => ({
+        district: r.district,
+        bookings: Number(r.bookings) || 0,
+        revenue: Number(r.revenue) || 0,
+      })),
+      avgBookingValue: {
+        value: Number(avgBookingValueRow.rows[0]?.value) || 0,
+        sampleSize: Number(avgBookingValueRow.rows[0]?.sample_size) || 0,
+      },
+    });
+  } catch (error) {
+    console.error('getVendorAnalytics error', error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { getMyHotels, getMyRooms, updateRoomPriceBand, addRoom, getMyBookings, getVendorStats, getVendorAnalytics };

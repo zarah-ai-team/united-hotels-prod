@@ -11,6 +11,8 @@ import {
   Sun,
   Moon,
   Search,
+  UserCircle2,
+  ShieldCheck,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
@@ -222,13 +224,47 @@ export function Navigation() {
                 </button>
                 {isLoginOpen && (
                   <div className="uh-dropdown" role="menu">
-                    <Link to="/portal" role="menuitem" className="uh-dropdown-item flex-col items-start" onClick={() => setIsLoginOpen(false)}>
-                      <span className="font-['Inter:SemiBold',sans-serif]">{t("Guest Portal")}</span>
-                      <span className="item-sub">{t("Manage bookings")}</span>
+                    <Link
+                      to="/portal"
+                      role="menuitem"
+                      className="uh-dropdown-item flex items-center gap-3"
+                      onClick={() => setIsLoginOpen(false)}
+                    >
+                      <span
+                        className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(26,188,156,0.15), rgba(45,212,191,0.25))',
+                          boxShadow: 'inset 0 0 0 1px rgba(26,188,156,0.30)',
+                        }}
+                        aria-hidden
+                      >
+                        <UserCircle2 className="w-4 h-4 text-[#0f9b86]" strokeWidth={2} />
+                      </span>
+                      <span className="flex flex-col items-start min-w-0">
+                        <span className="font-['Inter:SemiBold',sans-serif]">{t("Guest Portal")}</span>
+                        <span className="item-sub">{t("Manage bookings")}</span>
+                      </span>
                     </Link>
-                    <Link to="/admin/login" role="menuitem" className="uh-dropdown-item flex-col items-start" onClick={() => setIsLoginOpen(false)}>
-                      <span className="font-['Inter:SemiBold',sans-serif]">{t("Admin Login")}</span>
-                      <span className="item-sub">{t("Staff access")}</span>
+                    <Link
+                      to="/admin/login"
+                      role="menuitem"
+                      className="uh-dropdown-item flex items-center gap-3"
+                      onClick={() => setIsLoginOpen(false)}
+                    >
+                      <span
+                        className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.25))',
+                          boxShadow: 'inset 0 0 0 1px rgba(99,102,241,0.30)',
+                        }}
+                        aria-hidden
+                      >
+                        <ShieldCheck className="w-4 h-4 text-[#6366f1]" strokeWidth={2} />
+                      </span>
+                      <span className="flex flex-col items-start min-w-0">
+                        <span className="font-['Inter:SemiBold',sans-serif]">{t("Admin Login")}</span>
+                        <span className="item-sub">{t("Staff access")}</span>
+                      </span>
                     </Link>
                   </div>
                 )}

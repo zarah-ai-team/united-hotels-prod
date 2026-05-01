@@ -347,12 +347,43 @@ try {
     VALUES ('Admin User', 'admin@unitedhotels.com', ?, 1, 1, 'admin')
   `).run(adminHash);
 
-  // A demo vendor + a regular user so usersByRole shows non-zero counts on
-  // first boot. Real signups via /auth/register replace these as needed.
+  // Two demo staff (vendor) accounts, each pinned to a specific hotel via
+  // hotels.vendor_id so the staff portal only shows their property's data.
+  // Royan Hotel (id=1) and Ramada TRYP Beyoğlu (id=13) — picked because both
+  // have rich seeded room inventories already.
+  db.prepare(`
+    INSERT OR IGNORE INTO users (name, email, password, "isAdmin", "isManager", role)
+    VALUES ('Royan Hotel Staff', 'staff.royan@unitedhotels.com', ?, 0, 1, 'vendor')
+  `).run(vendorHash);
+  db.prepare(`
+    INSERT OR IGNORE INTO users (name, email, password, "isAdmin", "isManager", role)
+    VALUES ('Ramada Staff', 'staff.ramada@unitedhotels.com', ?, 0, 1, 'vendor')
+  `).run(vendorHash);
+  // Keep the legacy email working too — points the original demo vendor at
+  // Royan so existing tooling doesn't break.
   db.prepare(`
     INSERT OR IGNORE INTO users (name, email, password, "isAdmin", "isManager", role)
     VALUES ('Demo Vendor', 'vendor@unitedhotels.com', ?, 0, 1, 'vendor')
   `).run(vendorHash);
+
+  // Wire the vendor_id → user.id link on each hotel so vendorService.getMyHotels
+  // returns the right property for each staff login. Wrapped in a try because
+  // the column may be missing on older mocks (addColumn is idempotent).
+  try {
+    const royanStaffId = db.prepare(`SELECT id FROM users WHERE email = 'staff.royan@unitedhotels.com'`).get()?.id;
+    const ramadaStaffId = db.prepare(`SELECT id FROM users WHERE email = 'staff.ramada@unitedhotels.com'`).get()?.id;
+    const demoVendorId = db.prepare(`SELECT id FROM users WHERE email = 'vendor@unitedhotels.com'`).get()?.id;
+    if (royanStaffId) {
+      db.prepare(`UPDATE hotels SET vendor_id = ? WHERE slug = 'royan-hotel'`).run(royanStaffId);
+    }
+    if (ramadaStaffId) {
+      db.prepare(`UPDATE hotels SET vendor_id = ? WHERE slug = 'ramada-tryp-beyoglu'`).run(ramadaStaffId);
+    }
+    if (demoVendorId) {
+      // Same hotel as royan staff — convenient duplicate so both creds work.
+      db.prepare(`UPDATE hotels SET vendor_id = COALESCE(vendor_id, ?) WHERE slug = 'royan-hotel'`).run(demoVendorId);
+    }
+  } catch (_e) { /* schema not ready — non-fatal */ }
 
   db.prepare(`
     INSERT OR IGNORE INTO users (name, email, password, "isAdmin", "isManager", role)

@@ -25,7 +25,7 @@ const navItems = [
   { icon: Building2, label: 'Hotels & Rooms', path: '/admin/hotels', roles: ['admin', 'vendor'] },
   { icon: Users, label: 'Users', path: '/admin/users', roles: ['admin'] },
   { icon: Tag, label: 'Vendor Pricing', path: '/vendor', roles: ['admin'] },
-  { icon: BarChart3, label: 'Analytics', path: '/admin/analytics', roles: ['admin'] },
+  { icon: BarChart3, label: 'Analytics', path: '/admin/analytics', roles: ['admin', 'vendor'] },
   { icon: Mail, label: 'Email Logs', path: '/admin/email-logs', roles: ['admin'] },
   { icon: Settings, label: 'Settings', path: '/admin/settings', roles: ['admin', 'vendor'] },
 ];

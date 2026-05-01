@@ -86,6 +86,7 @@ export const API_ENDPOINTS = {
   // Vendor (vendor + admin)
   VENDOR: {
     STATS: '/api/vendor/stats',
+    ANALYTICS: '/api/vendor/analytics',
     HOTELS: '/api/vendor/hotels',
     ROOMS: '/api/vendor/rooms',
     ROOM_PRICE_BAND: (id: string) => `/api/vendor/rooms/${id}/price-band`,

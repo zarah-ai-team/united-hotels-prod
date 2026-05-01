@@ -10,13 +10,14 @@ export function AdminLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // If already logged in as admin, jump straight to the dashboard.
+  // If already logged in as admin or staff (vendor), jump straight to the dashboard.
   useEffect(() => {
     let active = true;
     authService.getCurrentUser()
       .then((user) => {
         if (!active) return;
-        if (user?.isAdmin || user?.role === 'admin') navigate('/admin', { replace: true });
+        const allowed = user?.isAdmin || user?.role === 'admin' || user?.role === 'vendor' || user?.isManager;
+        if (allowed) navigate('/admin', { replace: true });
       })
       .catch(() => { /* not logged in — stay on form */ });
     return () => { active = false; };
@@ -29,11 +30,11 @@ export function AdminLoginPage() {
     try {
       const res = await authService.login({ email: email.trim(), password });
       const user: any = (res as any).user;
-      const isAdmin = Boolean(user?.isAdmin || user?.role === 'admin');
-      if (!isAdmin) {
-        // Token is stored, but this account isn't an admin — clear and reject.
+      const allowed = Boolean(user?.isAdmin || user?.role === 'admin' || user?.role === 'vendor' || user?.isManager);
+      if (!allowed) {
+        // Token is stored, but this account isn't admin or staff — clear and reject.
         authService.logout();
-        setError('This account does not have admin access.');
+        setError('This account does not have staff or admin access. Use the Guest Portal instead.');
         return;
       }
       navigate('/admin', { replace: true });
@@ -42,6 +43,12 @@ export function AdminLoginPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Helper: prefill the email + password fields when the user clicks a demo card.
+  const useDemo = (demoEmail: string, demoPassword: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPassword);
   };
 
   return (
@@ -148,11 +155,83 @@ export function AdminLoginPage() {
               className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 transition-colors"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-              {submitting ? 'Signing in…' : 'Sign in to Admin'}
+              {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-[#eaeaea] flex items-center justify-between text-sm">
+          {/* Demo credentials — click any card to autofill the form. Removed
+              when running against real Postgres + a non-seeded user table. */}
+          <div className="mt-6">
+            <div className="text-[10.5px] font-semibold text-[#9aa0a6] uppercase tracking-[0.1em] mb-2">
+              Demo accounts (click to autofill)
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                onClick={() => useDemo('admin@unitedhotels.com', 'admin123')}
+                className="text-left rounded-lg border border-[#eaeaea] hover:border-[#1ABC9C]/40 hover:bg-[#1ABC9C]/[0.04] transition-colors px-3 py-2 flex items-center gap-3"
+              >
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
+                  style={{ background: 'linear-gradient(135deg, rgba(26,188,156,0.15), rgba(26,188,156,0.30))' }}
+                  aria-hidden
+                >
+                  <ShieldCheck className="w-4 h-4 text-[#0f9b86]" strokeWidth={2} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12.5px] font-semibold text-[#1f2937] flex items-center gap-1.5">
+                    Admin
+                    <span className="text-[10px] font-medium text-[#0f9b86] bg-[#1ABC9C]/15 rounded-full px-1.5 py-px">All access</span>
+                  </div>
+                  <div className="text-[11px] text-[#6b7280] font-mono">admin@unitedhotels.com · admin123</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => useDemo('staff.royan@unitedhotels.com', 'vendor123')}
+                className="text-left rounded-lg border border-[#eaeaea] hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/[0.04] transition-colors px-3 py-2 flex items-center gap-3"
+              >
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
+                  style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.30))' }}
+                  aria-hidden
+                >
+                  <Building2 className="w-4 h-4 text-[#3b82f6]" strokeWidth={2} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12.5px] font-semibold text-[#1f2937] flex items-center gap-1.5">
+                    Staff — Royan Hotel
+                    <span className="text-[10px] font-medium text-[#3b82f6] bg-[#3b82f6]/15 rounded-full px-1.5 py-px">Single property</span>
+                  </div>
+                  <div className="text-[11px] text-[#6b7280] font-mono">staff.royan@unitedhotels.com · vendor123</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => useDemo('staff.ramada@unitedhotels.com', 'vendor123')}
+                className="text-left rounded-lg border border-[#eaeaea] hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/[0.04] transition-colors px-3 py-2 flex items-center gap-3"
+              >
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
+                  style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.30))' }}
+                  aria-hidden
+                >
+                  <Building2 className="w-4 h-4 text-[#3b82f6]" strokeWidth={2} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12.5px] font-semibold text-[#1f2937] flex items-center gap-1.5">
+                    Staff — Ramada TRYP Beyoğlu
+                    <span className="text-[10px] font-medium text-[#3b82f6] bg-[#3b82f6]/15 rounded-full px-1.5 py-px">Single property</span>
+                  </div>
+                  <div className="text-[11px] text-[#6b7280] font-mono">staff.ramada@unitedhotels.com · vendor123</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-[#eaeaea] flex items-center justify-between text-sm">
             <Link to="/auth" className="text-[#6b7280] hover:text-[#3b3b3b] transition-colors">
               ← Guest login
             </Link>
