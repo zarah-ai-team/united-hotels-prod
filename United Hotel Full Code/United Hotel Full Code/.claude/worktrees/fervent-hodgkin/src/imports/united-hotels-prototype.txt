@@ -1,0 +1,365 @@
+United Hotels — Full Functional Website Prototype
+
+Refine and finalize the United Hotels website design by creating a fully connected interactive prototype that simulates the entire user journey from landing on the homepage to successfully completing a hotel booking and viewing the booking in the guest portal.
+
+This prototype must behave like a fully functional product demo, where every navigation item, CTA button, and major interaction leads to the appropriate screen.
+
+The purpose of this prototype is full product review and UX validation before development.
+
+Do not redesign the UI.
+Use the existing approved designs and brand system.
+
+BRAND SYSTEM (DO NOT MODIFY)
+
+Primary color
+#1ABC9C
+
+Typography
+Headings → Poppins
+Body/UI → Inter
+
+Grid
+12-column desktop grid
+
+Desktop frame
+1920 × 1080
+
+Mobile frame
+375px
+
+Spacing
+8pt spacing system
+
+Icons
+Outlined icons only
+
+Brand tagline
+Stay Smart. Stay United.
+
+Logo
+United Hotels
+
+CORE USER JOURNEY TO IMPLEMENT
+
+Follow the full booking journey:
+
+Discovery
+Comparison
+Decision
+Conversion
+Retention
+
+This journey must be fully represented in the prototype.
+
+GLOBAL NAVIGATION
+
+Ensure the top navigation is clickable and functional.
+
+Navigation items:
+
+Destinations
+Hotels
+Neighborhoods
+Travel Guides
+Support
+
+Right side navigation:
+
+Currency selector
+Language selector
+Login / Register
+Find Hotels (Primary CTA)
+
+Navigation must be sticky on scroll.
+
+Each navigation item must link to a working page.
+
+PAGE STRUCTURE REQUIRED
+
+Create fully connected screens for:
+
+Homepage
+Hotel Listing Page
+Hotel Detail Page
+Booking Flow
+Authentication
+Booking Confirmation
+Guest Portal
+Blog Page
+Support Page
+
+HOMEPAGE INTERACTIONS
+
+Homepage must include working interactions for:
+
+Search bar
+Featured hotels
+Area exploration cards
+Blog cards
+CTA buttons
+
+Interaction examples:
+
+Search Hotels → Listing Page
+View Hotel → Hotel Detail Page
+Explore Area → Filtered Listing Page
+Read Article → Blog Page
+
+LISTING PAGE INTERACTIONS
+
+Hotel listing page must simulate real browsing.
+
+Components:
+
+Hotel cards
+Filter panel
+Sort dropdown
+Map preview
+
+Interactions:
+
+Click hotel card → Hotel Detail Page
+Filter by price → Update results state
+Sort dropdown → Change listing order
+Map toggle → Show map layout
+
+Include loading and empty states.
+
+HOTEL DETAIL PAGE INTERACTIONS
+
+Hotel detail page must include:
+
+Image gallery
+Room availability section
+Amenities
+Location map
+Reviews preview
+
+Room cards must include:
+
+Room name
+Room price
+Availability indicator
+Select room CTA
+
+Interaction:
+
+Select room → Booking Step 1
+
+BOOKING FLOW (3 STEP PROCESS)
+
+Implement the full booking flow.
+
+Step 1
+Room Selection
+
+Step 2
+Guest Details
+
+Step 3
+Review & Confirm
+
+Include booking progress indicator.
+
+AUTHENTICATION STEP
+
+Before payment, require user authentication.
+
+If user not logged in, show options:
+
+Login
+Register
+Continue as guest
+
+Forms must simulate:
+
+Email input
+Password input
+Submit button
+
+Interaction:
+
+Successful login → Continue booking
+
+PAYMENT SIMULATION
+
+Payment screen should simulate payment methods:
+
+Credit card
+Debit card
+UPI
+Net banking
+
+Remove taxes from invoice.
+
+Invoice must display:
+
+Room price
+Service fee
+Total payable
+
+Interaction:
+
+Confirm payment → Booking confirmation screen.
+
+BOOKING CONFIRMATION PAGE
+
+Display booking success screen with:
+
+Booking ID
+Hotel name
+Dates
+Room type
+Total paid
+
+Actions:
+
+Download invoice
+Add to calendar
+View booking
+
+Booking ID must simulate sharing with:
+
+User
+Hotel
+Super admin
+
+HOTEL CONFIRMATION STATUS
+
+Include booking status indicator.
+
+Status flow:
+
+Pending
+Processing
+Confirmed
+
+Display message:
+
+“Your booking request has been received and is being confirmed by the hotel.”
+
+GUEST PORTAL
+
+Create guest dashboard with tabs:
+
+Upcoming bookings
+Past bookings
+Cancelled bookings
+
+Each booking card must show:
+
+Booking ID
+Hotel name
+Dates
+Status
+Modify booking
+Cancel booking
+
+Tabs must switch content dynamically.
+
+BLOG PAGE
+
+Include blog listing page with articles such as:
+
+Where to Stay in Istanbul
+Cheapest Neighborhoods in Istanbul
+Best Time to Visit Istanbul
+
+Each blog card should link to a sample article page.
+
+SUPPORT PAGE
+
+Support page should include:
+
+FAQ accordion
+Contact options
+WhatsApp support
+Email support
+
+Accordion items must open and close interactively.
+
+INTERACTION REQUIREMENTS
+
+All major buttons must be clickable.
+
+Add prototype interactions for:
+
+Navigation links
+Hotel cards
+Room selection
+Booking steps
+Authentication
+Payment confirmation
+Portal navigation
+
+Use smooth transitions such as:
+
+Smart Animate
+Slide transitions
+Fade transitions
+
+COMPONENT STRUCTURE
+
+Ensure all UI elements use reusable components.
+
+Components should include:
+
+Buttons with variants
+Input fields with states
+Hotel cards
+Room cards
+Badges
+Alerts
+Tabs
+Accordions
+
+All components must use:
+
+Auto Layout
+Consistent spacing tokens
+
+ACCESSIBILITY
+
+Ensure:
+
+Minimum 16px body text
+44px tap targets
+High contrast colors
+Clear focus states
+Readable hierarchy
+
+Design must remain accessible for users aged 50+.
+
+FINAL PROTOTYPE STRUCTURE
+
+Organize Figma pages:
+
+01 Design System
+02 Homepage
+03 Listing Page
+04 Hotel Detail
+05 Booking Flow
+06 Authentication
+07 Confirmation
+08 Guest Portal
+09 Blog
+10 Support
+11 Prototype Flow
+
+The final prototype must allow a reviewer to:
+
+Start at homepage → search hotels → view hotel → select room → complete booking → see confirmation → access guest portal.
+
+The prototype should simulate the entire booking experience without dead links or missing interactions.
+
+FINAL DESIGN GOAL
+
+The final prototype should feel like a fully functional modern travel booking product, comparable to platforms like Airbnb or Booking.com but with a simpler, cleaner booking experience focused on direct hotel rates and transparent pricing.
+
+The experience should feel:
+
+Modern
+Trustworthy
+Product-driven
+Conversion-focused
+Clear and intuitive

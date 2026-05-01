@@ -1,0 +1,2771 @@
+[
+  {
+    "hotel_name": "ROYAN HOTEL",
+    "information_raw": "29 Room",
+    "total_rooms": 29,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Cankurtaran, Yeni Saraçhane Sk. No:18, 34122 Fatih/İstanbul",
+    "email": "Tuana.toydemir@radissonindividuals.com",
+    "hotel_link": "https://www.radissonhotels.com/en-us/hotels/radisson-individuals-royan-hagia-sophia-istanbul",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "A sophisticated boutique hotel that blends modern aesthetics with the historic texture of the Old City. The rooms are designed with a minimalist yet warm touch, offering a peaceful retreat from the bustling streets of Istanbul. Its prime location allows guests to reach the Hagia Sophia and Blue Mosque within a few minutes' walk. The hotel is highly regarded for its personalized service and attention to detail. Guests can enjoy a fresh breakfast and benefit from a helpful concierge team ready to organize local tours or transfers. It is an ideal choice for travelers seeking contemporary comfort in a historical setting.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Cribs available.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Room-Standard Room Sea view",
+        "room_category": "standard",
+        "occupancy_code": "SNG-DBL",
+        "occupancy_type": "single_double",
+        "base_price": 5938.0,
+        "currency_code": "TRY",
+        "price_raw": "Standart Room SNG-DBL 5938 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "AC"
+      },
+      {
+        "name": "Breakfast"
+      },
+      {
+        "name": "Restaurant"
+      },
+      {
+        "name": "Concierge"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Amiral PALACE",
+    "information_raw": "51 Room",
+    "total_rooms": 51,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Cankurtaran, Bayram Fırını Sk. No:3, 34122 Fatih/İstanbul",
+    "email": "manager@amiralpalacehotel.com",
+    "hotel_link": "https://www.amiralpalacehotel.com/en/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "This hotel stands out in the Old City for offering comprehensive wellness facilities, including an indoor pool and a traditional Turkish bath. The architecture reflects the classic Ottoman style, with rooms featuring elegant drapery and period-inspired furniture. The rooftop terrace provides a stunning view of the Marmara Sea and the nearby historic monuments. It caters to those who want a blend of historical sightseeing and relaxation. After a day of exploring Fatih, guests can unwind in the spa or enjoy a meal at the on-site restaurant. Its proximity to the shoreline adds a refreshing sea breeze to the overall experience.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-2 Free; Family suites available.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking; Terrace allowed.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Executive suite room-Deluxe suite room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 6007.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 6007 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Indoor Pool"
+      },
+      {
+        "name": "Spa"
+      },
+      {
+        "name": "Fitness"
+      },
+      {
+        "name": "Roof Terrace"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "BEST POİNT HOTEL",
+    "information_raw": "32 and 40 Room",
+    "total_rooms": 32,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Sultan Ahmet, Akbıyık Cd. No:71, 34122 Fatih/İstanbul",
+    "email": "info@bestpointhotel.com",
+    "hotel_link": "https://www.bestpointhotel.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Consistently recognized for its exceptional hospitality, this hotel offers a cozy, home-like atmosphere. The rooms often feature traditional Turkish motifs and warm colors, providing an authentic local feel. One of its most famous features is the complimentary afternoon tea and snacks served on the terrace for guests. The hotel’s staff is known for going above and beyond to assist with guest needs, making it a favorite for repeat visitors. The breakfast is rich with local cheeses, olives, and pastries, ensuring a strong start to a day of sightseeing. It captures the essence of Turkish generosity perfectly.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Twin room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 5729.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 5729 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Open Buffet Breakfast"
+      },
+      {
+        "name": "Terrace"
+      },
+      {
+        "name": "Tea/Coffe"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "AĞAN HOTEL",
+    "information_raw": "37 Room",
+    "total_rooms": 37,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "hocapaşa mah safveti sok, Sirkeci - Harem no:4, 34110 Fatih/İstanbul",
+    "email": "info@aganhotel.com",
+    "hotel_link": "https://www.aganhotel.com/en/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "A long-standing establishment in the Sirkeci district, Ağan Hotel is known for its friendly environment and budget-friendly approach. While the rooms are simpler compared to luxury boutiques, they are clean, air-conditioned, and provide all the necessary essentials for a comfortable stay. Its location near the Sirkeci Marmaray station makes it a strategic hub for transportation. The rooftop terrace offers a nice spot to relax and observe the vibrant street life of the Old City. It is a perfect choice for backpackers or solo travelers who prioritize a central location and easy access to both the ferry docks and the tram line.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-5 Free; Extra beds available.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Twin room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3601.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3601 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "24h Front Desk"
+      },
+      {
+        "name": "Terrace"
+      },
+      {
+        "name": "Airport Shuttle"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Sirkeci golden horn",
+    "information_raw": "70 Room",
+    "total_rooms": 70,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hoca Paşa, Ebussuud Cd. No:26, 34110 Fatih/İstanbul",
+    "email": "info@thegoldenhorn.com",
+    "hotel_link": "https://www.thegoldenhorn.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "This hotel immerses its guests in the grandeur of the Ottoman era through its ornate interior design and classical furnishings. The lobby and rooms are decorated with traditional patterns, carpets, and gold accents, reflecting the \"Golden Horn\" name. It provides a regal atmosphere right in the heart of the historic transportation hub. Beyond the décor, the hotel features a lovely terrace restaurant where guests can dine while overlooking the Bosphorus. The service is professional and geared towards making guests feel like royalty. It is a great pick for those who appreciate history and classical luxury.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Triple rooms available.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard and Deluxe Room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4500.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4500 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Terrace Restaurant"
+      },
+      {
+        "name": "Library"
+      },
+      {
+        "name": "AC"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "ERBOY HOTEL",
+    "information_raw": "84 Room",
+    "total_rooms": 84,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hoca Paşa, Ebussuud Cd. No:18, 34110 Fatih/İstanbul",
+    "email": "sales@erboyhotel.com",
+    "hotel_link": "https://www.erboyhotel.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "A modern and eco-friendly choice in Sirkeci that has undergone significant renovations to offer bright, contemporary living spaces. The rooms are designed with light woods and neutral tones, creating a refreshing environment. It is particularly well-known for its commitment to sustainability and high-quality breakfast offerings. The hotel’s location is perfect for those who want to be steps away from the Gülhane Park and the Spice Bazaar. The staff is highly efficient, catering to both leisure travelers and those on short business trips. It represents the modern face of Sirkeci’s hospitality.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Modern family rooms.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Twin room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 6253.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 6253 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Eco-friendly features"
+      },
+      {
+        "name": "Restaurant"
+      },
+      {
+        "name": "Concierge"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Sirkeci park hotel",
+    "information_raw": "23 Room",
+    "total_rooms": 23,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Sirkeci Park Hotel İstanbul, Hoca Paşa, Ebussuud Cd. no:24, 34110 Fatih/İstanbul",
+    "email": "info@sirkeciparkhotel.com",
+    "hotel_link": "https://www.sirkeciparkhotel.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Overlooking the greenery of Gülhane Park, this hotel offers a slightly quieter atmosphere while remaining centrally located. The rooms are comfortable and functionally decorated, providing a solid base for city exploration. Many rooms offer pleasant views of the park trees and the historic walls. The breakfast service is intimate and features a variety of local products. Being situated right next to the tram line, it offers effortless connectivity to other parts of the city like Eminönü or Karaköy. It is a reliable choice for families and couples alike.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 5817.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 5817 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Breakfast"
+      },
+      {
+        "name": "Room Service"
+      },
+      {
+        "name": "AC"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Triton hotel",
+    "information_raw": "40 Room",
+    "total_rooms": 40,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Sultanahmet, Cankurtaran, Amiral Taftil Sok. No:7, 34400 Fatih/İstanbul",
+    "email": "info@tritonhotelistanbul.com",
+    "hotel_link": "https://www.tritonhotelistanbul.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Triton is a charming boutique hotel located in the Cankurtaran neighborhood, closer to the sea side of the Old City. It offers a more tranquil experience compared to the busy centers of Sultanahmet. The rooms are elegantly furnished, focusing on comfort and a peaceful night's sleep. The hotel is praised for its intimate scale, which allows the staff to provide very attentive service. Its proximity to the coastal walking path makes it ideal for guests who enjoy morning strolls by the Marmara Sea. It offers a nice balance between historic proximity and coastal calm.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 7293.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 7293 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Air Conditioning"
+      },
+      {
+        "name": "Daily Breakfast"
+      },
+      {
+        "name": "24-hour Front Desk"
+      },
+      {
+        "name": "Concierge Service"
+      },
+      {
+        "name": "Terrace"
+      },
+      {
+        "name": "and Airport Shuttle (surcharge)."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Hotel romantic",
+    "information_raw": "9 Room",
+    "total_rooms": 9,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Mimar Mehmet Aga Cad, Cankurtaran, Amiral Taftil Sok. No:17, 34122 Fatih/İstanbul",
+    "email": "info@hotelromanticistanbul.com",
+    "hotel_link": "http://www.romantichotelistanbul.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "True to its name, this hotel is housed in a beautifully restored wooden Ottoman mansion. The interior is filled with nostalgic charm, featuring antique-style furniture and hand-painted ceilings in some rooms. It provides a unique, \"old-world\" Istanbul experience that is hard to find in modern builds. The rooftop terrace is a highlight, offering intimate views of the Blue Mosque and the sea. It is a top recommendation for couples seeking a sentimental and historic atmosphere for their stay in the city. The service is warm and feels very personal.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-2 Free (Limited space for beds).",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard French And Twin room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4030.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4030 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Rooftop Terrace"
+      },
+      {
+        "name": "Jacuzzi Rooms"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Avicenna hotel",
+    "information_raw": "48 Room",
+    "total_rooms": 48,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Cankurtaran Mahallesi, Sultan Ahmet, Mehmet Ağa Cd. no:19, 34122 Fatih/İstanbul",
+    "email": "dilek.demirel@avicennahotel.com",
+    "hotel_link": "https://www.avicennahotel.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Located in a quiet corner of Sultanahmet, Avicenna is another stunning example of a renovated 19th-century Ottoman house. The highlight of the property is its beautiful inner courtyard garden, where guests can enjoy a coffee away from the city noise. The rooms are decorated with traditional fabrics and wooden details. The atmosphere is sophisticated yet cozy, making it feel more like a private residence than a hotel. It is perfect for travelers who want to stay in a historic building that has been modernized with care. Its location is ideal for walking to the Hippodrome and Topkapı Palace.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Garden area for kids.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking; Garden allowed.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3504.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3504 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Courtyard Garden"
+      },
+      {
+        "name": "Breakfast"
+      },
+      {
+        "name": "AC"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Sumengen hotel",
+    "information_raw": "25 Room",
+    "total_rooms": 25,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Sultan Ahmet Mahallesi Mimar Mehmet Ağa Caddesi, Amiral Taftil Sok. No:9, 34122 Fatih",
+    "email": "info@sumengenhotel.com",
+    "hotel_link": "https://sumengenhotel.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "This hotel offers some of the best panoramic views of the Marmara Sea in the Sultanahmet area. The rooms are spacious and decorated in a classic style with rich fabrics and traditional carpets. It combines the comfort of a larger hotel with the charm of a boutique property. Guests often praise the breakfast terrace for the breathtaking sunrise views over the water. The hotel also features a sauna for relaxation after a day of walking. It is a solid choice for those who want to see the sea from their window every morning.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 5776.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 5776 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Sauna"
+      },
+      {
+        "name": "Sea View Terrace"
+      },
+      {
+        "name": "Breakfas"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Evsen hotel",
+    "information_raw": "27 Room",
+    "total_rooms": 27,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hoca Paşa, İbn-i Kemal Cd. No:9, 34110 Fatih/İstanbul",
+    "email": "contact@hotelevsen.com",
+    "hotel_link": "https://www.hotelevsen.com/en-US/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "A centrally located hotel in Sirkeci that focuses on providing great value and accessibility. The rooms are modern, clean, and equipped with all modern amenities such as Wi-Fi and flat-screen TVs. It is situated in a lively area surrounded by famous local restaurants and dessert shops. The hotel’s tour desk is particularly helpful for guests looking to navigate the city’s many attractions. Because of its location near the tram and ferry, it is highly recommended for travelers who plan to explore both the European and Asian sides of Istanbul.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Economy Room",
+        "room_category": "standard",
+        "occupancy_code": null,
+        "occupancy_type": null,
+        "base_price": 7534.0,
+        "currency_code": "TRY",
+        "price_raw": "TRP Room 7534 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Tour Desk"
+      },
+      {
+        "name": "Lobby Bar"
+      },
+      {
+        "name": "Room Service"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Ramada tryp Beyoğlu",
+    "information_raw": "82 Room",
+    "total_rooms": 82,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Yenişehir, Irmak Cd. No:11, 34435 Beyoğlu/İstanbul",
+    "email": "seyma.kulak@trypistanbulbeyoglu.com",
+    "hotel_link": "https://www.wyndhamhotels.com/tryp/istanbul-turkiye/tryp-istanbul-beyoglu/overview",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "This hotel brings the reliable standards of an international brand to the vibrant Pera district. It features modern, stylish rooms and a full-service spa, including a sauna and fitness center. It is designed for the modern traveler who expects high-tech amenities and professional service. The location is excellent for those who want to be near Istiklal Avenue’s shopping and nightlife but tucked away in a quieter street. It serves as a perfect bridge between a business hotel and a leisure retreat.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-12 Policy varies; Cribs avail.",
+    "pet_policy": "Pet Friendly (On Request)",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room- City View",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 5867.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 5867 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Full Spa"
+      },
+      {
+        "name": "Sauna"
+      },
+      {
+        "name": "Fitness"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "City centre Beyoğlu",
+    "information_raw": "90 Room",
+    "total_rooms": 90,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Yenişehir, Irmak Cd. No:11, 34435 Beyoğlu/İstanbul",
+    "email": "sales@citycenterhotel.com.tr",
+    "hotel_link": "https://www.citycenterhotel.com.tr/tr",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Located just steps away from Taksim Square, this hotel is right in the heart of the action. It offers a wide range of facilities, including a spa and a Turkish bath, making it a great place to relax in the middle of the city's busiest district. The rooms are modern and designed to provide a quiet haven from the surrounding energy. The rooftop bar is a popular spot for guests to enjoy the city lights of Beyoğlu at night. It is the best choice for travelers who want to be at the epicenter of Istanbul’s modern life, theater, and dining.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Small Single room- Economy Double Room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4380.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4380 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Spa"
+      },
+      {
+        "name": "Turkish Bath"
+      },
+      {
+        "name": "Terrace Bar"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Trip Bosphorus Hotel",
+    "information_raw": "54 Room",
+    "total_rooms": 54,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Cihangir, Kazancı Yokuşu Sok. No:8-12, 34433 Beyoğlu/İstanbul",
+    "email": "gm@tripbosphorushotel.com",
+    "hotel_link": "https://www.tripbosphorushotel.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Located near the Tophane and Karaköy border, this hotel offers a very central location with a focus on wellness. It features an indoor pool and extensive spa facilities, which is a significant plus for the area. The rooms are trendy, reflecting the cool and artistic vibe of the nearby Karaköy streets. It is a great choice for those who want to stay between the historic Old City and the modern Taksim area. The staff is energetic, and the hotel’s design is sleek and professional.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Queen And Twin room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4092.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4092 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Indoor Pool"
+      },
+      {
+        "name": "Fitness"
+      },
+      {
+        "name": "Spa"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Abel hotel",
+    "information_raw": null,
+    "total_rooms": null,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Katip Kasım, Langa Hisarı Cd. No: 41, 34096 Fatih/İstanbul",
+    "email": null,
+    "hotel_link": "http://www.abelotel.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Located near the Yenikapı district, Abel Hotel offers a modern stay with easy access to the city’s ferry and metro networks. The rooms are sleek and functional, featuring contemporary art and comfortable bedding. It is a great option for those who want to be slightly away from the main tourist crowds but still within reach of the historic center. The hotel features a nice lobby bar and a restaurant serving international and local cuisine. Its location is particularly convenient for those arriving or departing via the Yenikapı ferry terminal or the airport metro line.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 1962.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 1962 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Restaurant"
+      },
+      {
+        "name": "Bar"
+      },
+      {
+        "name": "Rooftop Terrace"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Tria hotel",
+    "information_raw": "26 Room",
+    "total_rooms": 26,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Cankurtaran, Terbıyık Sk. No:7, 34122 Fatih/İstanbul",
+    "email": "info@triahotelistanbul.com",
+    "hotel_link": "https://www.triahotelistanbul.com/en",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Tria Hotel is an elegant boutique property that prides itself on luxury and style. The rooms are exceptionally well-designed, often featuring high-end materials and jacuzzis in the deluxe categories. It offers a high level of comfort and a modern take on Ottoman hospitality. The terrace restaurant offers a refined dining experience with a direct view of the Hagia Sophia. It is ideal for travelers looking for a bit more luxury and a quiet, upscale atmosphere within the historic district.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-2 Free; Boutique setting.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 8411.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 8411 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Terrace Restaurant"
+      },
+      {
+        "name": "AC"
+      },
+      {
+        "name": "Jacuzzi"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Armada Hotel",
+    "information_raw": "106 Room",
+    "total_rooms": 106,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Cankurtaran, Ahırkapı Cd No:10, 34122 Fatih/İstanbul",
+    "email": "gonbulak@armadahotel.com",
+    "hotel_link": "https://www.armadahotel.com.tr/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "The Armada is an Istanbul classic, famous for its preservation of \"Old Istanbul\" culture. The hotel is built on the site of ancient city walls and is decorated with authentic local crafts and furniture. It is world-renowned for its \"Armada Breakfast,\" which features organic and traditional products. The rooftop terrace is perhaps one of the most famous in the city, offering an unobstructed view of both the Blue Mosque and the Sea of Marmara. Staying here is as much a cultural experience as it is a lodging choice. It is perfect for those who want to support heritage-focused tourism.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "Family-centric; 0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking; Terrace allowed.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 5984.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 5984 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Bar"
+      },
+      {
+        "name": "Meeting Rooms"
+      },
+      {
+        "name": "Iconic Terrace"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Wings Hotel Karakoy",
+    "information_raw": "20 Room",
+    "total_rooms": 20,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kemankeş Karamustafa Paşa, Gümrük Sk. No:26, 34425 Beyoğlu/İstanbul",
+    "email": "merve.fidan@thewingshotel.com",
+    "hotel_link": "https://thewingshotels.com/en/karakoy/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "The Wings group of hotels focuses on \"Industrial Chic\" design, perfectly matching the trendy atmosphere of Karaköy and Pera. The rooms feature high-quality materials, modern lighting, and very comfortable bedding. Each property in the collection offers a slightly different take on urban luxury. The rooftop dining areas are a major draw, offering sophisticated cocktails and fusion cuisine with views of the Galata Tower or the Bosphorus. They are ideal for style-conscious travelers and \"foodies\" who want to be in the city's most fashionable neighborhoods.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Deluxe room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 9221.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 9221 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Terrace Dining"
+      },
+      {
+        "name": "Modern AC"
+      },
+      {
+        "name": "Design Rooms"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Wings Hotel Pera",
+    "information_raw": "54 Room",
+    "total_rooms": 54,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Asmalı Mescit, Meşrutiyet Cd. No:35, 34430 Beyoğlu/İstanbul",
+    "email": "merve.fidan@thewingshotel.com",
+    "hotel_link": "https://thewingshotels.com/en/pera/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "The Wings group of hotels focuses on \"Industrial Chic\" design, perfectly matching the trendy atmosphere of Karaköy and Pera. The rooms feature high-quality materials, modern lighting, and very comfortable bedding. Each property in the collection offers a slightly different take on urban luxury. The rooftop dining areas are a major draw, offering sophisticated cocktails and fusion cuisine with views of the Galata Tower or the Bosphorus. They are ideal for style-conscious travelers and \"foodies\" who want to be in the city's most fashionable neighborhoods.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4231.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4231 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Terrace Dining"
+      },
+      {
+        "name": "Modern AC"
+      },
+      {
+        "name": "Design Rooms"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Wings Hotel Collection",
+    "information_raw": "47 Room",
+    "total_rooms": 47,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kuloğlu Mahallesi, Sadri Alışık Sokak No:33",
+    "email": "merve.fidan@thewingshotel.com",
+    "hotel_link": "https://thewingshotels.com/en/collection/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "The Wings group of hotels focuses on \"Industrial Chic\" design, perfectly matching the trendy atmosphere of Karaköy and Pera. The rooms feature high-quality materials, modern lighting, and very comfortable bedding. Each property in the collection offers a slightly different take on urban luxury. The rooftop dining areas are a major draw, offering sophisticated cocktails and fusion cuisine with views of the Galata Tower or the Bosphorus. They are ideal for style-conscious travelers and \"foodies\" who want to be in the city's most fashionable neighborhoods.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Deluxe room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 5501.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 5501 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Terrace Dining"
+      },
+      {
+        "name": "Modern AC"
+      },
+      {
+        "name": "Design Rooms"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Root Hotel Karakoy",
+    "information_raw": "74 Room",
+    "total_rooms": 74,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hacımimi, Necatibey Cd. No:95, 34425 Beyoğlu/İstanbul",
+    "email": "info@roothotelgroup.com.tr",
+    "hotel_link": "https://www.rootkarakoy.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Root Hotel is a creative hub that blends lodging with art and design. The hotel often hosts local art pieces and has a very distinct, youthful energy. The rooms are uniquely decorated, focusing on raw materials like wood and iron, giving them a very \"loft-style\" feel. Its location in Karaköy means you are surrounded by the city's best third-wave coffee shops and art galleries. It is the perfect choice for younger travelers or those working in creative industries who want an inspiring environment.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "Pet Friendly (Case by case)",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4719.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4719 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Art Gallery"
+      },
+      {
+        "name": "Bar"
+      },
+      {
+        "name": "Rooftop"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Sub Hotel Karakoy",
+    "information_raw": "20 Room",
+    "total_rooms": 20,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hacımimi, Necatibey Cd. No:95, 34425 Beyoğlu/İstanbul",
+    "email": "info@roothotelgroup.com.tr",
+    "hotel_link": "https://www.subkarakoy.com/tr",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "One of the pioneers of the \"Karaköy transformation,\" Sub Hotel offers a nautical and industrial theme. The \"Sub-way\" beds and metal details give the rooms a unique character. It is a boutique hotel that prioritizes vibe and social connection, featuring a popular ground-floor café/bar. It is an excellent base for exploring the Galataport area and the backstreets of Karaköy. The atmosphere is laid-back and very welcoming to international travelers looking for a trendy, non-traditional hotel experience.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Twin room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4170.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4170 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Custom Design Furniture"
+      },
+      {
+        "name": "Social Bar"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Weingart Istanbul",
+    "information_raw": "50 Room",
+    "total_rooms": 50,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hacımimi, Necatibey Cd. No:69, 34425 Beyoğlu/İstanbul",
+    "email": "info@weingarthotel.com",
+    "hotel_link": "https://www.weingarthotel.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "The Weingart properties are set in beautifully restored historic buildings in the Karaköy area. They offer a blend of European elegance and Istanbul history, with rooms that feature high ceilings and large windows. The \"Seaside\" property offers closer proximity to the Bosphorus, while the suites provide more space for longer stays. The service is attentive and the breakfast is highly rated for its freshness. These hotels are great for travelers who appreciate architectural history but want the comforts of a brand-new interior.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4227.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4227 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Breakfast"
+      },
+      {
+        "name": "Room Service"
+      },
+      {
+        "name": "Elevator"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Weingart Suite",
+    "information_raw": "27 Oda",
+    "total_rooms": 27,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hacımimi, Necatibey Cd. No:69, 34425 Beyoğlu/İstanbul",
+    "email": "info@weingarthotel.com",
+    "hotel_link": "https://www.weingarthotel.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "The Weingart properties are set in beautifully restored historic buildings in the Karaköy area. They offer a blend of European elegance and Istanbul history, with rooms that feature high ceilings and large windows. The \"Seaside\" property offers closer proximity to the Bosphorus, while the suites provide more space for longer stays. The service is attentive and the breakfast is highly rated for its freshness. These hotels are great for travelers who appreciate architectural history but want the comforts of a brand-new interior.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4146.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4146 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Breakfast"
+      },
+      {
+        "name": "Room Service"
+      },
+      {
+        "name": "Elevator"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Weingart Seaside",
+    "information_raw": "15 Room",
+    "total_rooms": 15,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kemankeş Karamustafa Mah, Kemankeş Cd. No:14, 34425 Beyoğlu/İstanbul",
+    "email": "info@weingarthotel.com",
+    "hotel_link": "https://www.weingarthotel.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "The Weingart properties are set in beautifully restored historic buildings in the Karaköy area. They offer a blend of European elegance and Istanbul history, with rooms that feature high ceilings and large windows. The \"Seaside\" property offers closer proximity to the Bosphorus, while the suites provide more space for longer stays. The service is attentive and the breakfast is highly rated for its freshness. These hotels are great for travelers who appreciate architectural history but want the comforts of a brand-new interior.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4471.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4471 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Breakfast"
+      },
+      {
+        "name": "Room Service"
+      },
+      {
+        "name": "Elevator"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Union Hotel",
+    "information_raw": "20 Room",
+    "total_rooms": 20,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Arap Cami, Tersane Cd. No:70, 34420 Beyoğlu/İstanbul",
+    "email": "karakoy@unionhptel.com",
+    "hotel_link": "https://unionotel.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "A sleek and modern hotel located in the Taksim/Beyoğlu area. It focuses on clean lines, functionality, and a stress-free guest experience. The rooms are quiet despite the central location, making it a good spot for a restful night after exploring the city. The hotel provides great value for its location and modern amenities. It is a practical and stylish choice for travelers who want easy access to the metro and the cultural sites of Beyoğlu.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 5389.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 5389 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Breakfast"
+      },
+      {
+        "name": "24h Security"
+      },
+      {
+        "name": "AC"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Khai Hotel Karakoy",
+    "information_raw": "31 Room",
+    "total_rooms": 31,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Bereketzade, Bankalar Cd. 2/1, 34420 Beyoğlu/İstanbul",
+    "email": "umut.aksu@khaihotel.com",
+    "hotel_link": "https://www.khaihotel.com/karakoy/change-lang/2/rooms/0",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Khai is a high-end boutique hotel that emphasizes fine dining and sophisticated design. The rooms are luxurious, featuring premium linens and elegant bathrooms. The hotel’s own restaurant is a destination in itself, attracting both guests and locals for its gourmet menu. The hotel offers a very curated experience, making it perfect for a special occasion or a luxury getaway. Its location provides easy access to the ferry docks for a quick trip to the Asian side.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "Focus on adults; 0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Classic City View Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4297.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4297 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Gourmet Dining"
+      },
+      {
+        "name": "Bar"
+      },
+      {
+        "name": "Sea View"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Bankerhan Hotel",
+    "information_raw": "33 Room",
+    "total_rooms": 33,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Bereketzade, Banker Sk. No:2, 34421 Beyoğlu/İstanbul",
+    "email": "info@bankerhanhotel.com",
+    "hotel_link": "https://www.bankerhan.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Located on a quiet, hilly street in Galata, Bankerhan is a tribute to the neighborhood’s artistic spirit. The hotel is filled with original artworks and offers rooms with stunning views of the Golden Horn. The restoration of the building has kept its historic soul while adding modern comforts. The vibe is intellectual and bohemian, making it a favorite for writers, artists, and history buffs. It is just a short, steep walk away from the Galata Tower and the neighborhood's famous jazz clubs.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4443.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4443 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "Air Conditioning"
+      },
+      {
+        "name": "Flat-screen TV"
+      },
+      {
+        "name": "Minibar"
+      },
+      {
+        "name": "24-hour Front Desk"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "The Galata Istanbul Hotel",
+    "information_raw": "83 Room",
+    "total_rooms": 83,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Arap Cami, Bankalar Cd. No:21, 34421 Beyoğlu/İstanbul",
+    "email": "basar.tufekci@accor.com",
+    "hotel_link": "https://www.thegalataistanbul.com/",
+    "star_rating": 5,
+    "property_label_raw": null,
+    "hotel_description": "This is a luxury hotel that combines a historic bank building with a world-class spa and hammam. As part of the MGallery collection, it offers a high level of sophistication and professional service. The historic 170-year-old Turkish bath on-site is one of the most beautiful in the city. The rooms are opulent, blending marble and velvet with modern technology. It is a top-tier choice for luxury travelers who want a deep wellness experience combined with historical architecture.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Classic Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 11251.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 11251 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Historic Hammam"
+      },
+      {
+        "name": "Spa"
+      },
+      {
+        "name": "Fitness"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Galatas Hotel",
+    "information_raw": "52 Room",
+    "total_rooms": 52,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kemankeş Karamustafa Paşa, Mumhane Cd. No:23, 34425 Beyoğlu/İstanbul",
+    "email": "bdundar@galatashotel.com",
+    "hotel_link": "https://www.galatashotel.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "A modern hotel in Karaköy that stands out for its wellness facilities, including an indoor pool and a large spa. The rooms are spacious and decorated in a contemporary style, offering a comfortable retreat for families or groups. It offers a more \"full-service\" feel than the smaller boutiques in the area. Its location is perfect for those who want to be near the Galataport cruise terminal and the Istanbul Modern museum.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 6703.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 6703 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "Full Spa & Wellness Center"
+      },
+      {
+        "name": "Turkish Bath (Hammam)"
+      },
+      {
+        "name": "Sauna"
+      },
+      {
+        "name": "Indoor Swimming Pool"
+      },
+      {
+        "name": "Fitness Center"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "The House Hotel",
+    "information_raw": "66 Room",
+    "total_rooms": 66,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Arap Cami, Bankalar Cd. No:5 Karaköy, 34421 Beyoğlu/İstanbul",
+    "email": "tbh@thebankhotelistanbul.com",
+    "hotel_link": "https://thehousekarakoy.istanbulhotels365.com/en/",
+    "star_rating": 5,
+    "property_label_raw": null,
+    "hotel_description": "Set in the historic 19th-century Kredi-Reasürans building, this hotel is a masterpiece of Neo-Renaissance architecture. The interiors are designed with a \"luxury-residence\" feel, featuring high ceilings and original fireplaces in some suites. It is one of the most prestigious boutique hotels in the Karaköy/Galata area. The hotel offers a very exclusive and private atmosphere. It is the perfect choice for travelers who want to stay in a landmark building and enjoy a quiet, high-end environment.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-12 Policy (Depends on room).",
+    "pet_policy": "Pet Friendly (Specific rooms)",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Superior Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 15115.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 15115 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Fitness Center"
+      },
+      {
+        "name": "Meeting Space"
+      },
+      {
+        "name": "Bar"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "OrientBank Hotel",
+    "information_raw": "36 Room",
+    "total_rooms": 36,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hobyar, Fındıkçı Remzi Sk. No: 7, 34112 Sirkeci/İstanbul",
+    "email": "burcu.bulbulkaya@ayshotels.com",
+    "hotel_link": "https://www.marriott.com/en-us/hotels/istar-orientbank-hotel-istanbul-autograph-collection/overview/",
+    "star_rating": 5,
+    "property_label_raw": null,
+    "hotel_description": "Part of the Autograph Collection (Marriott), these hotels are located in meticulously restored historic bank buildings near the Spice Bazaar and Sirkeci. They offer \"ultra-luxury\" with a focus on the banking history of the area, including the use of original vaults in the design. The service is world-class, and the rooms feature the highest quality materials. They are perfect for travelers who want a five-star experience that is deeply rooted in Istanbul’s financial history and grand architecture.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-12 (Autograph Coll. rules).",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Deluxe Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 11954.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 11954 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Fine Dining"
+      },
+      {
+        "name": "Luxury Spa"
+      },
+      {
+        "name": "Vault Bar"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Orient Occident Hotel",
+    "information_raw": "40 Room",
+    "total_rooms": 40,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hobyar, Aşirefendi Cd. No: 11, 34112 Fatih/İstanbul",
+    "email": "burcu.bulbulkaya@ayshotels.com",
+    "hotel_link": "https://www.marriott.com/en-us/hotels/istag-orient-occident-hotel-istanbul-autograph-collection/overview/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Part of the Autograph Collection (Marriott), these hotels are located in meticulously restored historic bank buildings near the Spice Bazaar and Sirkeci. They offer \"ultra-luxury\" with a focus on the banking history of the area, including the use of original vaults in the design. The service is world-class, and the rooms feature the highest quality materials. They are perfect for travelers who want a five-star experience that is deeply rooted in Istanbul’s financial history and grand architecture.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 14793.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 14793 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Fine Dining"
+      },
+      {
+        "name": "Luxury Spa"
+      },
+      {
+        "name": "Vault Bar"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Nordstern Hotel Galata",
+    "information_raw": "21 Room",
+    "total_rooms": 21,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Arap Cami, Tersane Cd. No: 5, 34421 Beyoğlu/İstanbul",
+    "email": "info@nordsternhotel.com",
+    "hotel_link": "https://www.nordsternhotelgalata.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Housed in a magnificent Neo-Gothic building, Nordstern offers a unique architectural experience in Galata. The rooms are grand and many offer sweeping views of the Bosphorus and the Golden Horn. The hotel also features a very high-quality spa and Turkish bath. The breakfast terrace is one of the best in the area, providing a royal start to the day. It is a fantastic choice for those who love historical architecture and want to be close to both the Galata Bridge and the Tower.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 8844.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 8844 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Spa"
+      },
+      {
+        "name": "Turkish Bath"
+      },
+      {
+        "name": "Sea View Terrace"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "The Haze Karakoy",
+    "information_raw": "42 Room",
+    "total_rooms": 42,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kemankeş Karamustafa Paşa, Necatibey Cd. No:36, 34425 Beyoğlu/İstanbul",
+    "email": "info@thehazeistanbul.com",
+    "hotel_link": "https://www.thehazeistanbul.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "A design hotel that cleverly combines a former bakery and a bobbin factory into a trendy lodging space. The result is a unique architectural layout with rooms that feature industrial and modern elements. It is a very stylish and well-regarded property in the heart of Karaköy. The rooftop restaurant offers great views and a sophisticated atmosphere. It is a top pick for travelers who appreciate \"adaptive reuse\" architecture and want to stay in a cool, urban setting.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Non-smoking rooms.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Economy Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4506.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4506 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Fitness"
+      },
+      {
+        "name": "Terrace Restaurant"
+      },
+      {
+        "name": "Business Center"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Anemon Galata Hotel",
+    "information_raw": "28 Room",
+    "total_rooms": 28,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Mahallesi, Bereketzade, Büyük Hendek Cd. No:5, 34421 Beyoğlu/İstanbul",
+    "email": "galata@anemonhotels.com",
+    "hotel_link": "https://anemonhotels.com/hotel/galata/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "This hotel is all about the view. Located right next to the Galata Tower, its rooftop restaurant offers what many consider the best 360-degree view of Istanbul. The rooms are decorated in a heavy, classic Ottoman style with velvet curtains and dark woods. Staying here feels like stepping back in time to the 19th-century Pera district. It is a landmark hotel that is perfect for those who want to be in the very center of Galata’s history and nightlife.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room- City View",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4883.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4883 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Historic Rooftop Bar/Restaurant"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Hotel Momento  Golden Horn",
+    "information_raw": "35 Room",
+    "total_rooms": 35,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Arap Cami, Tersane Cd. No:24, 34420 Beyoğlu/İstanbul",
+    "email": "info@momentohotels.com",
+    "hotel_link": "https://www.momentohotelsistanbul.com/momento_hotel_golden_horn",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "A modern and professional hotel that offers clean, bright rooms with excellent views of the Haliç (Golden Horn). It is designed to cater to both business travelers and tourists, providing high-speed internet and comfortable workspaces. The location is very convenient for exploring the Karaköy shoreline. It is a reliable, middle-to-high-range option for those who want a modern room with a great view and straightforward service.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room- City View",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 6397.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 6397 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Meeting Rooms"
+      },
+      {
+        "name": "Restaurant"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Walton Hotels Galata",
+    "information_raw": "27 Room",
+    "total_rooms": 27,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Bereketzade Mahallesi Bankalar Caddesi, Şair Eşref Paşa Sk. No:4, 34420 Beyoğlu/İstanbul",
+    "email": "info@waltongalata.com",
+    "hotel_link": "https://waltongalata.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "A modern boutique hotel that focuses on \"smart\" luxury and contemporary art. The rooms are equipped with tablets for controlling room features and are decorated with vibrant paintings. Some rooms also offer small kitchenettes, making them great for longer stays. The hotel has a very friendly, independent vibe and a great rooftop bar. It is ideal for digital nomads or modern travelers who appreciate tech-friendly amenities and a creative neighborhood atmosphere.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Economy Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3900.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3900 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Wi-Fi"
+      },
+      {
+        "name": "Smart Room Tech"
+      },
+      {
+        "name": "Bar"
+      },
+      {
+        "name": "Kitchenettes"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Taksim Express Hotel",
+    "information_raw": "108 Room",
+    "total_rooms": 108,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "İnönü, Cumhuriyet Cd. No:135, 34373 Şişli/İstanbul",
+    "email": "info@taximexpress.com",
+    "hotel_link": "https://taximexpress.com/tr-tr/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Located in the heart of the city’s vibrant business and culture district, Taksim Express Hotel offers a sleek, functional environment for the modern traveler. The hotel is particularly popular with those attending events at the nearby Istanbul Congress Center and Lütfi Kırdar Convention Center, providing a professional yet welcoming atmosphere. Its rooms are designed with a minimalist aesthetic, ensuring a clutter-free and peaceful space to rest after a busy day.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Extra bed fee for 7+.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Economy Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3674.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3674 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "minibar"
+      },
+      {
+        "name": "24-hour front desk"
+      },
+      {
+        "name": "flat-screen TV"
+      },
+      {
+        "name": "desk"
+      },
+      {
+        "name": "and safety deposit box"
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Nova Plaza Orion Hotel",
+    "information_raw": "86 Room",
+    "total_rooms": 86,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kocatepe, Lamartin Cd. No:22, 34437 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@novaplazahotels.com",
+    "hotel_link": "https://novaplazahotels.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Nova Plaza Orion is a standout choice in the Talimhane district, known for combining central urban living with extensive wellness facilities. The hotel features a warm and inviting design, with rooms that offer a comfortable refuge from the bustling city streets. One of its primary draws is the dedicated spa area, which includes a traditional Turkish bath and sauna, allowing guests to experience authentic relaxation.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4500.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4500 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "Fitness Center"
+      },
+      {
+        "name": "Sauna"
+      },
+      {
+        "name": "Turkish Bath (Hammam)"
+      },
+      {
+        "name": "on-site restaurant"
+      },
+      {
+        "name": "bar"
+      },
+      {
+        "name": "and room service."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Maron Hotel Taksim",
+    "information_raw": "60 Room",
+    "total_rooms": 60,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Asmalı Mescit, Meşrutiyet Cd. No:17, 34440 Beyoğlu/İstanbul, Türkiye",
+    "email": "https://www.maroonhotels.com/tr",
+    "hotel_link": "https://www.maroonhotels.com/tr",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Maron Hotel offers a cozy and intimate boutique experience, tucked away just far enough from the main square to provide a quiet night’s sleep while remaining in the heart of the city. The interior design focuses on warm textures and soft lighting, creating a \"home-away-from-home\" feel. Each room is thoughtfully equipped with modern essentials, ensuring that space is used efficiently without sacrificing style.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-5 Free; Boutique setting.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Deluxe Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4100.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4100 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "tea/coffee maker"
+      },
+      {
+        "name": "soundproof rooms"
+      },
+      {
+        "name": "hairdryer"
+      },
+      {
+        "name": "and daily housekeeping."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Riva Hotel Taksim",
+    "information_raw": "70 Room",
+    "total_rooms": 70,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kocatepe, Aydede Cd. No:8, 34437 Beyoğlu/İstanbul, Türkiye",
+    "email": "riva@rivahotel.com.tr",
+    "hotel_link": "https://www.rivahotel.com.tr/riva-otel-taksim.aspx",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "A landmark of the Talimhane area, Riva Hotel Taksim has a long-standing reputation for providing reliable service and classical comfort. The hotel is designed to accommodate a wide variety of guests, from large tour groups to solo business travelers. Its lobby and common areas reflect a traditional hotel style that emphasizes spaciousness and professional service.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Cribs on request.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3200.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3200TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "restaurant"
+      },
+      {
+        "name": "bar"
+      },
+      {
+        "name": "meeting rooms"
+      },
+      {
+        "name": "laundry services"
+      },
+      {
+        "name": "and air-conditioned rooms."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Ferman Hill Hotel",
+    "information_raw": "45 Room",
+    "total_rooms": 45,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kocatepe, Topçu Cd. No:23, 34280 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@fermanhilal.com",
+    "hotel_link": "https://www.fermanhilal.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Ferman Hill Hotel is a stylish boutique property that brings a touch of contemporary elegance to the Taksim area. The hotel’s architecture and interior decor utilize modern materials and chic color palettes, appealing to design-conscious travelers. The rooms are bright and airy, often featuring large windows that provide a glimpse into the dynamic street life of Istanbul.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Stylish family units.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Deluxe Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3000.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3000TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "elegant modern décor"
+      },
+      {
+        "name": "minibar"
+      },
+      {
+        "name": "safe box"
+      },
+      {
+        "name": "flat-screen TV"
+      },
+      {
+        "name": "and concierge service."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Istanbul Dora Hotel",
+    "information_raw": "119 Room",
+    "total_rooms": 119,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Eskişehir, Dolapdere Cd. No:33, 34375 Şişli/İstanbul, Türkiye",
+    "email": "booking@istanbuldora.com",
+    "hotel_link": "https://istanbuldora.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Located in the Harbiye district, Istanbul Dora Hotel offers a more spacious and relaxed alternative to the compact hotels directly on Taksim Square. The hotel is well-known for its comprehensive spa and wellness center, which serves as a major highlight for guests looking to unwind. The rooms are significantly larger than the city average, making it a favorite for families and travelers with extra luggage.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-12 Policy varies (Spacious rooms).",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Superior Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4000.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4000TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "Spa & Wellness Center"
+      },
+      {
+        "name": "Hammam"
+      },
+      {
+        "name": "sauna"
+      },
+      {
+        "name": "massage services"
+      },
+      {
+        "name": "and a rich buffet breakfast."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Blueway Hotel Residence",
+    "information_raw": "35 Room",
+    "total_rooms": 35,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Ergenekon, Kaya Hatun Sk. No: 57, 34373 Şişli/İstanbul, Türkiye",
+    "email": "residenceblueway@gmail.com",
+    "hotel_link": "https://www.bluewayhotelresidence.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Blueway Hotel Residence specializes in a residential-style stay, offering \"apart-hotel\" rooms that are perfect for extended visits or families who prefer a bit more autonomy. Each unit is equipped with kitchenette facilities, allowing guests to prepare their own meals using fresh ingredients from the nearby local markets. The decor is modern and functional, emphasizing clean lines and a bright atmosphere.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Kitchenette for families.",
+    "pet_policy": "Pet Friendly (On Request)",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Deluxe Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3500.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3500TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "Kitchenette options (fridge"
+      },
+      {
+        "name": "stove"
+      },
+      {
+        "name": "kettle)"
+      },
+      {
+        "name": "seating area"
+      },
+      {
+        "name": "and modern furniture."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "The Tango Hotel Taksim",
+    "information_raw": "40 Room",
+    "total_rooms": 40,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Şehit Muhtar, Mahyacı Sk. No:9, 34435 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@thetangohotelistanbul.com",
+    "hotel_link": "https://www.thetangohotelistanbul.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "The Tango Hotel is a vibrant and trendy property that captures the artistic and musical spirit of its namesake. The hotel’s design is bold and modern, featuring unique decorative elements that make it stand out from standard city lodging. The rooms are compact but exceptionally well-organized, focusing on high-tech amenities and a comfortable sleep experience.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3000.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3000 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "sleek modern design"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "tea/coffee setup"
+      },
+      {
+        "name": "and daily breakfast buffet."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "La Serena Hotel Taksim",
+    "information_raw": "30 Room",
+    "total_rooms": 30,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "caylak sk, Kocatepe, Tak-ı Zafer Cd. No:26A, 34437 Beyoğlu/İstanbul, Türkiye",
+    "email": null,
+    "hotel_link": "https://la-serena-suites.hmshotel.net/?dil=tr",
+    "star_rating": null,
+    "property_label_raw": null,
+    "hotel_description": "La Serena is a charming boutique hotel that prides itself on being a peaceful sanctuary in the middle of one of the world's busiest cities. The hotel is simply yet tastefully decorated, focusing on cleanliness and a warm, friendly atmosphere. It offers a no-frills but high-quality stay for travelers who prioritize a central location and budget-friendly rates.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": null,
+    "pet_policy": null,
+    "smoking_policy": null,
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Economy Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3100.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3100 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "24-hour reception"
+      },
+      {
+        "name": "luggage storage"
+      },
+      {
+        "name": "and tour desk assistance."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Taksim Line Hotel",
+    "information_raw": "36 Room",
+    "total_rooms": 36,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Şehit Muhtar Caddesi Ana Çeşmesi Sokak No : 13 Taksim Meydan, 34435 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@taksimlinehotel.com",
+    "hotel_link": "https://taksimlinehotel.com/tr-tr/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Taksim Line Hotel offers a sophisticated urban experience with a focus on wellness and modern luxury. The hotel’s interior is characterized by sleek marble finishes and contemporary art, giving it a high-end feel. A major highlight is the on-site fitness and spa center, providing guests with a place to maintain their routine or relax with a traditional hammam experience.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Luxury suites available.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3800.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3800 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "Fitness Center"
+      },
+      {
+        "name": "Sauna"
+      },
+      {
+        "name": "Turkish Bath"
+      },
+      {
+        "name": "restaurant"
+      },
+      {
+        "name": "and luxury room amenities."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Taximtown Hotel",
+    "information_raw": "36 Room",
+    "total_rooms": 36,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Şehit Muhtar, Tarlabaşı Blv No:60, 34435 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@taximtownhotels.com",
+    "hotel_link": "https://www.taximtownhotels.com/tr",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Taximtown Hotel is designed for travelers who appreciate space and tranquility without leaving the city center. The rooms are uniquely spacious for the Beyoğlu area and feature excellent soundproofing, ensuring a quiet environment despite the proximity to the lively Istiklal Avenue. The decor is modern and understated, using neutral tones to create a relaxing atmosphere.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Soundproofed for kids.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Deluxe Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4100.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4100 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "soundproofed rooms"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "electric kettle"
+      },
+      {
+        "name": "and professional concierge."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Grand Hisar Hotel",
+    "information_raw": "87 Room",
+    "total_rooms": 87,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Hüseyinaga Mah.Kamerhatun Caddesi No:22 Balikpazari, 34400 Beyoğlu, Türkiye",
+    "email": "rezervasyon@hisarotel.com",
+    "hotel_link": "https://www.hisarotel.com/tr",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Grand Hisar Hotel is deeply rooted in the bohemian and historic culture of Beyoğlu. The hotel reflects the nostalgic charm of 19th-century Istanbul, with a focus on the vibrant nightlife and social scene that the neighborhood is famous for. It is an energetic property that often attracts those who want to be immersed in the music, food, and history of the district.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": null,
+        "occupancy_type": null,
+        "base_price": null,
+        "currency_code": null,
+        "price_raw": null
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "on-site restaurant/bar"
+      },
+      {
+        "name": "and 24-hour room service."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Opera Hotel Bosphorus",
+    "information_raw": "75 Room",
+    "total_rooms": 75,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Ömer Avni, Gümüşsuyu, İnönü Cd. No:26, 34427 Beyoğlu/İstanbul, Türkiye",
+    "email": "reservation@operahotel.com.tr",
+    "hotel_link": "https://www.operahotel.com.tr/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Opera Hotel Bosphorus is a luxury destination that combines high-end artistic design with some of the most beautiful views in the city. The hotel’s theme is inspired by the grandeur of the opera, featuring dramatic interiors and sophisticated finishes. Many of the rooms and the rooftop restaurant offer breathtaking panoramic views of the Bosphorus strait.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-12 (Luxury brand standards).",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking; Balconies avail.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Deluxe Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 6200.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 6200 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Outdoor Swimming Pool"
+      },
+      {
+        "name": "Full Spa"
+      },
+      {
+        "name": "Fitness Center"
+      },
+      {
+        "name": "Bosphorus-view restaurant"
+      },
+      {
+        "name": "and luxury suites."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Taksim Prelude Hotel",
+    "information_raw": "36 Room",
+    "total_rooms": 36,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kuloğlu, Sadri Alışık Sk. No:26, 34435 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@taksimpreludehotel.com",
+    "hotel_link": "https://taksimpreludehotel.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Taksim Prelude is set in a magnificently restored historic building that showcases the grand architecture of Istanbul’s past. The hotel features high ceilings, ornate details, and a sense of history that is immediately apparent upon entering. It offers a unique opportunity to stay in a building that feels like a piece of the city’s cultural heritage.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-5 Free; Historic building.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Economy Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3000.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3000 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "historic building charm"
+      },
+      {
+        "name": "high ceilings"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "and personalized guest service."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Mukarnas Taksim Hotel",
+    "information_raw": "32 Room",
+    "total_rooms": 32,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Katip Mustafa Çelebi, İpek Sk. No:6, 34433 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@mukarnastaksim.com",
+    "hotel_link": "https://www.mukarnastaksim.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Mukarnas Taksim is a highly-rated boutique hotel that focuses on providing a flawless, high-quality guest experience. The name \"Mukarnas\" refers to traditional Islamic architectural ornaments, a theme that is subtly reflected in the hotel’s elegant decor. The rooms are designed with a focus on comfort, featuring premium materials and a very clean, modern look.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free; Very family-friendly.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 4700.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 4700 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "Fitness Room"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "laptop-sized safe"
+      },
+      {
+        "name": "and chic modern furniture."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Hotel Venera Taksim",
+    "information_raw": "100 Room",
+    "total_rooms": 100,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Mimar Kemalettin, Mesihpaşa Cd. No:72, 34130 Fatih/İstanbul, Türkiye",
+    "email": "info@hotelvenera.com",
+    "hotel_link": "https://hotelvenera.com/",
+    "star_rating": 4,
+    "property_label_raw": null,
+    "hotel_description": "Hotel Venera offers a modern and straightforward stay in the Talimhane district, focusing on value and convenience. The rooms are decorated in a contemporary style with all the necessary amenities for a comfortable city stay. It is a popular choice for those who want a reliable, mid-range hotel that puts them within walking distance of the city's main attractions.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 5000.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 5000 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "modern rooms"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "minibar"
+      },
+      {
+        "name": "and a breakfast lounge."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "IQ Hotel Taksim",
+    "information_raw": "40 Room",
+    "total_rooms": 40,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "İstiklal Caddesi, Şehit Muhtar, Kurabiye Sk. No:2, 34445 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@iqhouses.com.tr",
+    "hotel_link": "https://www.iqhouses.com.tr/kurabiye/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "IQ Hotel is a smart, tech-friendly, and minimalist hotel designed for the modern \"on-the-go\" traveler. The hotel uses space creatively, providing compact rooms that are packed with modern technology, including smart TVs and high-speed connectivity. The design is youthful and industrial, appealing to digital nomads and solo adventurers.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-5 Free; Tech-focused rooms.",
+    "pet_policy": "No Pets Allowed",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Superior Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3700.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3700 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "modern minimalist design"
+      },
+      {
+        "name": "smart TVs"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "and 24-hour reception."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  },
+  {
+    "hotel_name": "Hotel Next2",
+    "information_raw": "45 Room",
+    "total_rooms": 45,
+    "contact_raw": null,
+    "contact_name": null,
+    "contact_phone": null,
+    "location_raw": "Kuloğlu, Koca Ağa Sk. No:10, 34433 Beyoğlu/İstanbul, Türkiye",
+    "email": "info@hotelnext2.com",
+    "hotel_link": "http://hotelnext2.com/",
+    "star_rating": 3,
+    "property_label_raw": null,
+    "hotel_description": "Hotel Next2 is a sophisticated boutique hotel that offers a quiet and upscale atmosphere in the middle of Beyoğlu. The design is chic and contemporary, with a focus on high-quality furnishings and a peaceful ambiance. It is one of the more refined options in the area, providing a sense of exclusivity and calm.",
+    "check_in_time": null,
+    "check_out_time": null,
+    "child_policy": "0-6 Free.",
+    "pet_policy": "Pet Friendly (Small pets)",
+    "smoking_policy": "Strictly Non-smoking indoors.",
+    "google_maps_link": null,
+    "room_categories": [
+      {
+        "room_name": "Standard Double And Single room",
+        "room_category": "standard",
+        "occupancy_code": "DBL-SNG",
+        "occupancy_type": "single_double",
+        "base_price": 3100.0,
+        "currency_code": "TRY",
+        "price_raw": "DBL-SNG 3100 TL"
+      }
+    ],
+    "amenities": [
+      {
+        "name": "Free Wi-Fi"
+      },
+      {
+        "name": "stylish boutique rooms"
+      },
+      {
+        "name": "air conditioning"
+      },
+      {
+        "name": "high-quality linens"
+      },
+      {
+        "name": "and tour assistance."
+      }
+    ],
+    "status": "active",
+    "manager_id": 1
+  }
+]

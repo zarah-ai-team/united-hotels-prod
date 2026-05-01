@@ -1,0 +1,9 @@
+{
+  "name": "united-hotel-workspace",
+  "private": true,
+  "scripts": {
+    "client": "npm --prefix \"United Hotel Full Code\" run dev",
+    "dev": "npm run client",
+    "build": "npm --prefix \"United Hotel Full Code\" run build"
+  }
+}

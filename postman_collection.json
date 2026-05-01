@@ -1,0 +1,484 @@
+{
+  "info": {
+    "name": "United Hotels Backend API",
+    "description": "United Hotels backend API. Supports hotel CRUD with room category min/max price bounds (loss prevention), dynamic recommended pricing, authenticated and guest bookings with special_request, and payments.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass123\",\n  \"phoneNumber\": 15551234567,\n  \"isAdmin\": false,\n  \"isManager\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const response = pm.response.json();",
+                  "  pm.collectionVariables.set('user_token', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"SecurePass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const response = pm.response.json();",
+                  "  pm.collectionVariables.set('admin_token', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Hotels",
+      "item": [
+        {
+          "name": "Public Hotels Full Details + Categories + Pricing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/public?status=active&limit=50&offset=0&includeRecommendedPrices=true&refreshPrices=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "public"],
+              "query": [
+                { "key": "status", "value": "active" },
+                { "key": "limit", "value": "50" },
+                { "key": "offset", "value": "0" },
+                { "key": "includeRecommendedPrices", "value": "true" },
+                { "key": "refreshPrices", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "All Hotels Recommended Prices (5m Cache)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/pricing/all?status=active&refresh=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "pricing", "all"],
+              "query": [
+                { "key": "status", "value": "active" },
+                { "key": "refresh", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Hotels By Manager/User Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/admin?managerId=1&status=active&limit=50&offset=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "admin"],
+              "query": [
+                { "key": "managerId", "value": "1" },
+                { "key": "status", "value": "active" },
+                { "key": "limit", "value": "50" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Create Hotel",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotel_name\": \"Wings Hotel Pera\",\n  \"information_raw\": \"54 Room\",\n  \"total_rooms\": 54,\n  \"contact_raw\": \"MERVE FIDAN 0538 360 45 56\",\n  \"contact_name\": \"MERVE FIDAN\",\n  \"contact_phone\": \"0538 360 45 56\",\n  \"location_raw\": \"Asmali Mescit, Mesrutiyet Cd. No:35, 34430 Beyoglu/Istanbul\",\n  \"email\": \"merve.fidan@thewingshotel.com\",\n  \"hotel_link\": \"https://thewingshotels.com/en/pera/\",\n  \"star_rating\": 4,\n  \"property_label_raw\": null,\n  \"hotel_description\": \"The Wings group of hotels focuses on Industrial Chic design and urban luxury.\",\n  \"check_in_time\": \"14:00:00\",\n  \"check_out_time\": \"12:00:00\",\n  \"child_policy\": null,\n  \"pet_policy\": null,\n  \"smoking_policy\": null,\n  \"google_maps_link\": \"https://www.google.com/maps/search/?api=1&query=Wings+Hotel+Pera\",\n  \"room_categories\": [\n    {\n      \"room_name\": \"Standard Double And Single room\",\n      \"room_category\": \"standard\",\n      \"occupancy_code\": \"DBL-SNG\",\n      \"occupancy_type\": \"single_double\",\n      \"base_price\": 4231.00,\n      \"min_price\": 4000.00,\n      \"max_price\": 5500.00,\n      \"currency_code\": \"TRY\",\n      \"price_raw\": \"DBL-SNG 4231 TL\"\n    },\n    {\n      \"room_name\": \"Deluxe King Room\",\n      \"room_category\": \"deluxe\",\n      \"occupancy_code\": \"DBL\",\n      \"occupancy_type\": \"double\",\n      \"base_price\": 6500.00,\n      \"min_price\": 6000.00,\n      \"max_price\": 8000.00,\n      \"currency_code\": \"TRY\",\n      \"price_raw\": \"DBL 6500 TL\"\n    }\n  ],\n  \"amenities\": [\n    { \"name\": \"Wi-Fi\" },\n    { \"name\": \"Terrace Dining\" },\n    { \"name\": \"Modern AC\" },\n    { \"name\": \"Design Rooms\" }\n  ],\n  \"status\": \"active\",\n  \"manager_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/hotels/admin/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "admin", "create"]
+            }
+          }
+        },
+        {
+          "name": "Admin Update Hotel",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotel_description\": \"Updated boutique hotel description\",\n  \"google_maps_link\": \"https://maps.google.com/?q=Walton+Hotels+Galata\",\n  \"total_rooms\": 24,\n  \"check_in_time\": \"14:00:00\",\n  \"check_out_time\": \"12:00:00\",\n  \"child_policy\": \"Children above 6 years are chargeable\",\n  \"smoking_policy\": \"No smoking in rooms\",\n  \"room_categories\": [\n    {\n      \"room_name\": \"Deluxe Sea View\",\n      \"room_category\": \"deluxe\",\n      \"occupancy_code\": \"DBL-SNG\",\n      \"occupancy_type\": \"single_double\",\n      \"base_price\": 5100,\n      \"min_price\": 4800,\n      \"max_price\": 7000,\n      \"currency_code\": \"TRY\",\n      \"price_raw\": \"DBL-SNG 5100 TL\"\n    }\n  ],\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/hotels/admin/1/update",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "admin", "1", "update"]
+            }
+          }
+        },
+        {
+          "name": "Admin Delete Hotel",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/admin/1/delete",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "admin", "1", "delete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pricing",
+      "item": [
+        {
+          "name": "Public Hotels With Dynamic Prices (Single Call)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/public?status=active&limit=50&offset=0&includeRecommendedPrices=true&refreshPrices=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "public"],
+              "query": [
+                { "key": "status", "value": "active" },
+                { "key": "limit", "value": "50" },
+                { "key": "offset", "value": "0" },
+                { "key": "includeRecommendedPrices", "value": "true" },
+                { "key": "refreshPrices", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "All Hotels Prices At Once (5m Cache)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/pricing/all?status=active&refresh=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "pricing", "all"],
+              "query": [
+                { "key": "status", "value": "active" },
+                { "key": "refresh", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "All Hotels Recommended Prices (Legacy Path)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/recommended-prices?status=active&refresh=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "recommended-prices"],
+              "query": [
+                { "key": "status", "value": "active" },
+                { "key": "refresh", "value": "true" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Authenticate Payment And Book Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room\": {\"name\": \"Deluxe\", \"id\": 1, \"hotelid\": 1},\n  \"email\": \"john@example.com\",\n  \"phoneNumber\": \"15551234567\",\n  \"fromdate\": \"2026-05-10\",\n  \"todate\": \"2026-05-12\",\n  \"totalamount\": 400,\n  \"totaldays\": 2,\n  \"bookedRooms\": 2,\n  \"paymentMode\": \"card\",\n  \"transactionId\": \"BOOK-CUSTOM-1001\",\n  \"special_request\": \"High floor room preferred, non-smoking\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/bookroom",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "bookroom"]
+            }
+          }
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{user_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": 1,\n  \"amount\": 400,\n  \"currency\": \"USD\",\n  \"paymentMode\": \"card\",\n  \"transactionId\": \"PAY-CUSTOM-1001\",\n  \"metadata\": {\"note\": \"advance payment\"}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payments/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payments", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get My Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{user_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        },
+        {
+          "name": "Get All Payments As Admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{user_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payments", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking (Authenticated)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{user_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room\": {\"name\": \"Deluxe\", \"id\": 1, \"hotelid\": 1},\n  \"fromdate\": \"2026-05-10\",\n  \"todate\": \"2026-05-12\",\n  \"totalamount\": 400,\n  \"totaldays\": 2,\n  \"bookedRooms\": 1,\n  \"paymentMode\": \"card\",\n  \"transactionId\": \"BOOK-CUSTOM-1002\",\n  \"special_request\": \"Early check-in requested, extra pillows\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/create",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "create"]
+            }
+          }
+        },
+        {
+          "name": "Create Booking (Guest — No Auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room\": {\"name\": \"Standard\", \"id\": 1, \"hotelid\": 1},\n  \"email\": \"guest@example.com\",\n  \"phoneNumber\": \"15559876543\",\n  \"fromdate\": \"2026-06-01\",\n  \"todate\": \"2026-06-03\",\n  \"totalamount\": 300,\n  \"totaldays\": 2,\n  \"bookedRooms\": 1,\n  \"paymentMode\": \"cash\",\n  \"special_request\": \"Ground floor room please\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/bookroom",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "bookroom"]
+            }
+          }
+        },
+        {
+          "name": "Get Bookings By User Id",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{user_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userid\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/getbookingsbyuserid",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "getbookingsbyuserid"]
+            }
+          }
+        },
+        {
+          "name": "Get All Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingid\": 1,\n  \"roomid\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Delete Booking (Body)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingid\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/delete",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "delete"]
+            }
+          }
+        },
+        {
+          "name": "Delete Booking (Param)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

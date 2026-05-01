@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: united-hotels-test
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install && npm --prefix "United Hotel Full Code/United Hotel Full Code" install && npm run build:frontend
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: REQUIRE_EMAIL_OTP
+        value: "false"
+      - key: PG_SSL
+        value: "true"
+      - key: USE_MOCK_MAKECORPS
+        value: "false"
+      - key: MAKECORPS_API_BASE_URL
+        value: "https://api.makcorps.com"
+      - key: MAKECORPS_API_KEY
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false

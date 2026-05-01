@@ -1,0 +1,576 @@
+{
+  "info": {
+    "name": "United Hotels Backend API",
+    "description": "Postman collection for testing the United Hotels Backend API with Neon DB, RBAC, and Makecorps pricing integration.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass123\",\n  \"phoneNumber\": 15551234567\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hotels",
+      "item": [
+        {
+          "name": "Get All Hotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/hotels",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels"]
+            }
+          }
+        },
+        {
+          "name": "Get Hotel by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Hotel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grand Hotel\",\n  \"address\": \"123 Main St\",\n  \"contact_name\": \"Manager\",\n  \"contact_phone\": \"+1234567890\",\n  \"contact_email\": \"manager@hotel.com\",\n  \"total_rooms\": 50,\n  \"description\": \"A luxurious hotel\",\n  \"rooms\": [\n    {\n      \"category\": \"standard\",\n      \"count\": 20,\n      \"price_per_night\": 100,\n      \"images\": [\"image1.jpg\"],\n      \"max_count\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/hotels",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels"]
+            }
+          }
+        },
+        {
+          "name": "Update Hotel",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Grand Hotel\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/hotels/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Hotel",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/hotels/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "hotels", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rooms",
+      "item": [
+        {
+          "name": "Get All Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/rooms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "rooms"]
+            }
+          }
+        },
+        {
+          "name": "Get Room by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/rooms/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "rooms", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotel_id\": 1,\n  \"category\": \"deluxe\",\n  \"max_count\": 4,\n  \"price_per_night\": 200,\n  \"room_number\": \"101\",\n  \"images\": [\"room1.jpg\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/rooms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "rooms"]
+            }
+          }
+        },
+        {
+          "name": "Update Room",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price_per_night\": 250\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/rooms/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "rooms", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Room",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/rooms/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "rooms", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Itineraries",
+      "item": [
+        {
+          "name": "Get All Itineraries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/itineraries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "itineraries"]
+            }
+          }
+        },
+        {
+          "name": "Get Itinerary by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/itineraries/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "itineraries", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Itinerary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotel_id\": 1,\n  \"name\": \"Summer Package\",\n  \"description\": \"A great summer deal\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/itineraries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "itineraries"]
+            }
+          }
+        },
+        {
+          "name": "Update Itinerary",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Summer Package\",\n  \"description\": \"Updated description with new benefits\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/itineraries/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "itineraries", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Itinerary",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/itineraries/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "itineraries", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Room Itineraries",
+      "item": [
+        {
+          "name": "Get Room Itineraries by Itinerary ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/room-itineraries/itinerary/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "room-itineraries", "itinerary", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Room Itinerary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itinerary_id\": 1,\n  \"room_id\": 1,\n  \"quantity\": 1,\n  \"price_per_night\": 180\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/room-itineraries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "room-itineraries"]
+            }
+          }
+        },
+        {
+          "name": "Update Room Itinerary",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/room-itineraries/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "room-itineraries", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Room Itinerary",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/room-itineraries/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "room-itineraries", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pricing",
+      "item": [
+        {
+          "name": "Get Recommended Price",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotelName\": \"Luxury Hotel Downtown\",\n  \"minBound\": 100,\n  \"maxBound\": 300\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/pricing/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pricing", "recommend"]
+            }
+          }
+        },
+        {
+          "name": "Get Specific Hotel Availability",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotelName\": \"Luxury Hotel Downtown\",\n  \"checkInDate\": \"2026-05-10\",\n  \"checkOutDate\": \"2026-05-12\",\n  \"guests\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/pricing/availability",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pricing", "availability"]
+            }
+          }
+        },
+        {
+          "name": "Get All Hotels Availability",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"checkInDate\": \"2026-05-10\",\n  \"checkOutDate\": \"2026-05-12\",\n  \"guests\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/pricing/all-availability",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pricing", "all-availability"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Get All Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/getallbookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "getallbookings"]
+            }
+          }
+        },
+        {
+          "name": "Book Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room\": {\"name\": \"Deluxe Room\", \"id\": 1},\n  \"userid\": 1,\n  \"fromdate\": \"2026-05-10\",\n  \"todate\": \"2026-05-12\",\n  \"totalamount\": 400,\n  \"totaldays\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/bookroom",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "bookroom"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
