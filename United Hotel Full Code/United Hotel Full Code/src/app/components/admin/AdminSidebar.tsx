@@ -34,8 +34,8 @@ export function AdminSidebar() {
 
   const handleLogout = () => {
     authService.logout();
-    localStorage.removeItem('uh_role');
-    localStorage.removeItem('uh_admin_name');
+    localStorage.removeItem('uh_active_role');
+    localStorage.removeItem('uh_active_name');
     navigate('/admin/login', { replace: true });
   };
 

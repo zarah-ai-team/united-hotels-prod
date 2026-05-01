@@ -43,6 +43,7 @@ const getUserMeta = async () => {
     phoneCol: pickColumn(cols, ['phoneNumber', 'phonenumber', 'phone_number']),
     isAdminCol: pickColumn(cols, ['isAdmin', 'isadmin', 'is_admin']),
     isManagerCol: pickColumn(cols, ['isManager', 'ismanager', 'is_manager']),
+    roleCol: pickColumn(cols, ['role']),
     verifiedAtCol: pickColumn(cols, ['verified_at', 'verifiedAt', 'email_verified_at']),
     createdCol: pickColumn(cols, ['createdAt', 'created_at']),
     updatedCol: pickColumn(cols, ['updatedAt', 'updated_at'])
@@ -53,18 +54,28 @@ const getUserMeta = async () => {
 
 const quoteCol = (col) => `"${col}"`;
 
-const mapUser = (row, meta) => ({
-  id: row.id,
-  name: row.name,
-  email: row.email,
-  phoneNumber: meta.phoneCol ? row[meta.phoneCol] : null,
-  isAdmin: meta.isAdminCol ? Boolean(row[meta.isAdminCol]) : false,
-  isManager: meta.isManagerCol ? Boolean(row[meta.isManagerCol]) : false,
-  emailVerified: meta.verifiedAtCol ? Boolean(row[meta.verifiedAtCol]) : false,
-  verifiedAt: meta.verifiedAtCol ? row[meta.verifiedAtCol] || null : null,
-  createdAt: meta.createdCol ? row[meta.createdCol] : null,
-  updatedAt: meta.updatedCol ? row[meta.updatedCol] : null
-});
+const mapUser = (row, meta) => {
+  const isAdmin = meta.isAdminCol ? Boolean(row[meta.isAdminCol]) : false;
+  const isManager = meta.isManagerCol ? Boolean(row[meta.isManagerCol]) : false;
+  const rawRole = meta.roleCol ? row[meta.roleCol] : null;
+  // Resolve a canonical role even when the column is null/legacy: an
+  // isAdmin row without a role still appears as 'admin' in the UI.
+  const role = rawRole || (isAdmin ? 'admin' : isManager ? 'vendor' : 'user');
+
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    phoneNumber: meta.phoneCol ? row[meta.phoneCol] : null,
+    isAdmin,
+    isManager,
+    role,
+    emailVerified: meta.verifiedAtCol ? Boolean(row[meta.verifiedAtCol]) : false,
+    verifiedAt: meta.verifiedAtCol ? row[meta.verifiedAtCol] || null : null,
+    createdAt: meta.createdCol ? row[meta.createdCol] : null,
+    updatedAt: meta.updatedCol ? row[meta.updatedCol] : null
+  };
+};
 
 const generateToken = (userId, isAdmin, isManager) => {
   const secret = process.env.JWT_SECRET || 'replace-me-with-secure-secret';
