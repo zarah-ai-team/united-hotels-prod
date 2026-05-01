@@ -1,9 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { adminService, type AdminUser } from '../../services/api';
-import { Button } from '../../components/ui/Button';
+import {
+  Search,
+  UserPlus,
+  Trash2,
+  ShieldCheck,
+  Tag,
+  User as UserIcon,
+  Mail,
+  Phone,
+  Lock,
+  ChevronDown,
+} from 'lucide-react';
 
 type Role = 'user' | 'vendor' | 'admin';
+
+const ROLE_META: Record<Role, { label: string; color: string; bg: string; ring: string }> = {
+  admin:  { label: 'Admin',  color: '#0f9b86', bg: 'rgba(26,188,156,0.10)', ring: 'rgba(26,188,156,0.35)' },
+  vendor: { label: 'Vendor', color: '#1d4ed8', bg: 'rgba(59,130,246,0.10)',  ring: 'rgba(59,130,246,0.35)' },
+  user:   { label: 'User',   color: '#52525b', bg: 'rgba(120,120,120,0.08)', ring: 'rgba(120,120,120,0.25)' },
+};
+
+const initialOf = (name?: string, email?: string) => {
+  const src = (name || email || 'U').trim();
+  const parts = src.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return (src[0] + (src[1] || '')).toUpperCase();
+};
 
 export function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -11,6 +35,7 @@ export function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | Role>('all');
+  const [showCreate, setShowCreate] = useState(false);
 
   // Create-user form
   const [form, setForm] = useState({ name: '', email: '', password: '', phoneNumber: '', role: 'user' as Role });
@@ -41,8 +66,9 @@ export function AdminUsersPage() {
     setFlash(null);
     try {
       await adminService.createUser(form);
-      setFlash({ kind: 'ok', text: `User ${form.email} created as ${form.role}` });
+      setFlash({ kind: 'ok', text: `${form.email} created as ${form.role}` });
       setForm({ name: '', email: '', password: '', phoneNumber: '', role: 'user' });
+      setShowCreate(false);
       refresh();
     } catch (e: any) {
       setFlash({ kind: 'err', text: e?.data?.error || e?.message || 'Failed to create user' });
@@ -60,8 +86,8 @@ export function AdminUsersPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this user permanently?')) return;
+  const handleDelete = async (id: number, email: string) => {
+    if (!confirm(`Permanently delete ${email}?`)) return;
     try {
       await adminService.deleteUser(id);
       setUsers((prev) => prev.filter((u) => u.id !== id));
@@ -70,126 +96,317 @@ export function AdminUsersPage() {
     }
   };
 
+  const counts = useMemo(() => {
+    const c = { all: users.length, user: 0, vendor: 0, admin: 0 } as Record<'all' | Role, number>;
+    users.forEach((u) => { c[u.role] += 1; });
+    return c;
+  }, [users]);
+
   return (
     <AdminLayout title="Users" breadcrumb="Admin / Users" adminOnly>
-      <div className="space-y-6">
-        {/* Create form */}
-        <div className="rounded-xl border border-[#eaeaea] bg-white p-6">
-          <h2 className="text-lg font-semibold text-[#3b3b3b] mb-4">Register a new user</h2>
-          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-6 gap-3">
-            <input
-              required
-              placeholder="Full name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="md:col-span-1 rounded-md border border-[#eaeaea] px-3 py-2 text-sm"
-            />
-            <input
-              required
-              type="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="md:col-span-2 rounded-md border border-[#eaeaea] px-3 py-2 text-sm"
-            />
-            <input
-              required
-              type="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="md:col-span-1 rounded-md border border-[#eaeaea] px-3 py-2 text-sm"
-            />
-            <select
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
-              className="md:col-span-1 rounded-md border border-[#eaeaea] px-3 py-2 text-sm bg-white"
-            >
-              <option value="user">User</option>
-              <option value="vendor">Vendor</option>
-              <option value="admin">Admin</option>
-            </select>
-            <Button type="submit" variant="primary" disabled={submitting}>
-              {submitting ? 'Creating…' : 'Create'}
-            </Button>
-          </form>
-          {flash && (
-            <div className={`mt-3 text-sm ${flash.kind === 'ok' ? 'text-emerald-700' : 'text-red-700'}`}>
-              {flash.text}
+      <div className="space-y-4">
+        {/* Toolbar — counts + filters + search + add */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[12.5px] text-[#6b7280]" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-[#1f2937] font-semibold">{users.length}</span> users
+            {filter !== 'all' && <span> · filtered by <span className="text-[#1f2937]">{filter}</span></span>}
+          </p>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9aa0a6]" />
+              <input
+                placeholder="Search name or email…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') refresh(); }}
+                className="rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] w-60 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C] transition-colors"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              />
             </div>
-          )}
+            <button
+              onClick={() => setShowCreate((v) => !v)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#1ABC9C] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#16A085] transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              {showCreate ? 'Cancel' : 'New User'}
+            </button>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Filter tabs — segmented control style */}
+        <div className="inline-flex items-center gap-0.5 bg-white border border-[#eaeaea] rounded-lg p-0.5">
           {(['all', 'user', 'vendor', 'admin'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-[12px] font-medium transition-colors ${
                 filter === f
-                  ? 'bg-[#1abc9c] text-white'
-                  : 'bg-[#eaeaea] text-[#3b3b3b] hover:bg-[#d4d4d4]'
+                  ? 'bg-[#1f2937] text-white shadow-sm'
+                  : 'text-[#6b7280] hover:text-[#1f2937]'
               }`}
+              style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+              {f === 'all' ? 'All' : ROLE_META[f].label}
+              <span
+                className={`text-[10px] rounded-full px-1.5 py-px font-semibold ${
+                  filter === f ? 'bg-white/15 text-white/85' : 'bg-[#f1f1f1] text-[#9aa0a6]'
+                }`}
+              >
+                {counts[f]}
+              </span>
             </button>
           ))}
-          <div className="ml-auto flex gap-2">
-            <input
-              placeholder="Search name or email"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="rounded-md border border-[#eaeaea] px-3 py-2 text-sm"
-            />
-            <Button variant="secondary" onClick={refresh}>Search</Button>
-          </div>
         </div>
 
-        {/* Table */}
-        <div className="rounded-xl border border-[#eaeaea] bg-white overflow-hidden">
+        {/* Create form — collapsible card */}
+        {showCreate && (
+          <div className="rounded-xl border border-[#eaeaea] bg-white shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+            <div className="px-4 py-3 border-b border-[#eaeaea] flex items-center justify-between">
+              <div>
+                <h2 className="text-[13.5px] font-semibold text-[#1f2937]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  Register a new user
+                </h2>
+                <p className="text-[11px] text-[#9aa0a6] mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Send a welcome email or share the credentials directly.
+                </p>
+              </div>
+            </div>
+            <form onSubmit={handleCreate} className="p-4 grid grid-cols-1 md:grid-cols-12 gap-2.5">
+              {/* Name */}
+              <div className="md:col-span-3">
+                <label className="block text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Name
+                </label>
+                <div className="relative">
+                  <UserIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9aa0a6]" />
+                  <input
+                    required
+                    placeholder="Full name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  />
+                </div>
+              </div>
+              {/* Email */}
+              <div className="md:col-span-3">
+                <label className="block text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9aa0a6]" />
+                  <input
+                    required
+                    type="email"
+                    placeholder="name@example.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  />
+                </div>
+              </div>
+              {/* Phone */}
+              <div className="md:col-span-2">
+                <label className="block text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Phone
+                </label>
+                <div className="relative">
+                  <Phone className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9aa0a6]" />
+                  <input
+                    placeholder="+1 555 0100"
+                    value={form.phoneNumber}
+                    onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+                    className="w-full rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  />
+                </div>
+              </div>
+              {/* Password */}
+              <div className="md:col-span-2">
+                <label className="block text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9aa0a6]" />
+                  <input
+                    required
+                    type="password"
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="w-full rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  />
+                </div>
+              </div>
+              {/* Role + submit */}
+              <div className="md:col-span-2 flex items-end gap-2">
+                <div className="flex-1">
+                  <label className="block text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6] mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Role
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={form.role}
+                      onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
+                      className="w-full appearance-none rounded-lg border border-[#eaeaea] bg-white pl-3 pr-7 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C]"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                    >
+                      <option value="user">User</option>
+                      <option value="vendor">Vendor</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 text-[#9aa0a6] pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+              <div className="md:col-span-12 flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowCreate(false)}
+                  className="rounded-lg border border-[#eaeaea] bg-white px-3 py-1.5 text-[12.5px] font-medium text-[#6b7280] hover:text-[#1f2937] hover:border-[#9aa0a6] transition-colors"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#1ABC9C] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#16A085] transition-colors disabled:opacity-50 shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  {submitting ? 'Creating…' : 'Create user'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {flash && (
+          <div
+            className={`text-[12px] rounded-lg px-3 py-2 ${
+              flash.kind === 'ok'
+                ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                : 'bg-red-50 border border-red-200 text-red-700'
+            }`}
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
+            {flash.text}
+          </div>
+        )}
+
+        {/* Users table */}
+        <div className="rounded-xl border border-[#eaeaea] bg-white overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
           {loading ? (
-            <p className="p-6 text-sm text-[#8c8c8c]">Loading users…</p>
+            <div className="p-6 text-center text-[12.5px] text-[#9aa0a6]">Loading users…</div>
           ) : error ? (
-            <p className="p-6 text-sm text-red-600">{error}</p>
+            <div className="p-6 text-center text-[12.5px] text-red-600">{error}</div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-[#fafafa] text-[#8c8c8c]">
+            <table className="w-full">
+              <thead className="bg-[#fafafa] border-b border-[#eaeaea]">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium">Name</th>
-                  <th className="px-4 py-3 text-left font-medium">Email</th>
-                  <th className="px-4 py-3 text-left font-medium">Role</th>
-                  <th className="px-4 py-3" />
+                  <th className="px-4 py-2 text-left text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    User
+                  </th>
+                  <th className="px-4 py-2 text-left text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Email
+                  </th>
+                  <th className="px-4 py-2 text-left text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Phone
+                  </th>
+                  <th className="px-4 py-2 text-left text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Role
+                  </th>
+                  <th className="px-4 py-2 text-left text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    Created
+                  </th>
+                  <th className="px-4 py-2 w-[60px]" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#eaeaea]">
-                {users.map((u) => (
-                  <tr key={u.id}>
-                    <td className="px-4 py-3 text-[#3b3b3b]">{u.name}</td>
-                    <td className="px-4 py-3 text-[#3b3b3b]">{u.email}</td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={u.role}
-                        onChange={(e) => handleRoleChange(u.id, e.target.value as Role)}
-                        className="rounded-md border border-[#eaeaea] px-2 py-1 text-sm bg-white"
-                      >
-                        <option value="user">user</option>
-                        <option value="vendor">vendor</option>
-                        <option value="admin">admin</option>
-                      </select>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => handleDelete(u.id)}
-                        className="text-sm text-red-600 hover:text-red-800"
-                      >
-                        Delete
-                      </button>
+              <tbody className="divide-y divide-[#f1f1f1]">
+                {users.map((u) => {
+                  const meta = ROLE_META[u.role] || ROLE_META.user;
+                  const RoleIcon = u.role === 'admin' ? ShieldCheck : u.role === 'vendor' ? Tag : UserIcon;
+                  return (
+                    <tr key={u.id} className="hover:bg-[#fafafa] transition-colors">
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-white text-[11px] font-semibold shrink-0"
+                            style={{
+                              background: 'linear-gradient(135deg, #1ABC9C, #16A085)',
+                              boxShadow: '0 4px 10px -4px rgba(26,188,156,0.45)',
+                            }}
+                          >
+                            {initialOf(u.name, u.email)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[12.5px] font-semibold text-[#1f2937] leading-tight truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                              {u.name || '—'}
+                            </div>
+                            <div className="text-[10.5px] text-[#9aa0a6] leading-tight">ID #{u.id}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2.5 text-[12.5px] text-[#3b3b3b]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {u.email}
+                      </td>
+                      <td className="px-4 py-2.5 text-[12.5px] text-[#6b7280]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {u.phoneNumber || <span className="text-[#d4d4d8]">—</span>}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <div className="relative inline-flex items-center">
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium pr-6 cursor-pointer"
+                            style={{
+                              color: meta.color,
+                              background: meta.bg,
+                              boxShadow: `inset 0 0 0 1px ${meta.ring}`,
+                              fontFamily: 'Inter, sans-serif',
+                            }}
+                          >
+                            <RoleIcon className="w-3 h-3" strokeWidth={2.2} />
+                            {meta.label}
+                          </span>
+                          <select
+                            value={u.role}
+                            onChange={(e) => handleRoleChange(u.id, e.target.value as Role)}
+                            className="absolute inset-0 w-full opacity-0 cursor-pointer"
+                            title="Change role"
+                          >
+                            <option value="user">User</option>
+                            <option value="vendor">Vendor</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                          <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" style={{ color: meta.color }} />
+                        </div>
+                      </td>
+                      <td className="px-4 py-2.5 text-[11.5px] text-[#9aa0a6]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <button
+                          onClick={() => handleDelete(u.id, u.email)}
+                          className="text-[#9aa0a6] hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors"
+                          title="Delete user"
+                          aria-label="Delete user"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center">
+                      <div className="text-[13px] text-[#9aa0a6] mb-1">No users found</div>
+                      <div className="text-[11.5px] text-[#d4d4d8]">Try adjusting your filters or invite someone new.</div>
                     </td>
                   </tr>
-                ))}
-                {users.length === 0 && (
-                  <tr><td colSpan={4} className="p-6 text-center text-sm text-[#8c8c8c]">No users found</td></tr>
                 )}
               </tbody>
             </table>

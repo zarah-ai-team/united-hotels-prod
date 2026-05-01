@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Navigate } from 'react-router';
-import { AdminSidebar } from './AdminSidebar';
+import { AdminSidebar, SIDEBAR_WIDTH } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { Monitor, Loader2 } from 'lucide-react';
 import { authService } from '../../services/api';
@@ -16,15 +16,18 @@ interface AdminLayoutProps {
 
 type AuthState = 'checking' | 'allowed' | 'admin-required' | 'denied';
 
-// Lowered from 1024px to 900px — admin layout is now compact enough that
-// 900px works comfortably (smaller laptops + half-screen split).
 const MIN_DESKTOP_WIDTH = 900;
+const COLLAPSED_KEY = 'uh_admin_sidebar_collapsed';
 
 export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: AdminLayoutProps) {
   const [authState, setAuthState] = useState<AuthState>('checking');
   const [viewportWidth, setViewportWidth] = useState(() =>
     typeof window === 'undefined' ? 1280 : window.innerWidth
   );
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(COLLAPSED_KEY) === '1';
+  });
 
   useEffect(() => {
     let active = true;
@@ -41,13 +44,20 @@ export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: 
     return () => { active = false; };
   }, [adminOnly]);
 
-  // Live-update on window resize so the desktop gate flips when the user
-  // expands a half-snap window (the previous version captured innerWidth
-  // once and never recomputed).
+  // Live viewport width so the desktop gate flips on resize.
   useEffect(() => {
     const onResize = () => setViewportWidth(window.innerWidth);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Sidebar broadcasts its collapsed state via a custom event; subscribe so
+  // the main content area's left margin updates in lockstep with the
+  // animated sidebar width.
+  useEffect(() => {
+    const onToggle = (e: Event) => setSidebarCollapsed(Boolean((e as CustomEvent).detail));
+    window.addEventListener('admin:sidebar-toggle', onToggle);
+    return () => window.removeEventListener('admin:sidebar-toggle', onToggle);
   }, []);
 
   if (authState === 'checking') {
@@ -70,8 +80,8 @@ export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: 
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1ABC9C]/5 via-white to-[#1ABC9C]/10 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl border-2 border-[#1ABC9C]/20 p-8 text-center">
+      <div className="min-h-screen bg-[#f7f8fa] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-[#1ABC9C]/15 p-8 text-center">
           <div className="h-20 w-20 rounded-full bg-[#1ABC9C]/10 flex items-center justify-center mx-auto mb-6">
             <Monitor className="h-10 w-10 text-[#1ABC9C]" strokeWidth={1.5} />
           </div>
@@ -96,22 +106,19 @@ export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: 
     );
   }
 
+  const sidebarWidth = sidebarCollapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded;
+
   return (
-    // Full-screen ambient gradient that the frosted sidebar/header sit on top
-    // of — a soft teal aurora plus a slate fade so the glass actually looks
-    // like glass (transparency reveals the colored backdrop).
-    <div
-      className="relative flex h-screen overflow-hidden"
-      style={{
-        background:
-          'radial-gradient(1200px 600px at 8% -10%, rgba(26,188,156,0.18), transparent 55%),' +
-          'radial-gradient(900px 500px at 105% 110%, rgba(45,212,191,0.13), transparent 50%),' +
-          'linear-gradient(180deg, #f7f8fb 0%, #eef2f4 100%)',
-      }}
-    >
+    // Plain neutral background — the previous teal-aurora gradient was making
+    // the page feel busy. Light grey reads as a clean canvas the cards float
+    // on top of.
+    <div className="relative flex h-screen overflow-hidden bg-[#f5f6f8]">
       <AdminSidebar />
 
-      <div className="flex-1 flex flex-col lg:ml-[220px] min-w-0">
+      <div
+        className="flex-1 flex flex-col min-w-0 transition-[margin-left] duration-200 ease-out"
+        style={{ marginLeft: viewportWidth >= 1024 ? sidebarWidth : 0 }}
+      >
         <AdminHeader title={title} breadcrumb={breadcrumb} />
 
         <main className="flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-5">

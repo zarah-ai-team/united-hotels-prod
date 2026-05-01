@@ -19,20 +19,44 @@ const fmtUsd = (n: number) => `$${Math.round(Number(n) || 0).toLocaleString()}`;
 function StatCard({
   label, value, icon: Icon, accent = '#1ABC9C',
 }: {
-  label: string; value: string | number; icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; accent?: string;
+  label: string; value: string | number; icon: React.ComponentType<{ className?: string; strokeWidth?: number; style?: React.CSSProperties }>; accent?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#eaeaea] p-5 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div className="h-11 w-11 rounded-full flex items-center justify-center" style={{ backgroundColor: `${accent}1a` }}>
-          <Icon className="h-5 w-5" strokeWidth={1.7} />
+    <div className="bg-white rounded-xl border border-[#eaeaea]/80 p-3 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] hover:border-[#1ABC9C]/30 transition-all">
+      <div className="flex items-center gap-2.5">
+        <div
+          className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0"
+          style={{
+            background: `linear-gradient(135deg, ${accent}1a, ${accent}33)`,
+            boxShadow: `inset 0 0 0 1px ${accent}22`,
+          }}
+        >
+          <Icon className="h-[16px] w-[16px]" strokeWidth={1.85} style={{ color: accent }} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10.5px] text-[#8c8c8c] uppercase tracking-[0.08em] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+            {label}
+          </p>
+          <p className="text-[18px] font-bold text-[#1f2937] mt-0.5 leading-none truncate" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            {value}
+          </p>
         </div>
       </div>
-      <p className="mt-3 text-xs text-[#8c8c8c] uppercase tracking-wider">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-[#3b3b3b]">{value}</p>
     </div>
   );
 }
+
+const ChartCard: React.FC<{ title: string; children: React.ReactNode; right?: React.ReactNode }> = ({ title, children, right }) => (
+  <div className="bg-white rounded-xl border border-[#eaeaea]/80 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] overflow-hidden">
+    <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#eaeaea]/60">
+      <h3 className="text-[12.5px] font-semibold text-[#1f2937]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+        {title}
+      </h3>
+      {right}
+    </div>
+    <div className="p-3.5">{children}</div>
+  </div>
+);
 
 export function AdminAnalyticsPage() {
   const [days, setDays] = useState<number>(30);
@@ -86,20 +110,25 @@ export function AdminAnalyticsPage() {
 
   return (
     <AdminLayout title="Analytics" breadcrumb="Admin / Analytics" adminOnly>
-      <div className="space-y-6">
-        {/* Range selector */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#6b7280]">
-            {data ? `Window: last ${data.window.days} days · generated ${new Date(data.window.generatedAt).toLocaleString()}` : 'Loading…'}
+      <div className="space-y-4">
+        {/* Range + meta — single tidy row */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[12px] text-[#6b7280]" style={{ fontFamily: 'Inter, sans-serif' }}>
+            {data
+              ? <>Window: <span className="text-[#1f2937] font-semibold">last {data.window.days} days</span> · generated {new Date(data.window.generatedAt).toLocaleString()}</>
+              : 'Loading…'}
           </p>
-          <div className="flex gap-2">
+          <div className="inline-flex items-center gap-0.5 bg-white border border-[#eaeaea] rounded-lg p-0.5">
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => setDays(opt.value)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                  days === opt.value ? 'bg-[#1ABC9C] text-white' : 'bg-[#eaeaea] text-[#3b3b3b] hover:bg-[#d4d4d4]'
+                className={`rounded-md px-2.5 py-1 text-[11.5px] font-medium transition-colors ${
+                  days === opt.value
+                    ? 'bg-[#1f2937] text-white shadow-sm'
+                    : 'text-[#6b7280] hover:text-[#1f2937]'
                 }`}
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {opt.label}
               </button>
@@ -108,134 +137,129 @@ export function AdminAnalyticsPage() {
         </div>
 
         {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
+          <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-[12.5px] text-red-700">{error}</div>
         )}
 
-        {/* KPI strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label={`Bookings (last ${days}d)`} value={totals.bookings.toLocaleString()} icon={CalendarCheck} accent="#1ABC9C" />
-          <StatCard label="Revenue" value={fmtUsd(totals.revenue)} icon={DollarSign} accent="#3B82F6" />
-          <StatCard label="Avg booking value" value={fmtUsd(totals.avgValue)} icon={TrendingUp} accent="#F59E0B" />
-          <StatCard label="Top hotel" value={totals.topHotelName} icon={Building2} accent="#8B5CF6" />
+        {/* KPI strip — compact row of 4 (matches dashboard) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard label={`Bookings (${days}d)`} value={totals.bookings.toLocaleString()} icon={CalendarCheck} accent="#1ABC9C" />
+          <StatCard label="Revenue" value={fmtUsd(totals.revenue)} icon={DollarSign} accent="#10b981" />
+          <StatCard label="Avg booking" value={fmtUsd(totals.avgValue)} icon={TrendingUp} accent="#0ea5e9" />
+          <StatCard label="Top hotel" value={totals.topHotelName} icon={Building2} accent="#8b5cf6" />
         </div>
 
-        {/* Revenue trend */}
-        <div className="bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Revenue · Direct vs OTA</h3>
-          <div style={{ width: '100%', height: 320 }}>
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={trendChartData}>
+        {/* Revenue trend — chart height 320 → 220 */}
+        <ChartCard title="Revenue · Direct vs OTA">
+          <div style={{ width: '100%', height: 220 }}>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={trendChartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
-                <XAxis dataKey="date" stroke="#8c8c8c" tickLine={false} axisLine={{ stroke: '#eaeaea' }} />
-                <YAxis stroke="#8c8c8c" tickLine={false} axisLine={{ stroke: '#eaeaea' }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
-                <Legend />
+                <XAxis dataKey="date" stroke="#9aa0a6" tickLine={false} axisLine={{ stroke: '#eaeaea' }} tick={{ fontSize: 11 }} />
+                <YAxis stroke="#9aa0a6" tickLine={false} axisLine={{ stroke: '#eaeaea' }} tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Line type="monotone" dataKey="direct" name="Direct" stroke="#1ABC9C" strokeWidth={2} dot={false} isAnimationActive={false} />
                 <Line type="monotone" dataKey="ota" name="OTA" stroke="#8c8c8c" strokeWidth={2} dot={false} isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </ChartCard>
 
-        {/* Bookings/day + Status breakdown side by side */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
-            <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Daily bookings</h3>
-            <div style={{ width: '100%', height: 280 }}>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={trendChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
-                  <XAxis dataKey="date" stroke="#8c8c8c" tickLine={false} />
-                  <YAxis stroke="#8c8c8c" tickLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
-                  <Bar dataKey="bookings" name="Bookings" fill="#1ABC9C" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+        {/* Bookings/day + Status breakdown */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="lg:col-span-2">
+            <ChartCard title="Daily bookings">
+              <div style={{ width: '100%', height: 200 }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={trendChartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+                    <XAxis dataKey="date" stroke="#9aa0a6" tickLine={false} tick={{ fontSize: 11 }} />
+                    <YAxis stroke="#9aa0a6" tickLine={false} allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
+                    <Bar dataKey="bookings" name="Bookings" fill="#1ABC9C" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
           </div>
 
-          <div className="bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
-            <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Bookings by status</h3>
+          <ChartCard title="Bookings by status">
             {data && data.bookingsByStatus.length > 0 ? (
-              <div style={{ width: '100%', height: 280 }}>
-                <ResponsiveContainer width="100%" height={280}>
+              <div style={{ width: '100%', height: 200 }}>
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
-                    <Pie data={data.bookingsByStatus} dataKey="count" nameKey="status" outerRadius={90} label isAnimationActive={false}>
+                    <Pie data={data.bookingsByStatus} dataKey="count" nameKey="status" outerRadius={68} label={{ fontSize: 10 }} isAnimationActive={false}>
                       {data.bookingsByStatus.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             ) : (
-              <p className="text-sm text-[#8c8c8c]">{loading ? 'Loading…' : 'No bookings yet.'}</p>
+              <p className="text-[12.5px] text-[#9aa0a6] py-6 text-center">{loading ? 'Loading…' : 'No bookings yet.'}</p>
             )}
-          </div>
+          </ChartCard>
         </div>
 
         {/* Top hotels + Users by role */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
-            <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Top hotels (revenue)</h3>
-            {data && data.topHotels.length > 0 ? (
-              <div style={{ width: '100%', height: 320 }}>
-                <ResponsiveContainer width="100%" height={320}>
-                  <BarChart data={data.topHotels} layout="vertical" margin={{ left: 10, right: 30 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" horizontal={false} />
-                    <XAxis type="number" stroke="#8c8c8c" tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                    <YAxis dataKey="hotelName" type="category" stroke="#8c8c8c" tickLine={false} width={140} />
-                    <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
-                    <Bar dataKey="revenue" name="Revenue" fill="#3B82F6" radius={[0, 4, 4, 0]} isAnimationActive={false} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="text-sm text-[#8c8c8c]">{loading ? 'Loading…' : 'No data yet.'}</p>
-            )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="lg:col-span-2">
+            <ChartCard title="Top hotels (revenue)">
+              {data && data.topHotels.length > 0 ? (
+                <div style={{ width: '100%', height: 240 }}>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={data.topHotels} layout="vertical" margin={{ left: 4, right: 16, top: 4, bottom: 4 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" horizontal={false} />
+                      <XAxis type="number" stroke="#9aa0a6" tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                      <YAxis dataKey="hotelName" type="category" stroke="#9aa0a6" tickLine={false} width={120} tick={{ fontSize: 11 }} />
+                      <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
+                      <Bar dataKey="revenue" name="Revenue" fill="#3B82F6" radius={[0, 3, 3, 0]} isAnimationActive={false} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="text-[12.5px] text-[#9aa0a6] py-6 text-center">{loading ? 'Loading…' : 'No data yet.'}</p>
+              )}
+            </ChartCard>
           </div>
 
-          <div className="bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <Users className="w-4 h-4 text-[#1abc9c]" />
-              <h3 className="text-base font-semibold text-[#3b3b3b]">Users by role</h3>
-            </div>
+          <ChartCard title="Users by role" right={<Users className="w-3.5 h-3.5 text-[#1abc9c]" />}>
             {usersByRoleChartData.length > 0 ? (
-              <div style={{ width: '100%', height: 280 }}>
-                <ResponsiveContainer width="100%" height={280}>
+              <div style={{ width: '100%', height: 200 }}>
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
-                    <Pie data={usersByRoleChartData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} label isAnimationActive={false}>
+                    <Pie data={usersByRoleChartData} dataKey="value" nameKey="name" innerRadius={38} outerRadius={68} label={{ fontSize: 10 }} isAnimationActive={false}>
                       {usersByRoleChartData.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             ) : (
-              <p className="text-sm text-[#8c8c8c]">{loading ? 'Loading…' : 'No users yet.'}</p>
+              <p className="text-[12.5px] text-[#9aa0a6] py-6 text-center">{loading ? 'Loading…' : 'No users yet.'}</p>
             )}
-          </div>
+          </ChartCard>
         </div>
 
         {/* Revenue by district */}
         {data && data.revenueByDistrict.length > 0 && (
-          <div className="bg-white rounded-xl border border-[#eaeaea] p-6 shadow-sm">
-            <h3 className="text-base font-semibold text-[#3b3b3b] mb-4">Revenue by district</h3>
-            <div style={{ width: '100%', height: 280 }}>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={data.revenueByDistrict}>
+          <ChartCard title="Revenue by district">
+            <div style={{ width: '100%', height: 200 }}>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={data.revenueByDistrict} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
-                  <XAxis dataKey="district" stroke="#8c8c8c" tickLine={false} />
-                  <YAxis stroke="#8c8c8c" tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea' }} />
-                  <Bar dataKey="revenue" name="Revenue" fill="#F59E0B" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                  <XAxis dataKey="district" stroke="#9aa0a6" tickLine={false} tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#9aa0a6" tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
+                  <Bar dataKey="revenue" name="Revenue" fill="#F59E0B" radius={[3, 3, 0, 0]} isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </ChartCard>
         )}
       </div>
     </AdminLayout>

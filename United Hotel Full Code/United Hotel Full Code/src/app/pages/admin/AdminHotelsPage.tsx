@@ -231,89 +231,103 @@ export function AdminHotelsPage() {
 
   return (
     <AdminLayout title="Hotels & Rooms" breadcrumb="Admin / Hotels">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm text-[#6b7280]">Manage your properties and room inventory · {hotels.length} hotels</p>
-          </div>
-          <div className="flex items-center gap-3">
+      <div className="space-y-4">
+        {/* Toolbar — single tidy row, smaller search/button */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[12.5px] text-[#6b7280]" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-[#1f2937] font-semibold">{hotels.length}</span> properties · room inventory
+          </p>
+          <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8c8c8c]" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9aa0a6]" />
               <input
-                placeholder="Search by name or location"
+                placeholder="Search hotels…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-lg border border-[#eaeaea] pl-9 pr-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/30 focus:border-[#1ABC9C]"
+                className="rounded-lg border border-[#eaeaea] bg-white pl-8 pr-3 py-1.5 text-[12.5px] w-56 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C] transition-colors"
+                style={{ fontFamily: 'Inter, sans-serif' }}
               />
             </div>
             {!isVendor && (
               <button
                 onClick={() => setShowAdd(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#1ABC9C] px-4 py-2 font-semibold text-white hover:bg-[#16A085] transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#1ABC9C] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#16A085] transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                <Plus className="w-4 h-4" /> Add Hotel
+                <Plus className="w-3.5 h-3.5" /> Add Hotel
               </button>
             )}
           </div>
         </div>
 
         {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
+          <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-[12.5px] text-red-700">{error}</div>
         )}
 
         {loading ? (
-          <p className="text-sm text-[#8c8c8c]">Loading hotels…</p>
+          <p className="text-[12.5px] text-[#8c8c8c]">Loading hotels…</p>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6">
-            {/* Hotel grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filtered.map((h) => (
-                <div
-                  key={h.id}
-                  onClick={() => setActiveId(h.id)}
-                  className={`text-left bg-white rounded-xl border overflow-hidden transition-all cursor-pointer ${
-                    activeId === h.id ? 'border-[#1ABC9C] ring-2 ring-[#1ABC9C]/20 shadow-md' : 'border-[#eaeaea] hover:shadow-sm'
-                  }`}
-                >
-                  <div className="relative h-36 bg-[#eaeaea]">
-                    <img src={h.image} alt={h.name} className="w-full h-full object-cover" />
-                    {h.vendorId ? (
-                      <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-[#1ABC9C] text-white text-[11px] px-2 py-1">
-                        <Tag className="w-3 h-3" /> Vendor #{h.vendorId}
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-[15px] font-semibold text-[#3b3b3b] line-clamp-1">{h.name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-[#8c8c8c] mt-1">
-                      <MapPin className="w-3.5 h-3.5" /> <span className="line-clamp-1">{h.location}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
+            {/* Hotel grid — denser cards (3 cols on wider screens), smaller image, tighter info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {filtered.map((h) => {
+                const isActiveCard = activeId === h.id;
+                return (
+                  <div
+                    key={h.id}
+                    onClick={() => setActiveId(h.id)}
+                    className={`group text-left bg-white rounded-xl border overflow-hidden transition-all cursor-pointer ${
+                      isActiveCard
+                        ? 'border-[#1ABC9C] ring-1 ring-[#1ABC9C]/30 shadow-[0_8px_24px_-12px_rgba(26,188,156,0.45)]'
+                        : 'border-[#eaeaea] hover:border-[#1ABC9C]/40 hover:shadow-[0_6px_18px_-12px_rgba(15,23,42,0.18)]'
+                    }`}
+                  >
+                    {/* Image — slightly shorter, with vendor pill */}
+                    <div className="relative h-24 bg-[#f1f1f1]">
+                      <img src={h.image} alt={h.name} className="w-full h-full object-cover" />
+                      {h.vendorId ? (
+                        <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-[#1ABC9C]/95 text-white text-[10px] px-1.5 py-0.5 shadow-sm">
+                          <Tag className="w-2.5 h-2.5" /> #{h.vendorId}
+                        </span>
+                      ) : null}
                     </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`w-3.5 h-3.5 ${i < h.starRating ? 'fill-[#FFA500] text-[#FFA500]' : 'fill-[#eaeaea] text-[#eaeaea]'}`} />
-                        ))}
+                    {/* Body — name + minimal meta. Stars and price-range are inline so the card stays short */}
+                    <div className="p-2.5 space-y-1.5">
+                      <h3 className="text-[13px] font-semibold text-[#1f2937] line-clamp-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {h.name}
+                      </h3>
+                      <div className="flex items-center gap-1 text-[11px] text-[#8c8c8c]">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span className="line-clamp-1">{h.location}</span>
                       </div>
-                      <div className="text-xs text-[#3b3b3b]">
-                        {h.minPrice > 0 ? `${fmtUsd(h.minPrice)}–${fmtUsd(h.maxPrice)}` : '—'}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < h.starRating ? 'fill-[#FFA500] text-[#FFA500]' : 'fill-[#eaeaea] text-[#eaeaea]'}`} />
+                          ))}
+                        </div>
+                        <div className="text-[11px] font-semibold text-[#0f9b86]">
+                          {h.minPrice > 0 ? `${fmtUsd(h.minPrice)}–${fmtUsd(h.maxPrice)}` : '—'}
+                        </div>
                       </div>
+                      <div className="flex items-center justify-between text-[10.5px] text-[#9aa0a6] pt-1 border-t border-[#f1f1f1]">
+                        <span><BedDouble className="w-2.5 h-2.5 inline -mt-0.5 mr-1" />{h.rooms.length} types</span>
+                        <span>{h.totalRooms ? `${h.totalRooms} rooms` : '—'}</span>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/admin/hotels/${h.id}`); }}
+                        className="w-full inline-flex items-center justify-center gap-1 rounded-md bg-[#1ABC9C]/10 hover:bg-[#1ABC9C] hover:text-white text-[#0f9b86] text-[11px] font-semibold py-1 transition-colors"
+                      >
+                        Open details <ChevronRight className="w-3 h-3" />
+                      </button>
                     </div>
-                    <div className="flex items-center justify-between mt-2 text-xs text-[#6b7280]">
-                      <span><BedDouble className="w-3 h-3 inline -mt-0.5 mr-1" /> {h.rooms.length} room categories</span>
-                      <span>{h.totalRooms ? `${h.totalRooms} rooms` : ''}</span>
-                    </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); navigate(`/admin/hotels/${h.id}`); }}
-                      className="mt-3 w-full inline-flex items-center justify-center gap-1 rounded-md bg-[#1ABC9C] hover:bg-[#16A085] text-white text-xs font-semibold py-1.5"
-                    >
-                      Open details <ChevronRight className="w-3 h-3" />
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {filtered.length === 0 && (
-                <p className="text-sm text-[#8c8c8c] col-span-full">No hotels match your search.</p>
+                <div className="col-span-full bg-white rounded-xl border border-dashed border-[#eaeaea] p-8 text-center">
+                  <p className="text-[13px] text-[#8c8c8c]">No hotels match your search.</p>
+                </div>
               )}
             </div>
 
