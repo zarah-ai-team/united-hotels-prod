@@ -170,14 +170,13 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/20 to-transparent opacity-60 mix-blend-overlay pointer-events-none" />
 
-        {/* Review-rating pill (top-left) — glassy in both themes */}
+        {/* Review-rating pill (top-left) — review count was a fixed 250
+            stub from the seed, so we just show the star rating itself
+            until real review counts are wired in. */}
         <div className="card-glass-pill absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1">
           <Star className="w-3 h-3 fill-[#FFA500] text-[#FFA500] drop-shadow-[0_0_4px_rgba(255,165,0,0.6)]" strokeWidth={0} />
           <span className="font-['Inter:SemiBold',sans-serif] text-[11.5px] leading-none">
             {hotel.rating.toFixed(1)}
-          </span>
-          <span className="card-glass-muted font-['Inter:Regular',sans-serif] text-[11px] leading-none">
-            ({hotel.reviews})
           </span>
         </div>
 
@@ -222,26 +221,9 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
         </div>
 
         {/* Hotel name */}
-        <h3 className="font-['Poppins:Bold',sans-serif] text-[19px] md:text-[20px] leading-[1.22] tracking-[-0.018em] text-[#1f2937] dark:text-white line-clamp-1 group-hover:text-[#1abc9c] transition-colors">
+        <h3 className="font-['Poppins:Bold',sans-serif] text-[19px] md:text-[20px] leading-[1.22] tracking-[-0.018em] text-[#1f2937] dark:text-white line-clamp-1 mb-3.5 group-hover:text-[#1abc9c] transition-colors">
           {hotel.name}
         </h3>
-
-        {/* Sub-meta — reviews + total rooms */}
-        <div className="font-['Inter:Regular',sans-serif] italic text-[12px] text-[#6b7280] dark:text-white/55 mt-1.5 mb-3.5 flex items-center gap-2">
-          <span>
-            {hotel.reviews > 0
-              ? `${hotel.reviews} ${t("verified reviews")}`
-              : t("Newly listed stay")}
-          </span>
-          {hotel.totalRooms ? (
-            <>
-              <span className="text-[#d1d5db] dark:text-white/20">·</span>
-              <span className="not-italic font-['Inter:Medium',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/65">
-                {hotel.totalRooms} {t("rooms")}
-              </span>
-            </>
-          ) : null}
-        </div>
 
         {/* Feature chips — top 3 amenities with icons */}
         <div className="flex flex-wrap items-center gap-1.5">
