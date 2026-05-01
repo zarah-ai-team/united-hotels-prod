@@ -48,19 +48,24 @@ export const REGIONS: Region[] = [
   { code: "ja-JP", label: "日本", language: "ja", languageLabel: "日本語", currency: "JPY", flag: "🇯🇵" },
 ];
 
-// Approximate FX — base unit is TRY (Turkish Lira) since hotel prices are stored in TRY.
-// These are static reference rates; refresh quarterly. Travel sites commonly do this.
-export const FX_FROM_TRY: Record<CurrencyCode, number> = {
-  TRY: 1,
-  USD: 1 / 34,
-  EUR: 1 / 37,
-  GBP: 1 / 43,
-  AED: 1 / 9.3,
-  SAR: 1 / 9,
-  RUB: 2.65,
-  CNY: 0.21,
-  JPY: 4.4,
+// Approximate FX — base unit is USD since hotel prices are stored in USD
+// (matches scripts/seedNeon.js + the SQLite mock seed). These are static
+// reference rates; refresh quarterly. Travel sites commonly do this.
+export const FX_FROM_USD: Record<CurrencyCode, number> = {
+  USD: 1,
+  EUR: 0.92,
+  GBP: 0.79,
+  TRY: 34,
+  AED: 3.67,
+  SAR: 3.75,
+  RUB: 90,
+  CNY: 7.2,
+  JPY: 150,
 };
+
+// Backwards-compat alias — older code (currency.ts, components) still imports
+// the previous name. Semantically the rates are now USD-based.
+export const FX_FROM_TRY = FX_FROM_USD;
 
 // Currencies where decimals are unhelpful (large unit or no minor unit)
 const ZERO_DECIMAL_CURRENCIES: CurrencyCode[] = ["JPY", "RUB", "CNY", "TRY"];

@@ -330,8 +330,8 @@ interface RoomCategoryCardProps {
 }
 
 function RoomCategoryCard({ room, index, image, onImageError, recommendation, isSelected, onSelect, canBook }: RoomCategoryCardProps) {
-  const { t } = useLanguage();
-  const currency = room.currency_code || "TRY";
+  const { t, format } = useLanguage();
+  const currency = room.currency_code || "USD";
   const recommendedPrice = Number(recommendation?.recommendedPrice || 0);
   const fallbackBase = Number(room.price_per_night || room.base_price || 0);
   const displayPrice = recommendedPrice > 0 ? recommendedPrice : fallbackBase;
@@ -436,13 +436,13 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
             </div>
             {hasDiscount && basePrice > displayPrice && (
               <div className="text-[11.5px] line-through text-[#9aa0a6] dark:text-white/40">
-                {formatPrice(basePrice, currency)}
+                {format(basePrice)}
               </div>
             )}
             {displayPrice > 0 ? (
               <>
                 <div className="font-['Poppins:Bold',sans-serif] text-[28px] leading-none tracking-[-0.025em] text-[#0f9b86] dark:text-[#2dd4bf]">
-                  {formatPrice(displayPrice, currency)}
+                  {format(displayPrice)}
                 </div>
                 <div className="text-[12px] text-[#6b7280] dark:text-white/55 mt-1">
                   / {t("night")}
@@ -454,7 +454,7 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
             {savings > 0 && (
               <div className="mt-1.5 inline-flex items-center gap-1 font-['Inter:SemiBold',sans-serif] text-[11px] text-[#0f9b86] dark:text-[#2dd4bf]">
                 <Sparkles className="w-3 h-3" strokeWidth={2.2} />
-                {t("Save")} {formatPrice(savings, currency)}
+                {t("Save")} {format(savings)}
               </div>
             )}
           </div>
@@ -747,7 +747,7 @@ const mapToViewRoom = (room: PublicHotelRoom, hotel: PublicHotel, index: number)
 export function HotelDetailPageNew() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, format } = useLanguage();
   const { setHotel, setRoom, setDates, setGuests, setRoomCount } = useBooking();
   useScrollProgress();
 
@@ -906,9 +906,7 @@ export function HotelDetailPageNew() {
           : []);
   const allDisplayRooms: PublicHotelRoom[] = baseRooms.flatMap(splitRoomDisplayEntries);
 
-  const priceDisplay = selectedRoom?.price
-    ? formatPrice(selectedRoom.price, "TRY") ?? `${selectedRoom.price.toFixed(2)}`
-    : null;
+  const priceDisplay = selectedRoom?.price ? format(selectedRoom.price) : null;
 
   const nights = checkIn && checkOut
     ? Math.max(1, Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000))
@@ -1125,7 +1123,7 @@ export function HotelDetailPageNew() {
                   </div>
                   {selectedRoom.basePrice && selectedRoom.basePrice > selectedRoom.price && (
                     <div className="mt-1 text-[12px] text-[#10b981] font-medium">
-                      Save {formatPrice(selectedRoom.savingsAmount * roomCount, "TRY")} vs. base rate
+                      Save {format(selectedRoom.savingsAmount * roomCount)} vs. base rate
                     </div>
                   )}
                 </>

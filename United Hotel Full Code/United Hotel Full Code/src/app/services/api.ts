@@ -277,6 +277,11 @@ export const authService = {
     if (response.token) {
       localStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
     }
+    // Persist the user record so guards like RequireAdmin can check
+    // isAdmin/isManager without an extra round-trip on every protected route.
+    if ((response as any).user) {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify((response as any).user));
+    }
 
     return response;
   },
@@ -325,8 +330,12 @@ export const authService = {
       token
     );
 
-    if (response?.user) return response.user;
-    return response;
+    const user = response?.user ?? response;
+    // Keep the cached user in sync so RequireAdmin sees fresh role info on reload.
+    if (user && typeof user === 'object') {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    }
+    return user;
   },
 
   logout(): void {
