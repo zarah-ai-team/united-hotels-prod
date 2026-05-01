@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 interface Room {
   id: string;
@@ -61,36 +61,39 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     confirmationId: null
   });
 
-  const setHotel = (hotel: Hotel) => {
+  // All setters are wrapped in useCallback so they keep a stable identity
+  // across renders. Components can safely include them in useEffect/useMemo
+  // dependency arrays without triggering infinite re-render loops.
+  const setHotel = useCallback((hotel: Hotel) => {
     setBooking(prev => ({ ...prev, hotel }));
-  };
+  }, []);
 
-  const setRoom = (room: Room) => {
+  const setRoom = useCallback((room: Room) => {
     setBooking(prev => ({ ...prev, room }));
-  };
+  }, []);
 
-  const setDates = (checkIn: string, checkOut: string) => {
+  const setDates = useCallback((checkIn: string, checkOut: string) => {
     const nights = calculateNightsBetween(checkIn, checkOut);
     setBooking(prev => ({ ...prev, checkIn, checkOut, nights }));
-  };
+  }, []);
 
-  const setGuests = (guests: number) => {
+  const setGuests = useCallback((guests: number) => {
     setBooking(prev => ({ ...prev, guests }));
-  };
+  }, []);
 
-  const setRoomCount = (roomCount: number) => {
+  const setRoomCount = useCallback((roomCount: number) => {
     setBooking(prev => ({ ...prev, roomCount: Math.max(1, roomCount) }));
-  };
+  }, []);
 
-  const setGuestDetails = (guestDetails: GuestDetails) => {
+  const setGuestDetails = useCallback((guestDetails: GuestDetails) => {
     setBooking(prev => ({ ...prev, guestDetails }));
-  };
+  }, []);
 
-  const setConfirmationId = (confirmationId: string) => {
+  const setConfirmationId = useCallback((confirmationId: string) => {
     setBooking(prev => ({ ...prev, confirmationId }));
-  };
+  }, []);
 
-  const clearBooking = () => {
+  const clearBooking = useCallback(() => {
     setBooking({
       hotel: null,
       room: null,
@@ -102,7 +105,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
       nights: 0,
       confirmationId: null
     });
-  };
+  }, []);
 
   const calculateNightsBetween = (checkIn: string, checkOut: string): number => {
     if (!checkIn || !checkOut) return 0;
@@ -113,9 +116,9 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     return diffDays;
   };
 
-  const calculateNights = () => {
+  const calculateNights = useCallback(() => {
     return calculateNightsBetween(booking.checkIn, booking.checkOut);
-  };
+  }, [booking.checkIn, booking.checkOut]);
 
   return (
     <BookingContext.Provider value={{

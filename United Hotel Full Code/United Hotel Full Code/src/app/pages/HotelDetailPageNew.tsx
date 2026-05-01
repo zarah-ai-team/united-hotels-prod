@@ -786,11 +786,12 @@ export function HotelDetailPageNew() {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [id]);
 
-  // Whenever the local date state changes (e.g. user edits the picker on
-  // this page), keep BookingContext in sync so the next step inherits it.
-  useEffect(() => {
-    if (checkIn && checkOut) setDates(checkIn, checkOut);
-  }, [checkIn, checkOut, setDates]);
+  // NOTE: a previous version of this page tried to keep BookingContext in
+  // sync via a useEffect with [checkIn, checkOut, setDates] deps. setDates
+  // is a fresh closure on every BookingProvider render, which triggered an
+  // infinite re-render loop and froze the page (every click — Continue,
+  // back link, header dropdowns — became a no-op). Sync now happens
+  // explicitly inside handleSelectRoom / handleContinue instead.
 
   useEffect(() => {
     if (!checkIn || !checkOut) return;
@@ -865,6 +866,10 @@ export function HotelDetailPageNew() {
 
   const handleContinue = () => {
     if (!selectedRoom || !hotel) return;
+    // Push the right-side panel's current selection into BookingContext so
+    // BookingStep1/2/3 (which read booking.checkIn/checkOut/guests/roomCount)
+    // inherit the guest's choices instead of empty defaults.
+    if (checkIn && checkOut) setDates(checkIn, checkOut);
     setGuests(guestCount);
     setRoomCount(roomCount);
     navigate("/booking/step1");
