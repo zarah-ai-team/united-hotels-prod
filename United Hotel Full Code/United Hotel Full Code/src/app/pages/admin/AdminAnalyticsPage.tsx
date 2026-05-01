@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import { TrendingUp, DollarSign, CalendarCheck, Building2, Users } from 'lucide-react';
+import { TrendingUp, DollarSign, CalendarCheck, Building2 } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { adminService, vendorService, type AdminAnalytics } from '../../services/api';
 import { useRole } from '../../components/admin/RoleSwitcher';
 
-const COLORS = ['#1ABC9C', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981', '#6B7280'];
 const RANGE_OPTIONS = [
   { label: '7 days', value: 7 },
   { label: '30 days', value: 30 },
@@ -104,15 +103,6 @@ export function AdminAnalyticsPage() {
     }));
   }, [data]);
 
-  const usersByRoleChartData = useMemo(() => {
-    if (!data) return [];
-    return [
-      { name: 'Users', value: data.usersByRole.user },
-      { name: 'Vendors', value: data.usersByRole.vendor },
-      { name: 'Admins', value: data.usersByRole.admin },
-    ].filter((r) => r.value > 0);
-  }, [data]);
-
   return (
     <AdminLayout title="Analytics" breadcrumb={isVendor ? 'Staff / Analytics' : 'Admin / Analytics'}>
       <div className="space-y-4">
@@ -153,119 +143,60 @@ export function AdminAnalyticsPage() {
           <StatCard label="Top hotel" value={totals.topHotelName} icon={Building2} accent="#8b5cf6" />
         </div>
 
-        {/* Revenue trend — chart height 320 → 220 */}
-        <ChartCard title="Revenue · Direct vs OTA">
-          <div style={{ width: '100%', height: 220 }}>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={trendChartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
-                <XAxis dataKey="date" stroke="#9aa0a6" tickLine={false} axisLine={{ stroke: '#eaeaea' }} tick={{ fontSize: 11 }} />
-                <YAxis stroke="#9aa0a6" tickLine={false} axisLine={{ stroke: '#eaeaea' }} tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="direct" name="Direct" stroke="#1ABC9C" strokeWidth={2} dot={false} isAnimationActive={false} />
-                <Line type="monotone" dataKey="ota" name="OTA" stroke="#8c8c8c" strokeWidth={2} dot={false} isAnimationActive={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        {/* Bookings/day + Status breakdown */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          <div className="lg:col-span-2">
-            <ChartCard title="Daily bookings">
-              <div style={{ width: '100%', height: 200 }}>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={trendChartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
-                    <XAxis dataKey="date" stroke="#9aa0a6" tickLine={false} tick={{ fontSize: 11 }} />
-                    <YAxis stroke="#9aa0a6" tickLine={false} allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
-                    <Bar dataKey="bookings" name="Bookings" fill="#1ABC9C" radius={[3, 3, 0, 0]} isAnimationActive={false} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </ChartCard>
-          </div>
-
-          <ChartCard title="Bookings by status">
-            {data && data.bookingsByStatus.length > 0 ? (
-              <div style={{ width: '100%', height: 200 }}>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie data={data.bookingsByStatus} dataKey="count" nameKey="status" outerRadius={68} label={{ fontSize: 10 }} isAnimationActive={false}>
-                      {data.bookingsByStatus.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="text-[12.5px] text-[#9aa0a6] py-6 text-center">{loading ? 'Loading…' : 'No bookings yet.'}</p>
-            )}
-          </ChartCard>
-        </div>
-
-        {/* Top hotels + Users by role */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          <div className="lg:col-span-2">
-            <ChartCard title="Top hotels (revenue)">
-              {data && data.topHotels.length > 0 ? (
-                <div style={{ width: '100%', height: 240 }}>
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={data.topHotels} layout="vertical" margin={{ left: 4, right: 16, top: 4, bottom: 4 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" horizontal={false} />
-                      <XAxis type="number" stroke="#9aa0a6" tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                      <YAxis dataKey="hotelName" type="category" stroke="#9aa0a6" tickLine={false} width={120} tick={{ fontSize: 11 }} />
-                      <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
-                      <Bar dataKey="revenue" name="Revenue" fill="#3B82F6" radius={[0, 3, 3, 0]} isAnimationActive={false} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="text-[12.5px] text-[#9aa0a6] py-6 text-center">{loading ? 'Loading…' : 'No data yet.'}</p>
-              )}
-            </ChartCard>
-          </div>
-
-          <ChartCard title="Users by role" right={<Users className="w-3.5 h-3.5 text-[#1abc9c]" />}>
-            {usersByRoleChartData.length > 0 ? (
-              <div style={{ width: '100%', height: 200 }}>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie data={usersByRoleChartData} dataKey="value" nameKey="name" innerRadius={38} outerRadius={68} label={{ fontSize: 10 }} isAnimationActive={false}>
-                      {usersByRoleChartData.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="text-[12.5px] text-[#9aa0a6] py-6 text-center">{loading ? 'Loading…' : 'No users yet.'}</p>
-            )}
-          </ChartCard>
-        </div>
-
-        {/* Revenue by district */}
-        {data && data.revenueByDistrict.length > 0 && (
-          <ChartCard title="Revenue by district">
-            <div style={{ width: '100%', height: 200 }}>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={data.revenueByDistrict} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
-                  <XAxis dataKey="district" stroke="#9aa0a6" tickLine={false} tick={{ fontSize: 11 }} />
-                  <YAxis stroke="#9aa0a6" tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(v: any) => fmtUsd(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #eaeaea', fontSize: 12 }} />
-                  <Bar dataKey="revenue" name="Revenue" fill="#F59E0B" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+        {/* Minimal analytics — exactly two charts:
+            (1) booking trend (volume + revenue per day)
+            (2) top hotels by revenue.
+            Everything else (status pie, users-by-role, revenue-by-district)
+            was deliberately removed to keep the page scannable. The same
+            data is still available via /api/admin/analytics if needed. */}
+        <ChartCard title="Booking trend">
+          {trendChartData.length === 0 ? (
+            <p className="text-[12.5px] py-6 text-center" style={{ color: 'var(--admin-text-faint)' }}>
+              {loading ? 'Loading…' : 'No bookings in this window yet.'}
+            </p>
+          ) : (
+            <div style={{ width: '100%', height: 220 }}>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={trendChartData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-border)" vertical={false} />
+                  <XAxis dataKey="date" stroke="var(--admin-text-faint)" tickLine={false} tick={{ fontSize: 11 }} />
+                  <YAxis yAxisId="left" stroke="var(--admin-text-faint)" tickLine={false} allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <YAxis yAxisId="right" orientation="right" stroke="var(--admin-text-faint)" tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 8, border: '1px solid var(--admin-border)', fontSize: 12, background: 'var(--admin-surface-2)', color: 'var(--admin-text)' }}
+                    formatter={(v: any, n: any) => (n === 'Revenue' ? fmtUsd(Number(v)) : v)}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Bar yAxisId="left" dataKey="bookings" name="Bookings" fill="#1ABC9C" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+                  <Bar yAxisId="right" dataKey="revenue" name="Revenue" fill="#3B82F6" radius={[3, 3, 0, 0]} isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </ChartCard>
-        )}
+          )}
+        </ChartCard>
+
+        <ChartCard title="Top hotels by revenue">
+          {data && data.topHotels.length > 0 ? (
+            <div style={{ width: '100%', height: 240 }}>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={data.topHotels.slice(0, 8)} layout="vertical" margin={{ left: 4, right: 16, top: 4, bottom: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-border)" horizontal={false} />
+                  <XAxis type="number" stroke="var(--admin-text-faint)" tickLine={false} tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <YAxis dataKey="hotelName" type="category" stroke="var(--admin-text-faint)" tickLine={false} width={120} tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(v: any) => fmtUsd(Number(v))}
+                    contentStyle={{ borderRadius: 8, border: '1px solid var(--admin-border)', fontSize: 12, background: 'var(--admin-surface-2)', color: 'var(--admin-text)' }}
+                  />
+                  <Bar dataKey="revenue" name="Revenue" fill="#1ABC9C" radius={[0, 3, 3, 0]} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className="text-[12.5px] py-6 text-center" style={{ color: 'var(--admin-text-faint)' }}>
+              {loading ? 'Loading…' : 'No bookings yet — top hotels will populate as guests book.'}
+            </p>
+          )}
+        </ChartCard>
       </div>
     </AdminLayout>
   );

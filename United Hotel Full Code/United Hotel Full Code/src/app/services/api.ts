@@ -785,6 +785,14 @@ export const adminService = {
     return apiCall(API_ENDPOINTS.ADMIN.BOOKINGS_BY_COUNTRY, { method: 'GET' }, token);
   },
 
+  async getUsersByCountry(): Promise<{
+    total: number;
+    countries: Array<{ country: string; users: number; share: number }>;
+  }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.USERS_BY_COUNTRY, { method: 'GET' }, token);
+  },
+
   async listUsers(params: { role?: 'user' | 'vendor' | 'admin'; search?: string } = {}): Promise<{ users: AdminUser[]; count: number }> {
     const token = getStoredToken() || undefined;
     const query = new URLSearchParams();

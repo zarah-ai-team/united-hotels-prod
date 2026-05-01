@@ -75,6 +75,7 @@ export const API_ENDPOINTS = {
     STATS: '/api/admin/stats',
     ANALYTICS: '/api/admin/analytics',
     BOOKINGS_BY_COUNTRY: '/api/admin/bookings-by-country',
+    USERS_BY_COUNTRY: '/api/admin/users-by-country',
     USERS: '/api/admin/users',
     USER_ROLE: (id: string) => `/api/admin/users/${id}/role`,
     USER_DELETE: (id: string) => `/api/admin/users/${id}`,

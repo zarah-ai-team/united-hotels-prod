@@ -6,6 +6,7 @@ const {
   getDashboardStats,
   getAnalytics,
   getBookingsByCountry,
+  getUsersByCountry,
   listUsers,
   adminRegisterUser,
   updateUserRole,
@@ -20,6 +21,7 @@ router.use(authenticate, authorizeAdmin);
 router.get('/stats', getDashboardStats);
 router.get('/analytics', getAnalytics);
 router.get('/bookings-by-country', getBookingsByCountry);
+router.get('/users-by-country', getUsersByCountry);
 
 router.get('/users', listUsers);
 router.post('/users', adminRegisterUser);

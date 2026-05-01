@@ -808,8 +808,14 @@ export function HotelDetailPageNew() {
     let active = true;
     setLoading(true);
     setError(null);
+    // Forward checkIn/checkOut so the backend pricing engine can return
+    // date-aware recommendations (demand × lead-time × weekend × season),
+    // bounded by the per-room min/max bands.
     hotelService
-      .getById(id)
+      .getById(id, {
+        checkInDate: checkIn || undefined,
+        checkOutDate: checkOut || undefined,
+      })
       .then((found) => {
         if (!active) return;
         if (!found) setError("Hotel not found");
@@ -821,7 +827,7 @@ export function HotelDetailPageNew() {
       })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [id]);
+  }, [id, checkIn, checkOut]);
 
   const bookableRooms = useMemo<ViewRoom[]>(() => {
     if (!hotel || !Array.isArray(hotel.rooms)) return [];

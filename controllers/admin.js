@@ -299,6 +299,43 @@ const getBookingsByCountry = async (_req, res) => {
   }
 };
 
+// ─── Users by country (admin dashboard tile) ─────────────────────────────
+//
+// Groups every user record by their geo-detected country (set by
+// utils/geoip on register). Used for the "where are our customers from?"
+// tile next to the bookings-by-country chart on the dashboard.
+
+const getUsersByCountry = async (_req, res) => {
+  try {
+    // The country column is added lazily on first registration; make sure
+    // it exists so the SELECT doesn't 500 on a brand-new database.
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS country text`).catch(() => {});
+
+    const result = await pool.query(`
+      SELECT COALESCE(NULLIF(TRIM(country), ''), 'Unknown') AS country,
+             COUNT(*)::int AS users
+        FROM users
+       GROUP BY 1
+       ORDER BY users DESC, country ASC
+       LIMIT 50
+    `);
+
+    const total = result.rows.reduce((sum, r) => sum + Number(r.users || 0), 0);
+
+    return res.json({
+      total,
+      countries: result.rows.map((r) => ({
+        country: r.country,
+        users: Number(r.users) || 0,
+        share: total > 0 ? Number(((Number(r.users) / total) * 100).toFixed(2)) : 0,
+      })),
+    });
+  } catch (error) {
+    console.error('getUsersByCountry error', error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 // ─── User management ─────────────────────────────────────────────────────
 
 const listUsers = async (req, res) => {
@@ -544,6 +581,7 @@ module.exports = {
   getDashboardStats,
   getAnalytics,
   getBookingsByCountry,
+  getUsersByCountry,
   listUsers,
   adminRegisterUser,
   updateUserRole,

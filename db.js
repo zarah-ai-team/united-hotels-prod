@@ -397,96 +397,10 @@ try {
 // real booking flow can populate it without errors.
 addColumn('bookings', 'country', 'TEXT');
 
-// ─── Demo bookings seed (realistic, varied) ────────────────────────────────
-//
-// The admin/staff portal bookings tab feels dead on a fresh boot — this
-// seed plants ~14 bookings across 8 hotels, 5 statuses, and 8 countries so
-// recruiters / stakeholders see a populated dashboard immediately. Real
-// guest bookings via the user flow add to these.
-try {
-  addColumn('users', 'phone', 'TEXT');
-
-  const guestId = db.prepare(`SELECT id FROM users WHERE email = 'guest@unitedhotels.com'`).get()?.id;
-
-  const insertBooking = db.prepare(`
-    INSERT INTO bookings (
-      room, roomid, hotelid, userid, fromdate, todate,
-      totalamount, totaldays, status, transactionid, payment_mode,
-      special_request, country, created_at, updated_at
-    ) VALUES (
-      @room, @roomid, @hotelid, @userid, @fromdate, @todate,
-      @totalamount, @totaldays, @status, @txn, @payment,
-      @specialRequest, @country, @createdAt, @createdAt
-    )
-  `);
-
-  const insertPayment = db.prepare(`
-    INSERT INTO payments (booking_id, amount, status, created_at)
-    VALUES (@booking_id, @amount, @paymentStatus, @createdAt)
-  `);
-
-  // Bookings vary by status and how recent they are — mix of confirmed,
-  // checked-in, checked-out, pending, and a single cancellation. Days are
-  // ISO date strings so the date-aware sort in /admin/bookings sees them
-  // in order. Guest names are ordinary so the table doesn't look templated.
-  const samples = [
-    { hotelSlug: 'royan-hotel',              guest: 'Liam Carter',     country: 'United States',  daysAgo: 2,  nights: 3, tier: 'superior', status: 'checked-in',  payment: 'card',  paymentStatus: 'paid',      special: 'Late check-in around 10pm' },
-    { hotelSlug: 'amiral-palace',            guest: 'Sophie Müller',   country: 'Germany',         daysAgo: 5,  nights: 2, tier: 'standard', status: 'checked-out', payment: 'card',  paymentStatus: 'paid',      special: null },
-    { hotelSlug: 'sirkeci-golden-horn',      guest: 'James O\'Brien',  country: 'United Kingdom',  daysAgo: 8,  nights: 4, tier: 'deluxe',   status: 'checked-out', payment: 'card',  paymentStatus: 'paid',      special: 'Anniversary trip — please prepare a small surprise' },
-    { hotelSlug: 'the-galata-istanbul-hotel',guest: 'Camille Roussel', country: 'France',           daysAgo: 12, nights: 5, tier: 'deluxe',   status: 'checked-out', payment: 'card',  paymentStatus: 'paid',      special: 'Vegan breakfast preference' },
-    { hotelSlug: 'wings-hotel-pera',         guest: 'Daniel Park',     country: 'United States',   daysAgo: 18, nights: 2, tier: 'standard', status: 'checked-out', payment: 'paypal',paymentStatus: 'paid',      special: null },
-    { hotelSlug: 'walton-hotels-galata',     guest: 'Khalid Al-Rashid',country: 'Saudi Arabia',     daysAgo: 25, nights: 3, tier: 'superior', status: 'checked-out', payment: 'card',  paymentStatus: 'paid',      special: 'Halal meal options' },
-    { hotelSlug: 'avicenna-hotel',           guest: 'Yui Tanaka',      country: 'Japan',            daysAgo: 1,  nights: 4, tier: 'superior', status: 'confirmed',   payment: 'card',  paymentStatus: 'paid',      special: 'Quiet room, away from elevator' },
-    { hotelSlug: 'erboy-hotel',              guest: 'Marco Bianchi',   country: 'Italy',            daysAgo: 3,  nights: 2, tier: 'standard', status: 'checked-in',  payment: 'card',  paymentStatus: 'paid',      special: null },
-    { hotelSlug: 'tria-hotel',               guest: 'Elena Petrova',   country: 'Russia',           daysAgo: 7,  nights: 6, tier: 'deluxe',   status: 'checked-out', payment: 'card',  paymentStatus: 'paid',      special: 'Need extra pillows + an iron' },
-    { hotelSlug: 'sumengen-hotel',           guest: 'Alex Schmidt',    country: 'Switzerland',      daysAgo: -3, nights: 3, tier: 'superior', status: 'confirmed',   payment: 'card',  paymentStatus: 'paid',      special: null },
-    { hotelSlug: 'bankerhan-hotel',          guest: 'Aisha Khan',      country: 'United Arab Emirates', daysAgo: -7, nights: 5, tier: 'deluxe', status: 'pending',   payment: 'card',  paymentStatus: 'pending',   special: 'Awaiting confirmation' },
-    { hotelSlug: 'hotel-momento-golden-horn',guest: 'Chen Wei',        country: 'China',            daysAgo: -14, nights: 4, tier: 'standard', status: 'pending',   payment: 'card',  paymentStatus: 'pending',   special: 'Group of 3 — adjacent rooms preferred' },
-    { hotelSlug: 'wings-hotel-karakoy',      guest: 'Hannah Nielsen',  country: 'Denmark',          daysAgo: 30, nights: 2, tier: 'superior', status: 'cancelled',   payment: 'card',  paymentStatus: 'refunded',  special: 'Cancelled by guest — flight rerouted' },
-    { hotelSlug: 'ramada-tryp-beyoglu',      guest: 'Olivia Anderson', country: 'United States',    daysAgo: 4,  nights: 3, tier: 'deluxe',   status: 'checked-in',  payment: 'card',  paymentStatus: 'paid',      special: 'Bosphorus-view room if available' },
-  ];
-
-  const findRoom = db.prepare(`
-    SELECT r.id AS room_id, r.hotel_id, r.name AS room_name, r.price_per_night
-    FROM rooms r JOIN hotels h ON h.id = r.hotel_id
-    WHERE h.slug = ? AND r.category = ?
-    LIMIT 1
-  `);
-
-  for (const sb of samples) {
-    const room = findRoom.get(sb.hotelSlug, sb.tier);
-    if (!room) continue;
-    const checkIn = new Date(Date.now() - sb.daysAgo * 86400000);
-    const checkOut = new Date(checkIn.getTime() + sb.nights * 86400000);
-    const total = Number(room.price_per_night) * sb.nights;
-    const createdAt = new Date(Date.now() - (sb.daysAgo + 5) * 86400000).toISOString().slice(0, 19).replace('T', ' ');
-    const result = insertBooking.run({
-      room: room.room_name,
-      roomid: String(room.room_id),
-      hotelid: room.hotel_id,
-      userid: guestId ? String(guestId) : null,
-      fromdate: checkIn.toISOString().slice(0, 10),
-      todate: checkOut.toISOString().slice(0, 10),
-      totalamount: total,
-      totaldays: sb.nights,
-      status: sb.status,
-      txn: `BOOK-${sb.hotelSlug.toUpperCase().replace(/-/g,'')}-${Math.floor(Math.random() * 9000 + 1000)}`,
-      payment: sb.payment,
-      specialRequest: sb.special,
-      country: sb.country,
-      createdAt,
-    });
-    insertPayment.run({
-      booking_id: result.lastInsertRowid,
-      amount: sb.paymentStatus === 'refunded' ? 0 : total,
-      paymentStatus: sb.paymentStatus,
-      createdAt,
-    });
-  }
-  console.log(`[Mock DB] Seeded ${samples.length} demo bookings + payments across ${new Set(samples.map(s => s.hotelSlug)).size} hotels`);
-} catch (e) {
-  console.warn('[Mock DB] demo bookings seed skipped:', e.message);
-}
+// Mock booking seed deliberately removed. Bookings + payments are now
+// only ever produced by the real guest flow (POST /api/bookings/bookroom),
+// so the dashboard / bookings table / analytics reflect actual usage.
+addColumn('users', 'phone', 'TEXT');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

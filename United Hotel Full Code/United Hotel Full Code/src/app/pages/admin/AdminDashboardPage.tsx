@@ -7,14 +7,9 @@ import { useRole } from '../../components/admin/RoleSwitcher';
 import { adminService, vendorService, type AdminStats } from '../../services/api';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
-// Mock recent bookings
-const recentBookings = [
-  { id: 'BK-1247', guest: 'John Smith', hotel: 'Grand Palace Hotel', room: 'Deluxe Suite', checkIn: '2026-04-15', status: 'confirmed', amount: '$450' },
-  { id: 'BK-1246', guest: 'Emma Johnson', hotel: 'Bosphorus View Hotel', room: 'Standard Room', checkIn: '2026-04-10', status: 'pending', amount: '$280' },
-  { id: 'BK-1245', guest: 'Michael Brown', hotel: 'Sultanahmet Inn', room: 'Family Room', checkIn: '2026-04-08', status: 'checked-in', amount: '$380' },
-  { id: 'BK-1244', guest: 'Sarah Davis', hotel: 'Grand Palace Hotel', room: 'Executive Suite', checkIn: '2026-04-05', status: 'checked-out', amount: '$520' },
-  { id: 'BK-1243', guest: 'Robert Wilson', hotel: 'Bosphorus View Hotel', room: 'Deluxe Room', checkIn: '2026-04-01', status: 'cancelled', amount: '$320' },
-];
+// All booking data is fetched live from the backend (/api/admin/stats →
+// recentBookings, /api/admin/bookings-by-country, /api/admin/users-by-country).
+// No hard-coded sample data is allowed in this file.
 
 type DateFilter = '7days' | '30days' | '90days' | 'today' | 'custom';
 
@@ -29,6 +24,7 @@ export function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [byCountry, setByCountry] = useState<Array<{ country: string; bookings: number; revenue: number; share: number }>>([]);
+  const [usersByCountry, setUsersByCountry] = useState<Array<{ country: string; users: number; share: number }>>([]);
 
   useEffect(() => {
     let active = true;
@@ -42,6 +38,9 @@ export function AdminDashboardPage() {
       adminService.getBookingsByCountry()
         .then((r) => { if (active) setByCountry(r.countries || []); })
         .catch(() => { if (active) setByCountry([]); });
+      adminService.getUsersByCountry()
+        .then((r) => { if (active) setUsersByCountry(r.countries || []); })
+        .catch(() => { if (active) setUsersByCountry([]); });
     }
     return () => { active = false; };
   }, [currentRole]);
@@ -176,9 +175,12 @@ export function AdminDashboardPage() {
           ))}
         </div>
 
-        {/* Bookings by country (admin only) */}
+        {/* Bookings by country + Users by country (admin only) */}
         {currentRole === 'admin' && (
-          <BookingsByCountryCard rows={byCountry} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <BookingsByCountryCard rows={byCountry} />
+            <UsersByCountryCard rows={usersByCountry} />
+          </div>
         )}
 
         {/* Recent Bookings Table — vendors only; admins see the country chart instead */}
@@ -225,18 +227,22 @@ export function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-[#11151a] divide-y divide-[#EAEAEA]">
-                {(liveRecent.length > 0
-                  ? liveRecent.map((b) => ({
-                      id: `BK-${b.id}`,
-                      guest: b.userName || b.userEmail || 'Guest',
-                      hotel: b.hotelName || '—',
-                      room: '—',
-                      checkIn: b.checkIn ? String(b.checkIn).slice(0, 10) : '',
-                      status: b.status || 'pending',
-                      amount: `$${Math.round(Number(b.totalPrice) || 0).toLocaleString()}`,
-                    }))
-                  : recentBookings
-                ).map((booking) => (
+                {liveRecent.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-10 text-center text-[12.5px]" style={{ color: 'var(--admin-text-faint)' }}>
+                      No bookings yet. Recent bookings will appear here once guests start booking.
+                    </td>
+                  </tr>
+                )}
+                {liveRecent.map((b) => ({
+                  id: `BK-${b.id}`,
+                  guest: b.userName || b.userEmail || 'Guest',
+                  hotel: b.hotelName || '—',
+                  room: '—',
+                  checkIn: b.checkIn ? String(b.checkIn).slice(0, 10) : '',
+                  status: b.status || 'pending',
+                  amount: `$${Math.round(Number(b.totalPrice) || 0).toLocaleString()}`,
+                })).map((booking) => (
                   <tr key={booking.id} className="hover:bg-[#FAFAFA] transition-colors">
                     <td className="px-3 py-2 whitespace-nowrap">
                       <a
@@ -319,166 +325,44 @@ export function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Modals */}
-      <Modal isOpen={showPricingModal} onClose={() => setShowPricingModal(false)} title="Manage Pricing" size="lg">
-        <div className="space-y-6">
-          <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Update room rates for your properties
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Select Hotel
-              </label>
-              <select className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20">
-                <option>Grand Palace Hotel</option>
-                <option>Bosphorus View Hotel</option>
-                <option>Sultanahmet Inn</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Room Type
-              </label>
-              <select className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20">
-                <option>Deluxe Suite</option>
-                <option>Standard Room</option>
-                <option>Family Room</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Base Price (USD)
-              </label>
-              <input type="number" placeholder="150" className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20" />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Weekend Price (USD)
-              </label>
-              <input type="number" placeholder="180" className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Peak Season Price (USD)
-              </label>
-              <input type="number" placeholder="220" className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20" />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <button onClick={() => setShowPricingModal(false)} className="px-6 py-2.5 border border-[#EAEAEA] rounded-lg text-[#3B3B3B] hover:bg-[#FAFAFA] transition-colors">
-              Cancel
-            </button>
-            <button onClick={() => setShowPricingModal(false)} className="px-6 py-2.5 bg-[#1ABC9C] text-white rounded-lg hover:bg-[#16A085] transition-colors">
-              Save Changes
-            </button>
-          </div>
+      {/* Quick-action modals are intentionally light: they only deep-link
+          into the real flow rather than ship a placeholder UI with mock
+          hotels / mock availability. The user explicitly asked for zero
+          mock data anywhere on the site, so the once-hard-coded selects
+          and Math.random() availability grids were replaced. */}
+      <Modal isOpen={showPricingModal} onClose={() => setShowPricingModal(false)} title="Manage Pricing">
+        <div className="space-y-4 text-[13px]" style={{ color: 'var(--admin-text-muted)', fontFamily: 'Inter, sans-serif' }}>
+          <p>Per-room base / min / max price bands are edited live on each hotel's room cards.</p>
+          <button
+            onClick={() => { setShowPricingModal(false); navigate('/admin/hotels'); }}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+          >
+            <Tag className="w-3.5 h-3.5" /> Open Hotels & Rooms
+          </button>
         </div>
       </Modal>
 
       <Modal isOpen={showReportModal} onClose={() => setShowReportModal(false)} title="Generate Report">
-        <div className="space-y-6">
-          <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Export analytics data for the selected period
-          </p>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Report Type
-              </label>
-              <select className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20">
-                <option>Revenue Report</option>
-                <option>Booking Report</option>
-                <option>Occupancy Report</option>
-                <option>Guest Demographics</option>
-              </select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  Start Date
-                </label>
-                <input type="date" className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  End Date
-                </label>
-                <input type="date" className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#3B3B3B] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Format
-              </label>
-              <select className="w-full px-4 py-2.5 border border-[#EAEAEA] rounded-lg focus:outline-none focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/20">
-                <option>Excel (.xlsx)</option>
-                <option>PDF</option>
-                <option>CSV</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <button onClick={() => setShowReportModal(false)} className="px-6 py-2.5 border border-[#EAEAEA] rounded-lg text-[#3B3B3B] hover:bg-[#FAFAFA] transition-colors">
-              Cancel
-            </button>
-            <button onClick={() => setShowReportModal(false)} className="px-6 py-2.5 bg-[#1ABC9C] text-white rounded-lg hover:bg-[#16A085] transition-colors flex items-center gap-2">
-              <FileDown className="h-4 w-4" />
-              Generate & Download
-            </button>
-          </div>
+        <div className="space-y-4 text-[13px]" style={{ color: 'var(--admin-text-muted)', fontFamily: 'Inter, sans-serif' }}>
+          <p>Live KPIs, daily booking trend, top-performing hotels and revenue by district are all on the Analytics page — pick a 7/30/90-day window there. Export will be wired to /api/admin/analytics in a follow-up.</p>
+          <button
+            onClick={() => { setShowReportModal(false); navigate('/admin/analytics'); }}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+          >
+            <FileDown className="w-3.5 h-3.5" /> Open Analytics
+          </button>
         </div>
       </Modal>
 
-      <Modal isOpen={showCalendarModal} onClose={() => setShowCalendarModal(false)} title="Availability Calendar" size="xl">
-        <div className="space-y-6">
-          <p className="text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-            View and manage room availability across your properties
-          </p>
-          
-          <div className="grid grid-cols-7 gap-2">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-              <div key={day} className="text-center font-medium text-sm text-[#8C8C8C]" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {day}
-              </div>
-            ))}
-            {Array.from({ length: 35 }, (_, i) => (
-              <button
-                key={i}
-                className="aspect-square p-2 border border-[#EAEAEA] rounded-lg hover:border-[#1ABC9C] transition-colors text-sm"
-              >
-                <div className="font-medium text-[#3B3B3B]">{((i % 30) + 1)}</div>
-                <div className="text-xs text-[#22C55E] mt-1">{Math.floor(Math.random() * 20) + 5} avail</div>
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-4 pt-4 border-t border-[#EAEAEA]">
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 bg-[#22C55E]/20 border border-[#22C55E] rounded"></div>
-              <span className="text-sm text-[#8C8C8C]">Available</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 bg-[#F59E0B]/20 border border-[#F59E0B] rounded"></div>
-              <span className="text-sm text-[#8C8C8C]">Limited</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 bg-[#EF4444]/20 border border-[#EF4444] rounded"></div>
-              <span className="text-sm text-[#8C8C8C]">Sold Out</span>
-            </div>
-          </div>
+      <Modal isOpen={showCalendarModal} onClose={() => setShowCalendarModal(false)} title="Availability">
+        <div className="space-y-4 text-[13px]" style={{ color: 'var(--admin-text-muted)', fontFamily: 'Inter, sans-serif' }}>
+          <p>Room-level availability per hotel is reflected on the public listing page once dates are picked, and on each hotel's admin detail page. A standalone calendar view is on the roadmap.</p>
+          <button
+            onClick={() => { setShowCalendarModal(false); navigate('/admin/bookings'); }}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+          >
+            <Calendar className="w-3.5 h-3.5" /> Open Bookings
+          </button>
         </div>
       </Modal>
     </AdminLayout>
@@ -542,6 +426,65 @@ function BookingsByCountryCard({ rows }: { rows: Array<{ country: string; bookin
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Users-by-country tile — companion to BookingsByCountryCard.
+ *
+ * Reads from /api/admin/users-by-country, which groups every registered
+ * user by the geo-detected country saved on registration (utils/geoip).
+ * Presented as a sorted list of pills (no chart) so the dashboard stays
+ * scannable — the chart on the bookings card already covers the visual
+ * distribution case.
+ */
+function UsersByCountryCard({ rows }: { rows: Array<{ country: string; users: number; share: number }> }) {
+  const top = rows.slice(0, 10);
+  const total = rows.reduce((s, r) => s + r.users, 0);
+  const max = Math.max(1, ...top.map((r) => r.users));
+  return (
+    <div className="admin-card p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-[14px] font-semibold flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif', color: 'var(--admin-text)' }}>
+          <Globe2 className="w-4 h-4 text-[#1ABC9C]" /> Users by country
+        </h3>
+        <span className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
+          {total} users · {top.length} countries
+        </span>
+      </div>
+
+      {top.length === 0 ? (
+        <div className="py-12 text-center text-[12.5px]" style={{ color: 'var(--admin-text-faint)' }}>
+          No users yet. Country detection runs on every signup (CDN header → IP geo → locale).
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          {top.map((row, i) => {
+            const widthPct = Math.round((row.users / max) * 100);
+            return (
+              <div key={row.country} className="grid grid-cols-[100px_1fr_60px] items-center gap-2 text-[12px]">
+                <div className="truncate font-medium" style={{ color: 'var(--admin-text)' }} title={row.country}>
+                  {COUNTRY_FLAGS[row.country] || '🌐'} {row.country}
+                </div>
+                <div className="relative h-1.5 rounded-full" style={{ background: 'var(--admin-row-hover)' }}>
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full"
+                    style={{
+                      width: `${widthPct}%`,
+                      background: COUNTRY_COLORS[i % COUNTRY_COLORS.length],
+                      boxShadow: `0 0 8px -2px ${COUNTRY_COLORS[i % COUNTRY_COLORS.length]}66`,
+                    }}
+                  />
+                </div>
+                <div className="text-right tabular-nums" style={{ color: 'var(--admin-text-muted)' }}>
+                  {row.users} <span className="text-[10.5px]" style={{ color: 'var(--admin-text-faint)' }}>· {row.share.toFixed(0)}%</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
