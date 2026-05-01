@@ -1607,6 +1607,134 @@ html.dark {
   color: #0a0a0a;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+ * Admin design system — charcoal palette + subtle glassmorphism.
+ *
+ * The previous dark-mode pass used a flat near-black bg (#0b0d10) which
+ * made every card disappear into the same plane. This version layers four
+ * shades of charcoal so cards, hover states and modals each sit at a
+ * different visual altitude, plus a hairline + inset highlight per surface
+ * so the edges read as glass against the bg rather than empty cutouts.
+ *
+ * Light mode keeps the same .admin-card class so we don't have to ship two
+ * className strings everywhere — the variables flip on .dark.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --admin-bg:           #f5f6f8;
+  --admin-bg-end:       #eef0f3;
+  --admin-surface:      rgba(255, 255, 255, 0.85);
+  --admin-surface-2:    #ffffff;
+  --admin-surface-hov:  #fafafa;
+  --admin-border:       rgba(15, 23, 42, 0.08);
+  --admin-border-soft:  rgba(15, 23, 42, 0.05);
+  --admin-text:         #1f2937;
+  --admin-text-muted:   #6b7280;
+  --admin-text-faint:   #9aa0a6;
+  --admin-row-hover:    rgba(15, 23, 42, 0.03);
+  --admin-card-shadow:  0 2px 8px -4px rgba(15, 23, 42, 0.06);
+  --admin-card-inset:   inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.dark {
+  /* Layered charcoal — each step is a measured 4-6% luminance bump so the
+   * eye can register hierarchy without any one card looking lifted off. */
+  --admin-bg:           #0c0f14;
+  --admin-bg-end:       #0e1218;
+  --admin-surface:      rgba(20, 24, 33, 0.72);
+  --admin-surface-2:    #161b24;
+  --admin-surface-hov:  rgba(255, 255, 255, 0.04);
+  --admin-border:       rgba(255, 255, 255, 0.08);
+  --admin-border-soft:  rgba(255, 255, 255, 0.05);
+  --admin-text:         #f1f3f5;
+  --admin-text-muted:   rgba(255, 255, 255, 0.65);
+  --admin-text-faint:   rgba(255, 255, 255, 0.42);
+  --admin-row-hover:    rgba(255, 255, 255, 0.04);
+  --admin-card-shadow:  0 8px 24px -16px rgba(0, 0, 0, 0.6);
+  --admin-card-inset:   inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Page background — soft vertical fade so flat charcoal doesn't look
+ * sterile. No aurora / no green tint per the brief. */
+.admin-bg {
+  background: linear-gradient(180deg, var(--admin-bg) 0%, var(--admin-bg-end) 100%);
+}
+
+/* Glass card. Use this on every panel/table/section. Inner highlight is
+ * the trick that makes it feel premium — without it the edges look
+ * computer-generated. */
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  box-shadow: var(--admin-card-shadow), var(--admin-card-inset);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* Solid-surface variant for when the glass would clash with overlapping
+ * gradients (e.g. inside modals, popovers). */
+.admin-card-solid {
+  background: var(--admin-surface-2);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  box-shadow: var(--admin-card-shadow), var(--admin-card-inset);
+}
+
+/* Header strip used at the top of tables / lists — charcoal black in
+ * BOTH modes so it pops in light theme too (per the bookings brief). */
+.admin-strip {
+  background: linear-gradient(180deg, #1a1f29 0%, #14181f 100%);
+  color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.admin-strip-cell {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Row hover — subtle wash, no jitter. */
+.admin-row {
+  transition: background-color 160ms ease;
+}
+.admin-row:hover {
+  background: var(--admin-row-hover);
+}
+
+/* Status pills — matches the engagement requirement on the bookings table.
+ * Each variant has tuned contrast for both light and dark. */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+}
+.status-pill::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-confirmed  { color: #047857; background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.28); }
+.status-pending    { color: #92400e; background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.32); }
+.status-checked-in { color: #1d4ed8; background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.32); }
+.status-checked-out{ color: #475569; background: rgba(100,116,139,0.10); border-color: rgba(100,116,139,0.30); }
+.status-cancelled  { color: #b91c1c; background: rgba(239,68,68,0.10);  border-color: rgba(239,68,68,0.32); }
+.dark .status-confirmed  { color: #34d399; background: rgba(16,185,129,0.16); border-color: rgba(16,185,129,0.32); }
+.dark .status-pending    { color: #fbbf24; background: rgba(245,158,11,0.18); border-color: rgba(245,158,11,0.32); }
+.dark .status-checked-in { color: #60a5fa; background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.32); }
+.dark .status-checked-out{ color: #94a3b8; background: rgba(148,163,184,0.14);border-color: rgba(148,163,184,0.30); }
+.dark .status-cancelled  { color: #f87171; background: rgba(239,68,68,0.16);  border-color: rgba(239,68,68,0.32); }
+
 /* Glass dropdown panels */
 .uh-dropdown {
   position: absolute;

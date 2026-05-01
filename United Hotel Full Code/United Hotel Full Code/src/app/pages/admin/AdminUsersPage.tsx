@@ -161,7 +161,7 @@ export function AdminUsersPage() {
 
         {/* Create form — collapsible card */}
         {showCreate && (
-          <div className="rounded-xl border border-[#eaeaea] bg-white dark:bg-[#11151a] shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+          <div className="admin-card">
             <div className="px-4 py-3 border-b border-[#eaeaea] flex items-center justify-between">
               <div>
                 <h2 className="text-[13.5px] font-semibold text-[#1f2937]" style={{ fontFamily: 'Poppins, sans-serif' }}>
@@ -299,7 +299,7 @@ export function AdminUsersPage() {
         )}
 
         {/* Users table */}
-        <div className="rounded-xl border border-[#eaeaea] bg-white dark:bg-[#11151a] overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+        <div className="admin-card overflow-hidden">
           {loading ? (
             <div className="p-6 text-center text-[12.5px] text-[#9aa0a6]">Loading users…</div>
           ) : error ? (

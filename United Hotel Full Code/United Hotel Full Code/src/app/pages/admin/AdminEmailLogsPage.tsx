@@ -139,7 +139,7 @@ export function AdminEmailLogsPage() {
         )}
 
         {/* Table */}
-        <div className="rounded-xl border border-[#eaeaea] bg-white dark:bg-[#11151a] overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+        <div className="admin-card overflow-hidden">
           {loading ? (
             <div className="p-6 text-center text-[12.5px] text-[#9aa0a6]">Loading email logs…</div>
           ) : (

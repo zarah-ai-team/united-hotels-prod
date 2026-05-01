@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Search, X, Building2, User as UserIcon, Mail, CalendarRange, BedDouble, DollarSign } from 'lucide-react';
+import {
+  Search,
+  X,
+  Building2,
+  User as UserIcon,
+  Mail,
+  CalendarRange,
+  BedDouble,
+  DollarSign,
+  Filter,
+  ChevronRight,
+} from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { vendorService } from '../../services/api';
 
@@ -24,8 +35,28 @@ type Booking = {
 
 type StatusFilter = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'checked-in' | 'checked-out';
 
+const STATUS_OPTIONS: Array<{ key: StatusFilter; label: string }> = [
+  { key: 'all',         label: 'All' },
+  { key: 'confirmed',   label: 'Confirmed' },
+  { key: 'pending',     label: 'Pending' },
+  { key: 'checked-in',  label: 'Checked-in' },
+  { key: 'checked-out', label: 'Checked-out' },
+  { key: 'cancelled',   label: 'Cancelled' },
+];
+
 const fmtUsd = (n: number) => `$${Math.round(Number(n) || 0).toLocaleString()}`;
-const fmtDate = (d: string | null) => (d ? String(d).slice(0, 10) : '—');
+const fmtDate = (d: string | null) => {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return String(d).slice(0, 10);
+  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+};
+const fmtShortDate = (d: string | null) => {
+  if (!d) return '—';
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return String(d).slice(0, 10);
+  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+};
 
 const nightsBetween = (checkIn: string, checkOut: string) => {
   if (!checkIn || !checkOut) return 0;
@@ -34,15 +65,21 @@ const nightsBetween = (checkIn: string, checkOut: string) => {
   return Math.max(0, Math.round(ms / 86400000));
 };
 
-const getStatusBadgeClass = (status: string) => {
-  const base = 'inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold';
+const initials = (name?: string | null, email?: string | null) => {
+  const src = (name || email || 'G').trim();
+  const parts = src.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return (src[0] + (src[1] || '')).toUpperCase();
+};
+
+const statusClass = (status: string) => {
   const s = (status || '').toLowerCase();
-  if (s === 'confirmed' || s === 'booked') return `${base} bg-emerald-50 text-emerald-700`;
-  if (s === 'pending') return `${base} bg-amber-50 text-amber-700`;
-  if (s === 'cancelled') return `${base} bg-red-50 text-red-700`;
-  if (s === 'checked-in') return `${base} bg-blue-50 text-blue-700`;
-  if (s === 'checked-out') return `${base} bg-gray-100 text-gray-700`;
-  return `${base} bg-gray-100 text-gray-700`;
+  if (s === 'confirmed' || s === 'booked') return 'status-pill status-confirmed';
+  if (s === 'pending') return 'status-pill status-pending';
+  if (s === 'checked-in') return 'status-pill status-checked-in';
+  if (s === 'checked-out') return 'status-pill status-checked-out';
+  if (s === 'cancelled') return 'status-pill status-cancelled';
+  return 'status-pill status-checked-out';
 };
 
 export function AdminBookingsPage() {
@@ -58,16 +95,20 @@ export function AdminBookingsPage() {
     setLoading(true);
     vendorService
       .getBookings()
-      .then((res) => {
-        if (!active) return;
-        setBookings(res.bookings as unknown as Booking[]);
-      })
-      .catch((e: any) => {
-        if (active) setError(e?.data?.error || e?.message || 'Failed to load bookings');
-      })
+      .then((res) => { if (active) setBookings(res.bookings as unknown as Booking[]); })
+      .catch((e: any) => { if (active) setError(e?.data?.error || e?.message || 'Failed to load bookings'); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: bookings.length };
+    bookings.forEach((b) => {
+      const s = (b.status || '').toLowerCase();
+      c[s] = (c[s] || 0) + 1;
+    });
+    return c;
+  }, [bookings]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -82,80 +123,190 @@ export function AdminBookingsPage() {
     });
   }, [bookings, searchQuery, statusFilter]);
 
+  const totalRevenue = useMemo(
+    () => filtered.reduce((sum, b) => sum + (Number(b.total_price) || 0), 0),
+    [filtered],
+  );
+
   return (
     <AdminLayout title="Bookings" breadcrumb="Admin / Bookings">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-[#6b7280]">{bookings.length.toLocaleString()} bookings · live from Neon</p>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8c8c8c]" />
-              <input
-                placeholder="Search ID / guest / hotel"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-lg border border-[#eaeaea] pl-9 pr-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/30 focus:border-[#1ABC9C]"
-              />
+      <div className="space-y-3">
+        {/* Top info bar — solid charcoal in BOTH modes per the brief.
+            Holds the count, total revenue, search and status filter. */}
+        <div className="admin-strip rounded-xl overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] items-stretch">
+            {/* Stats */}
+            <div className="flex items-center divide-x divide-white/10 px-4">
+              <div className="pr-5 py-3">
+                <div className="admin-strip-cell">Total bookings</div>
+                <div className="text-[18px] font-semibold text-white tabular-nums leading-none mt-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  {bookings.length.toLocaleString()}
+                </div>
+              </div>
+              <div className="px-5 py-3">
+                <div className="admin-strip-cell">Filtered revenue</div>
+                <div className="text-[18px] font-semibold text-[#5eead4] tabular-nums leading-none mt-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  {fmtUsd(totalRevenue)}
+                </div>
+              </div>
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              className="rounded-lg border border-[#eaeaea] px-3 py-2 text-sm bg-white dark:bg-[#11151a]"
-            >
-              <option value="all">All statuses</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="pending">Pending</option>
-              <option value="checked-in">Checked-in</option>
-              <option value="checked-out">Checked-out</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+
+            {/* Search — middle */}
+            <div className="flex items-center px-3 py-2 md:py-0 border-t md:border-t-0 md:border-l border-white/10">
+              <div className="relative w-full max-w-md">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/45" />
+                <input
+                  placeholder="Search ID, guest name, email, or hotel…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-0 pl-8 pr-3 py-2.5 text-[12.5px] text-white placeholder-white/35 focus:outline-none"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                />
+              </div>
+            </div>
+
+            {/* Status filter dropdown */}
+            <div className="flex items-center px-3 py-2 md:py-0 border-t md:border-t-0 md:border-l border-white/10">
+              <div className="relative">
+                <Filter className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/45 pointer-events-none" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                  className="appearance-none bg-white/[0.06] hover:bg-white/[0.10] text-white text-[12.5px] font-medium pl-8 pr-7 py-1.5 rounded-md border border-white/10 focus:outline-none focus:ring-1 focus:ring-white/30 cursor-pointer"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  {STATUS_OPTIONS.map((o) => (
+                    <option key={o.key} value={o.key} className="bg-[#1f2937] text-white">
+                      {o.label} {counts[o.key] != null ? `(${counts[o.key]})` : ''}
+                    </option>
+                  ))}
+                </select>
+                <ChevronRight className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 rotate-90 text-white/45 pointer-events-none" />
+              </div>
+            </div>
           </div>
         </div>
 
         {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
+          <div className="rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 px-3 py-2 text-[12.5px] text-red-700 dark:text-red-300">
+            {error}
+          </div>
         )}
 
         {/* Table */}
-        <div className="bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea] overflow-hidden">
+        <div className="admin-card overflow-hidden">
           {loading ? (
-            <p className="p-6 text-sm text-[#8c8c8c]">Loading bookings…</p>
+            <p className="p-6 text-[12.5px] text-center" style={{ color: 'var(--admin-text-muted)' }}>Loading bookings…</p>
           ) : filtered.length === 0 ? (
-            <p className="p-6 text-sm text-[#8c8c8c]">No bookings match your filters.</p>
+            <div className="px-6 py-12 text-center">
+              <div className="text-[13px]" style={{ color: 'var(--admin-text-muted)' }}>No bookings match your filters.</div>
+              <div className="text-[11.5px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>Try clearing the search or switching status.</div>
+            </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-[#fafafa] text-[#8c8c8c]">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-xs">ID</th>
-                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-xs">Guest</th>
-                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-xs">Hotel</th>
-                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-xs">Room</th>
-                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-xs">Check-in</th>
-                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-xs">Nights</th>
-                    <th className="px-4 py-3 text-right font-medium uppercase tracking-wider text-xs">Amount</th>
-                    <th className="px-4 py-3 text-left font-medium uppercase tracking-wider text-xs">Status</th>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: 'var(--admin-border)' }}>
+                    {['Booking', 'Guest', 'Property', 'Check-in', 'Nights', 'Amount', 'Status'].map((h, i) => (
+                      <th
+                        key={h}
+                        className={`px-4 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] ${
+                          i === 5 ? 'text-right' : 'text-left'
+                        }`}
+                        style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text-muted)' }}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#eaeaea] bg-white dark:bg-[#11151a]">
-                  {filtered.map((b) => (
+                <tbody>
+                  {filtered.map((b, idx) => (
                     <tr
                       key={b.id}
-                      className="hover:bg-[#fafafa] cursor-pointer transition-colors"
                       onClick={() => setSelected(b)}
+                      className={`admin-row cursor-pointer ${
+                        idx !== filtered.length - 1 ? 'border-b' : ''
+                      }`}
+                      style={{ borderColor: 'var(--admin-border-soft)' }}
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-[#1ABC9C]">BK-{b.id}</td>
-                      <td className="px-4 py-3 text-[#3b3b3b]">
-                        <div className="font-medium">{b.user_name || 'Guest'}</div>
-                        <div className="text-xs text-[#8c8c8c]">{b.user_email || '—'}</div>
+                      {/* Booking ID + created date */}
+                      <td className="px-4 py-3 align-top whitespace-nowrap">
+                        <div className="font-mono text-[12px] font-semibold text-[#0f9b86] dark:text-[#5eead4]">BK-{b.id}</div>
+                        <div className="text-[10.5px] mt-0.5" style={{ color: 'var(--admin-text-faint)' }}>
+                          {fmtShortDate(b.created_at)}
+                        </div>
                       </td>
-                      <td className="px-4 py-3 text-[#3b3b3b]">{b.hotel_name || '—'}</td>
-                      <td className="px-4 py-3 text-[#6b7280]">{b.room_name || '—'}</td>
-                      <td className="px-4 py-3">{fmtDate(b.check_in_date)}</td>
-                      <td className="px-4 py-3">{nightsBetween(b.check_in_date, b.check_out_date)}</td>
-                      <td className="px-4 py-3 text-right font-semibold">{fmtUsd(Number(b.total_price))}</td>
-                      <td className="px-4 py-3"><span className={getStatusBadgeClass(b.status)}>{b.status || 'unknown'}</span></td>
+
+                      {/* Guest avatar + name + email */}
+                      <td className="px-4 py-3 align-top">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-white text-[10.5px] font-semibold shrink-0"
+                            style={{
+                              background: 'linear-gradient(135deg, #1ABC9C, #16A085)',
+                              boxShadow: '0 4px 10px -4px rgba(26,188,156,0.45)',
+                            }}
+                          >
+                            {initials(b.user_name, b.user_email)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[12.5px] font-semibold truncate" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text)' }}>
+                              {b.user_name || 'Guest'}
+                            </div>
+                            <div className="text-[10.5px] truncate" style={{ color: 'var(--admin-text-faint)' }}>
+                              {b.user_email || '—'}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Hotel + room */}
+                      <td className="px-4 py-3 align-top">
+                        <div className="text-[12.5px] font-medium truncate max-w-[200px]" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text)' }}>
+                          {b.hotel_name || '—'}
+                        </div>
+                        <div className="text-[10.5px] truncate" style={{ color: 'var(--admin-text-faint)' }}>
+                          <BedDouble className="w-2.5 h-2.5 inline -mt-0.5 mr-1" />
+                          {b.room_name || 'Room'}{b.room_category ? ` · ${b.room_category}` : ''}
+                        </div>
+                      </td>
+
+                      {/* Check-in (full date) + check-out (short) */}
+                      <td className="px-4 py-3 align-top whitespace-nowrap">
+                        <div className="text-[12.5px] font-medium" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text)' }}>
+                          {fmtShortDate(b.check_in_date)}
+                        </div>
+                        <div className="text-[10.5px]" style={{ color: 'var(--admin-text-faint)' }}>
+                          → {fmtShortDate(b.check_out_date)}
+                        </div>
+                      </td>
+
+                      {/* Nights */}
+                      <td className="px-4 py-3 align-top">
+                        <span
+                          className="inline-flex items-center justify-center min-w-[28px] h-6 rounded-md text-[11px] font-semibold tabular-nums"
+                          style={{
+                            background: 'rgba(26,188,156,0.10)',
+                            color: '#0f9b86',
+                            border: '1px solid rgba(26,188,156,0.20)',
+                          }}
+                        >
+                          {nightsBetween(b.check_in_date, b.check_out_date)}
+                        </span>
+                      </td>
+
+                      {/* Amount */}
+                      <td className="px-4 py-3 align-top text-right whitespace-nowrap">
+                        <div className="text-[13.5px] font-bold tabular-nums" style={{ fontFamily: 'Poppins, sans-serif', color: 'var(--admin-text)' }}>
+                          {fmtUsd(Number(b.total_price))}
+                        </div>
+                      </td>
+
+                      {/* Status pill */}
+                      <td className="px-4 py-3 align-top">
+                        <span className={statusClass(b.status)}>{b.status || 'unknown'}</span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -163,27 +314,47 @@ export function AdminBookingsPage() {
             </div>
           )}
         </div>
+
+        <p className="text-[10.5px] text-right" style={{ color: 'var(--admin-text-faint)' }}>
+          Showing {filtered.length} of {bookings.length} bookings · click any row for details
+        </p>
       </div>
 
       {/* Detail drawer */}
       {selected && (
         <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setSelected(null)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/45 backdrop-blur-sm" />
           <aside
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md bg-white dark:bg-[#11151a] shadow-2xl h-full overflow-y-auto p-6"
+            className="relative w-full max-w-md admin-card rounded-none border-l h-full overflow-y-auto p-6"
+            style={{ borderRadius: 0 }}
           >
-            <button onClick={() => setSelected(null)} className="absolute top-4 right-4 text-[#8c8c8c] hover:text-[#3b3b3b]">
-              <X className="w-5 h-5" />
+            <button
+              onClick={() => setSelected(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              style={{ color: 'var(--admin-text-muted)' }}
+            >
+              <X className="w-4 h-4" />
             </button>
-            <h2 className="text-lg font-bold text-[#3b3b3b]">Booking BK-{selected.id}</h2>
-            <span className={`mt-2 inline-block ${getStatusBadgeClass(selected.status)}`}>{selected.status || 'unknown'}</span>
+            <div className="font-mono text-[11px] font-semibold mb-1 text-[#0f9b86] dark:text-[#5eead4]">BK-{selected.id}</div>
+            <h2 className="text-[18px] font-bold" style={{ fontFamily: 'Poppins, sans-serif', color: 'var(--admin-text)' }}>
+              {selected.user_name || 'Booking detail'}
+            </h2>
+            <span className={`mt-2 inline-block ${statusClass(selected.status)}`}>{selected.status || 'unknown'}</span>
 
-            <div className="mt-6 space-y-4 text-sm">
+            <div className="mt-5 space-y-3">
               <Field icon={UserIcon} label="Guest" value={selected.user_name || 'Anonymous'} />
               <Field icon={Mail} label="Email" value={selected.user_email || '—'} />
-              <Field icon={Building2} label="Hotel" value={`${selected.hotel_name || '—'}${selected.hotel_location ? ` · ${selected.hotel_location}` : ''}`} />
-              <Field icon={BedDouble} label="Room" value={`${selected.room_name || '—'}${selected.room_category ? ` (${selected.room_category})` : ''}`} />
+              <Field
+                icon={Building2}
+                label="Hotel"
+                value={`${selected.hotel_name || '—'}${selected.hotel_location ? ` · ${selected.hotel_location}` : ''}`}
+              />
+              <Field
+                icon={BedDouble}
+                label="Room"
+                value={`${selected.room_name || '—'}${selected.room_category ? ` (${selected.room_category})` : ''}`}
+              />
               <Field
                 icon={CalendarRange}
                 label="Stay"
@@ -191,12 +362,24 @@ export function AdminBookingsPage() {
               />
               <Field icon={DollarSign} label="Total" value={fmtUsd(Number(selected.total_price))} />
               {selected.special_request && (
-                <div className="rounded-lg bg-[#fafafa] border border-[#eaeaea] p-3">
-                  <div className="text-xs text-[#8c8c8c] mb-1">Special request</div>
-                  <p className="text-[13px] text-[#3b3b3b]">{selected.special_request}</p>
+                <div
+                  className="rounded-lg p-3"
+                  style={{
+                    background: 'var(--admin-row-hover)',
+                    border: '1px solid var(--admin-border)',
+                  }}
+                >
+                  <div className="text-[10.5px] uppercase tracking-[0.08em] font-semibold mb-1" style={{ color: 'var(--admin-text-faint)' }}>
+                    Special request
+                  </div>
+                  <p className="text-[12.5px]" style={{ color: 'var(--admin-text)' }}>
+                    {selected.special_request}
+                  </p>
                 </div>
               )}
-              <p className="text-xs text-[#8c8c8c]">Created {selected.created_at ? new Date(selected.created_at).toLocaleString() : '—'}</p>
+              <p className="text-[10.5px] pt-2" style={{ color: 'var(--admin-text-faint)' }}>
+                Created {selected.created_at ? new Date(selected.created_at).toLocaleString() : '—'}
+              </p>
             </div>
           </aside>
         </div>
@@ -210,12 +393,20 @@ function Field({
 }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="h-9 w-9 rounded-full bg-[#1ABC9C]/10 flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-[#1ABC9C]" />
+      <div
+        className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
+        style={{
+          background: 'linear-gradient(135deg, rgba(26,188,156,0.12), rgba(26,188,156,0.22))',
+          boxShadow: 'inset 0 0 0 1px rgba(26,188,156,0.25)',
+        }}
+      >
+        <Icon className="w-3.5 h-3.5 text-[#0f9b86] dark:text-[#5eead4]" />
       </div>
-      <div className="min-w-0">
-        <div className="text-xs text-[#8c8c8c] uppercase tracking-wider">{label}</div>
-        <div className="text-[#3b3b3b] break-words">{value}</div>
+      <div className="min-w-0 flex-1">
+        <div className="text-[10.5px] uppercase tracking-[0.08em] font-semibold" style={{ color: 'var(--admin-text-faint)' }}>
+          {label}
+        </div>
+        <div className="text-[12.5px] break-words" style={{ color: 'var(--admin-text)' }}>{value}</div>
       </div>
     </div>
   );

@@ -105,19 +105,19 @@ export function AdminDashboardPage() {
   return (
     <AdminLayout title="Dashboard" breadcrumb="Admin">
       <div className="space-y-5">
-        {/* Welcome Bar + Date Filter — slimmer typography, tighter spacing */}
+        {/* Welcome Bar + Date Filter */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-[18px] font-semibold text-[#1f2937] leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h2 className="text-[18px] font-semibold leading-tight" style={{ fontFamily: 'Poppins, sans-serif', color: 'var(--admin-text)' }}>
               Welcome back, Admin
             </h2>
-            <p className="text-[12px] text-[#8C8C8C] mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-[12px] mt-0.5" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text-muted)' }}>
               United Hotels Partner Network
             </p>
           </div>
 
-          {/* Date Filter Pills */}
-          <div className="flex flex-wrap gap-1.5">
+          {/* Date Filter — segmented control */}
+          <div className="inline-flex items-center gap-0.5 admin-card !p-0.5 rounded-lg !shadow-none">
             {[
               { label: 'Today', value: 'today' as DateFilter },
               { label: '7 Days', value: '7days' as DateFilter },
@@ -128,12 +128,15 @@ export function AdminDashboardPage() {
               <button
                 key={filter.value}
                 onClick={() => setDateFilter(filter.value)}
-                className={`rounded-full px-3 py-1 text-[11.5px] font-medium transition-all ${
+                className={`rounded-md px-2.5 py-1 text-[11.5px] font-medium transition-colors ${
                   dateFilter === filter.value
                     ? 'bg-[#1ABC9C] text-white shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]'
-                    : 'bg-white/70 border border-[#EAEAEA] text-[#6b7280] hover:text-[#1f2937] hover:border-[#1ABC9C]/40'
+                    : 'hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
-                style={{ fontFamily: 'Inter, sans-serif' }}
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  color: dateFilter === filter.value ? '#ffffff' : 'var(--admin-text-muted)',
+                }}
               >
                 {filter.label}
               </button>
@@ -141,29 +144,30 @@ export function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* KPI Stat Cards — compact (p-4, smaller icons + numbers) */}
+        {/* KPI stat cards — admin-card (CSS-var driven) so dark mode picks
+            up charcoal surface + hairline border + inner highlight without
+            per-card overrides. */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {statCards.map(({ label, value, Icon, accent }) => (
             <div
               key={label}
-              className="group relative bg-white/80 dark:bg-[#11151a]/85 rounded-xl p-3.5 border border-[#EAEAEA]/80 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] hover:border-[#1ABC9C]/30 transition-all"
-              style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+              className="group admin-card p-3.5 hover:border-[#1ABC9C]/30 hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] transition-all"
             >
               <div className="flex items-center gap-3">
                 <div
                   className="flex h-9 w-9 items-center justify-center rounded-lg shrink-0"
                   style={{
                     background: `linear-gradient(135deg, ${accent}1a, ${accent}33)`,
-                    boxShadow: `inset 0 0 0 1px ${accent}22`,
+                    boxShadow: `inset 0 0 0 1px ${accent}28`,
                   }}
                 >
                   <Icon className="h-[16px] w-[16px]" style={{ color: accent }} strokeWidth={1.85} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10.5px] text-[#8C8C8C] uppercase tracking-[0.08em] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <p className="text-[10.5px] uppercase tracking-[0.08em] font-medium" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text-muted)' }}>
                     {label}
                   </p>
-                  <p className="text-[20px] font-bold text-[#1f2937] mt-0.5 leading-none truncate" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  <p className="text-[20px] font-bold mt-0.5 leading-none truncate" style={{ fontFamily: 'Poppins, sans-serif', color: 'var(--admin-text)' }}>
                     {value}
                   </p>
                 </div>
@@ -272,7 +276,7 @@ export function AdminDashboardPage() {
 
         {/* Quick Actions — compact row of icon-led buttons */}
         <div>
-          <h3 className="text-[12px] font-semibold text-[#6b7280] uppercase tracking-[0.1em] mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <h3 className="text-[12px] font-semibold uppercase tracking-[0.1em] mb-2" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text-muted)' }}>
             Quick Actions
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -287,8 +291,7 @@ export function AdminDashboardPage() {
                 <button
                   key={index}
                   onClick={() => handleQuickAction(action.title)}
-                  className="group bg-white/80 dark:bg-[#11151a]/85 rounded-xl p-3 border border-[#EAEAEA]/80 hover:border-[#1ABC9C]/40 hover:shadow-[0_8px_20px_-10px_rgba(26,188,156,0.25)] transition-all text-left"
-                  style={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
+                  className="group admin-card p-3 hover:border-[#1ABC9C]/40 hover:shadow-[0_8px_20px_-10px_rgba(26,188,156,0.25)] transition-all text-left"
                 >
                   <div className="flex items-center gap-2.5">
                     <div
@@ -301,10 +304,10 @@ export function AdminDashboardPage() {
                       <Icon className="h-[15px] w-[15px]" style={{ color: action.accent }} strokeWidth={1.85} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-[12.5px] font-semibold text-[#1f2937] leading-tight truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      <h4 className="text-[12.5px] font-semibold leading-tight truncate" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text)' }}>
                         {action.title}
                       </h4>
-                      <p className="text-[10.5px] text-[#8C8C8C] mt-0.5 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      <p className="text-[10.5px] mt-0.5 truncate" style={{ fontFamily: 'Inter, sans-serif', color: 'var(--admin-text-muted)' }}>
                         {action.description}
                       </p>
                     </div>

@@ -31,7 +31,7 @@ interface SectionCardProps {
 function SectionCard({ title, icon: Icon, accent = '#1ABC9C', children, className = '' }: SectionCardProps) {
   return (
     <div
-      className={`bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea] dark:border-white/8 p-3.5 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] ${className}`}
+      className={`admin-card dark:border-white/8 p-3.5 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] ${className}`}
     >
       <div className="flex items-center gap-2 mb-3">
         <span

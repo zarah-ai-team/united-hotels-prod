@@ -29,11 +29,10 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
   ];
 
   return (
-    // Slimmer (h-12 vs h-16) + frosted so it visually pairs with the dark
-    // sidebar. Light theme: white/80; dark theme: slate/80 with a faint
-    // bottom border that picks up the page bg.
+    // Slim frosted bar — uses admin-strip-* tokens so the same charcoal
+    // tone shows up across header / sidebar / table info bars.
     <header
-      className="sticky top-0 z-30 h-12 border-b border-[#EAEAEA]/70 dark:border-white/8 bg-white/80 dark:bg-[#11151a]/85"
+      className="sticky top-0 z-30 h-12 bg-white/85 dark:bg-[rgba(20,24,33,0.78)] border-b border-[#EAEAEA]/70 dark:border-white/8"
       style={{ backdropFilter: 'blur(14px) saturate(140%)', WebkitBackdropFilter: 'blur(14px) saturate(140%)' }}
     >
       <div className="flex h-full items-center justify-between pl-12 pr-5 lg:pl-6 lg:pr-6">

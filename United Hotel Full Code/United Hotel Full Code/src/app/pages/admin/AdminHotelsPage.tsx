@@ -276,8 +276,8 @@ export function AdminHotelsPage() {
                 thumbnail on the left and stats laid out in a column-based
                 grid. Reads like an industry partner-portal property list
                 (Booking, Cloudbeds, Hotelogix) instead of a Pinterest grid. */}
-            <div className="bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea] dark:border-white/8 overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
-              <div className="hidden md:grid grid-cols-[96px_minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_88px] gap-3 px-3 py-2 bg-[#fafafa] dark:bg-[#0d1014] border-b border-[#eaeaea] dark:border-white/8 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#9aa0a6] dark:text-white/45" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <div className="admin-card dark:border-white/8 overflow-hidden shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+              <div className="hidden md:grid grid-cols-[96px_minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_88px] gap-3 px-3 py-2 admin-strip text-[10.5px] font-semibold uppercase tracking-[0.08em]" style={{ fontFamily: 'Inter, sans-serif' }}>
                 <div></div>
                 <div>Property</div>
                 <div>Rating</div>
@@ -388,7 +388,7 @@ export function AdminHotelsPage() {
             </div>
 
             {/* Detail panel */}
-            <aside className="bg-white dark:bg-[#11151a] rounded-xl border border-[#eaeaea] dark:border-white/8 p-5 sticky top-4 self-start shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
+            <aside className="admin-card dark:border-white/8 p-5 sticky top-4 self-start shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)]">
               {!active ? (
                 <p className="text-sm text-[#8c8c8c]">Select a hotel to inspect its rooms.</p>
               ) : (

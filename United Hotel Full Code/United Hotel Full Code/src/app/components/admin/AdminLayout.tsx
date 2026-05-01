@@ -109,10 +109,10 @@ export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: 
   const sidebarWidth = sidebarCollapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded;
 
   return (
-    // Plain neutral background that flips with the global ThemeContext.
-    // Light: #f5f6f8 (cool grey canvas). Dark: #0b0d10 (near-black slate
-    // that lets the teal accent + glass cards pop).
-    <div className="relative flex h-screen overflow-hidden bg-[#f5f6f8] dark:bg-[#0b0d10]">
+    // Layered charcoal canvas via the .admin-bg utility (defined in
+    // theme.css). Vertical fade gives flat dark surfaces just enough
+    // depth to separate from the glass cards stacked on top.
+    <div className="relative flex h-screen overflow-hidden admin-bg">
       <AdminSidebar />
 
       <div
