@@ -11,6 +11,7 @@ import { useScrollReveal } from "../hooks/useScrollReveal";
 import { useScrollProgress } from "../hooks/useScrollProgress";
 import { useParallax } from "../hooks/useParallax";
 import { useLanguage } from "../context/LanguageContext";
+import { useBooking } from "../context/BookingContext";
 import imgRectangle10 from "figma:asset/2e73560823491cb7aae2b44b94830399bada8384.png";
 import imgKadikoy from "figma:asset/250023f532e568305b14dfb57c614f51c1fba582.png";
 import heroFigma1 from "../../assets/hero-figma-1.webp";
@@ -77,6 +78,7 @@ const SLIDE_INTERVAL_MS = 6000;
 function HeroSection() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { setDates, setGuests } = useBooking();
   const [activeSlide, setActiveSlide] = useState(0);
   // Modest parallax speed — the slideshow wrapper has a vertical buffer below,
   // so this stays well within the safe window and never exposes empty space.
@@ -99,7 +101,24 @@ function HeroSection() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/listing");
+    // Persist the search to BookingContext so the listing + detail pages can
+    // pre-fill from it, and mirror to URL params so a refresh / shared link
+    // keeps the selection. Without this every downstream page reset to
+    // today/tomorrow regardless of what the guest picked here.
+    if (searchData.checkIn && searchData.checkOut) {
+      setDates(searchData.checkIn, searchData.checkOut);
+    }
+    const guestsNum = parseInt(searchData.guests || "0", 10);
+    if (Number.isFinite(guestsNum) && guestsNum > 0) {
+      setGuests(guestsNum);
+    }
+    const params = new URLSearchParams();
+    if (searchData.destination) params.set("destination", searchData.destination);
+    if (searchData.checkIn) params.set("checkIn", searchData.checkIn);
+    if (searchData.checkOut) params.set("checkOut", searchData.checkOut);
+    if (searchData.guests) params.set("guests", searchData.guests);
+    const qs = params.toString();
+    navigate(qs ? `/listing?${qs}` : "/listing");
   };
 
   return (

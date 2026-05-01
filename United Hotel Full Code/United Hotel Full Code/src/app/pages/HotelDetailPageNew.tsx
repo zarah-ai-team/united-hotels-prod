@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { HotelDetailLoader } from "../components/HotelLoadingState";
@@ -748,16 +748,35 @@ export function HotelDetailPageNew() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, format } = useLanguage();
-  const { setHotel, setRoom, setDates, setGuests, setRoomCount } = useBooking();
+  const { booking, setHotel, setRoom, setDates, setGuests, setRoomCount } = useBooking();
   useScrollProgress();
+
+  // Pull any pre-existing search from URL params (set by HomePage) — these
+  // survive refresh and shared links, while BookingContext only survives
+  // in-app navigation. URL wins when both are present.
+  const [searchParams] = useSearchParams();
+  const urlCheckIn = searchParams.get("checkIn") || "";
+  const urlCheckOut = searchParams.get("checkOut") || "";
+  const urlGuests = parseInt(searchParams.get("guests") || "", 10);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hotel, setHotelState] = useState<PublicHotel | null>(null);
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guestCount, setGuestCount] = useState(2);
-  const [roomCount, setSelectedRoomCount] = useState(1);
+  // Initialise dates from URL → BookingContext → today/tomorrow (in that
+  // priority order). Without this the page hard-overwrote whatever the user
+  // picked on the home page back to today/tomorrow, so per-night totals
+  // never reflected the chosen stay.
+  const initialCheckIn = urlCheckIn || booking.checkIn || new Date().toISOString().split("T")[0];
+  const initialCheckOut =
+    urlCheckOut ||
+    booking.checkOut ||
+    new Date(Date.now() + 86400000).toISOString().split("T")[0];
+  const [checkIn, setCheckIn] = useState(initialCheckIn);
+  const [checkOut, setCheckOut] = useState(initialCheckOut);
+  const [guestCount, setGuestCount] = useState(
+    Number.isFinite(urlGuests) && urlGuests > 0 ? urlGuests : booking.guests || 2,
+  );
+  const [roomCount, setSelectedRoomCount] = useState(booking.roomCount || 1);
   // Selection key = `${roomId}::${displayName}` so two split halves of the
   // same source room (e.g. "Standard Room" and "Standard Room Sea view") can
   // be selected independently and the chosen sub-name flows into the booking.
@@ -767,12 +786,11 @@ export function HotelDetailPageNew() {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [id]);
 
+  // Whenever the local date state changes (e.g. user edits the picker on
+  // this page), keep BookingContext in sync so the next step inherits it.
   useEffect(() => {
-    const today = new Date();
-    const tomorrow = new Date(Date.now() + 86400000);
-    setCheckIn(today.toISOString().split("T")[0]);
-    setCheckOut(tomorrow.toISOString().split("T")[0]);
-  }, []);
+    if (checkIn && checkOut) setDates(checkIn, checkOut);
+  }, [checkIn, checkOut, setDates]);
 
   useEffect(() => {
     if (!checkIn || !checkOut) return;
