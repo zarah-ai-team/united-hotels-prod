@@ -1,0 +1,10 @@
+{
+  "comment": "100 cases = 10 hotelIds × 5 future dates × 2 categories. Dates anchored to 2026-05-01 + {3,10,30,60,90}.",
+  "checkIns": ["2026-05-04", "2026-05-11", "2026-05-31", "2026-06-30", "2026-07-30"],
+  "stayNights": 2,
+  "categories": ["Deluxe", "Standard"],
+  "hotelIds": [217, 218, 219, 220, 221, 222, 223, 224, 225, 226],
+  "guests": 2,
+  "rooms": 1,
+  "currency": "USD"
+}
