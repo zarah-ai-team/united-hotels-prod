@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useBooking } from '../context/BookingContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import svgPaths from '../../imports/svg-nnzqmx1xjq';
 import { Navigation } from '../components/Navigation';
 import { formatCurrency } from '../utils/currency';
@@ -16,6 +17,19 @@ export function BookingStep1() {
   const navigate = useNavigate();
   const { booking, calculateNights } = useBooking();
   const { language } = useLanguage();
+  const { isAuthenticated } = useAuth();
+
+  // Logged-in users skip the /auth gate — they go straight to step 2 where
+  // BookingStep2 prefills their details from AuthContext. Guests still pass
+  // through /auth to register, log in, or continue as guest.
+  const continueToNext = () => {
+    if (isAuthenticated) {
+      navigate('/booking/step2');
+    } else {
+      sessionStorage.setItem('authReturnUrl', '/booking/step2');
+      navigate('/auth');
+    }
+  };
 
   // Handle missing booking data
   useEffect(() => {
@@ -702,7 +716,7 @@ export function BookingStep1() {
 
                 {/* CTA Button */}
                 <button
-                  onClick={() => { sessionStorage.setItem('authReturnUrl', '/booking/step2'); navigate('/auth'); }}
+                  onClick={continueToNext}
                   className="w-full bg-[#1abc9c] text-white py-3 rounded-xl hover:bg-[#16a085] transition-all font-['Inter:Bold',sans-serif] text-[14px] mb-2.5 relative overflow-hidden group"
                 >
                   <span className="relative z-10">Continue to Guest Details</span>
@@ -780,7 +794,7 @@ export function BookingStep1() {
 
             {/* CTA Button */}
             <button
-                onClick={() => { sessionStorage.setItem('authReturnUrl', '/booking/step2'); navigate('/auth'); }}
+                onClick={continueToNext}
               className="bg-[#1abc9c] text-white px-6 py-3 rounded-xl hover:bg-[#16a085] transition-all font-['Inter:Bold',sans-serif] text-[15px] min-h-12 flex items-center justify-center gap-2 shrink-0"
             >
               Continue

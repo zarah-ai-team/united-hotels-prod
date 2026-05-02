@@ -167,7 +167,7 @@ export function DestinationsSection() {
   }, [hotels]);
 
   return (
-    <section id="destinations" className="glass-section-bg py-20 md:py-32 relative overflow-hidden">
+    <section id="destinations" className="glass-section-bg py-10 md:py-32 relative overflow-hidden">
       <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative">
         {/* Editorial header with scroll controls */}
         <div className="flex items-end justify-between gap-6 mb-10 md:mb-14">

@@ -91,7 +91,7 @@ function LocationSection({ location, locationHotels }: LocationSectionProps) {
 
 export function CountriesSection() {
   return (
-    <section className="py-24 bg-[#fafafa] relative overflow-hidden">
+    <section className="py-10 md:py-24 bg-[#fafafa] relative overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1abc9c]/3 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#1abc9c]/3 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3" />

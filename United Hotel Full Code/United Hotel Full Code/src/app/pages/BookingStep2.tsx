@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useBooking } from "../context/BookingContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 import svgPaths from "../../imports/svg-nnzqmx1xjq";
 import { Navigation } from "../components/Navigation";
 import { formatCurrency } from "../utils/currency";
@@ -29,6 +30,7 @@ export function BookingStep2() {
   const navigate = useNavigate();
   const { booking, setGuestDetails, calculateNights } = useBooking();
   const { language } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -44,6 +46,24 @@ export function BookingStep2() {
       navigate("/listing");
     }
   }, [booking.hotel, booking.room, navigate]);
+
+  // Prefill from the logged-in user. We only fill fields the guest hasn't
+  // already touched so we don't clobber their edits if they switch accounts
+  // or come back to the page. Source of truth is AuthContext (in-memory),
+  // not localStorage — so the data is always fresh from /api/users/me.
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    setFormData((prev) => {
+      const fullName = String(user.name || '').trim();
+      const [first, ...rest] = fullName.split(/\s+/);
+      const next = { ...prev };
+      if (!next.firstName && first) next.firstName = first;
+      if (!next.lastName && rest.length) next.lastName = rest.join(' ');
+      if (!next.email && user.email) next.email = String(user.email);
+      if (!next.phone && user.phoneNumber) next.phone = String(user.phoneNumber);
+      return next;
+    });
+  }, [isAuthenticated, user]);
 
   // Don't render if no booking data
   if (!booking.hotel || !booking.room) {

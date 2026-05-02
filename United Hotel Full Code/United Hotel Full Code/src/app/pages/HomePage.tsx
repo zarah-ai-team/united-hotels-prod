@@ -354,7 +354,7 @@ function StatsBand() {
     { value: "4.8", suffix: "/5", label: t("Average rating") },
   ];
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden">
+    <section className="relative py-10 md:py-32 overflow-hidden">
       {/* Cinematic backdrop — same image language as the hero */}
       <div className="absolute inset-0">
         <img
@@ -469,7 +469,7 @@ function FAQSection() {
   ];
 
   return (
-    <section id="faqs" className="relative glass-section-bg py-20 md:py-32 overflow-hidden">
+    <section id="faqs" className="relative glass-section-bg py-10 md:py-32 overflow-hidden">
       <div className="relative max-w-[860px] mx-auto px-4 md:px-10">
         {/* Editorial header */}
         <div className="text-center mb-12 md:mb-16">
@@ -564,7 +564,7 @@ function FAQSection() {
 function CTASection() {
   const { t } = useLanguage();
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden">
+    <section className="relative py-10 md:py-32 overflow-hidden">
       {/* Cinematic backdrop */}
       <div className="absolute inset-0">
         <img

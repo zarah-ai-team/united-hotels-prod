@@ -87,7 +87,7 @@ export function ValuePropositionSection() {
   return (
     <section
       id="why-choose-united-hotels"
-      className="glass-section-bg py-20 md:py-32 relative overflow-hidden"
+      className="glass-section-bg py-10 md:py-32 relative overflow-hidden"
     >
       <div className="max-w-[1280px] mx-auto px-4 md:px-10">
         {/* Editorial header — left/right balanced */}

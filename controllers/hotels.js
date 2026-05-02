@@ -1,5 +1,6 @@
 const pool = require('../db');
 const { resolveHotelImage, resolveHotelGallery } = require('../utils/imageKit');
+const pricingV2 = require('../utils/pricingV2Client');
 
 const attachImageKitUrls = (hotel) => {
   if (!hotel) return hotel;
@@ -266,6 +267,75 @@ const computeRecommendedPrice = ({
   };
 };
 
+/**
+ * Adapt a pricing-engine-v2 response to the legacy `computeRecommendedPrice`
+ * shape so it is a drop-in replacement at every call site. Returns null when
+ * v2 didn't produce a usable number — caller should then run the legacy
+ * formula.
+ */
+const adaptV2Response = (v2, { basePrice, roomCategory, minPrice, maxPrice }) => {
+  if (!v2 || !Number.isFinite(Number(v2.recommendedPriceUsd))) return null;
+  const base = Number(basePrice);
+  const recommended = Number(v2.recommendedPriceUsd);
+  const effectiveDiscount = base > 0 ? ((base - recommended) / base) * 100 : 0;
+  return {
+    basePrice: Number(base.toFixed(2)),
+    discountPercent: Number(effectiveDiscount.toFixed(2)),
+    recommendedPrice: Number(recommended.toFixed(2)),
+    savingsAmount: Number(Math.max(0, base - recommended).toFixed(2)),
+    dynamicPrice: Number(recommended.toFixed(2)),
+    roomCategory,
+    priceBounds: {
+      minPrice: Number.isFinite(minPrice) && minPrice > 0 ? Number(minPrice.toFixed(2)) : null,
+      maxPrice: Number.isFinite(maxPrice) && maxPrice > 0 ? Number(maxPrice.toFixed(2)) : null,
+      floorApplied: Number(Number(v2.bounds?.floor || base * 0.85).toFixed(2)),
+    },
+    factors: {
+      demand: Number(Number(v2.factors?.demand || 1).toFixed(3)),
+      leadTime: Number(Number(v2.factors?.leadTime || 1).toFixed(3)),
+      weekend: Number(Number(v2.factors?.weekend || 1).toFixed(3)),
+      season: Number(Number(v2.factors?.season || 1).toFixed(3)),
+      lengthMul: Number(Number(v2.factors?.lengthMul || 1).toFixed(3)),
+    },
+    // Provenance fields — handy for the admin debug overlay; the legacy
+    // shape ignores unknown keys so this is non-breaking.
+    pricingSource: v2.source,           // 'hybrid' | 'analytical'
+    pricingConfidence: v2.confidence ?? 0,
+    pricingAnchors: Array.isArray(v2.anchors) ? v2.anchors.length : 0,
+  };
+};
+
+/**
+ * Try v2 first; on miss, run the legacy in-process formula. The selection
+ * is logged at most once per request so we can audit which path served any
+ * given recommendation.
+ */
+const computeRecommendedPriceWithV2 = async ({
+  basePrice, hotelId, roomCategory, minPrice, maxPrice,
+  checkInDate, checkOutDate, occupancyRatio,
+}) => {
+  const v2 = await pricingV2.getRecommendedPrice({
+    hotelId,
+    roomCategory,
+    checkInDate,
+    checkOutDate,
+    // Pass our own basePrice + bounds so v2 can compute the multipliers
+    // even when its internal Hotel-by-id lookup misses (different DB).
+    basePrice,
+    minPrice,
+    maxPrice,
+  });
+  if (process.env.PRICING_V2_DEBUG === 'true') {
+    console.log(`[pricing-v2] hotel=${hotelId} cat=${roomCategory} → ${v2 ? 'hit ' + v2.source + ' $' + v2.recommendedPriceUsd : 'miss (legacy fallback)'}`);
+  }
+  const adapted = adaptV2Response(v2, { basePrice, roomCategory, minPrice, maxPrice });
+  if (adapted) return adapted;
+  return computeRecommendedPrice({
+    basePrice, hotelId, roomCategory, minPrice, maxPrice,
+    checkInDate, checkOutDate, occupancyRatio,
+  });
+};
+
 const toRoomObject = (roomLike = {}, index = 0) => {
   const parsed = typeof roomLike === 'string' ? parseJsonLikeValue(roomLike) : roomLike;
   const room = parsed && typeof parsed === 'object' ? parsed : {};
@@ -422,89 +492,128 @@ const buildAllHotelsRecommendedPricing = async ({
   const hotelResult = await fetchHotels({ status, limit: 10000, offset: 0 });
   const basePriceIndex = await getBasePriceIndex();
 
-  const hotelsWithRecommendations = hotelResult.rows.map((hotel) => {
+  // Step 1: shape every (hotel, room) into a flat priceable list. Doing this
+  // upfront lets us send ONE batch request to v2 instead of N parallel calls
+  // that would hammer RapidAPI's 500-req/month free tier.
+  const flat = [];        // [{ hotelIdx, room, roomCategory, basePrice, hotelName, hotelId, minPrice, maxPrice }]
+  const hotelMeta = [];   // [{ id, name, pricedRooms: [...basePrice] }]
+  hotelResult.rows.forEach((hotel) => {
     const hotelId = toInt(hotel.id);
     const basePricesByCategory = basePriceIndex.get(hotelId) || new Map();
-
-    const rooms = getHotelRoomsForPricing(hotel);
-    const sourceRooms = rooms.length
-      ? rooms
+    const rawRooms = getHotelRoomsForPricing(hotel);
+    const sourceRooms = rawRooms.length
+      ? rawRooms
       : Array.from(basePricesByCategory.entries()).map(([category, basePrice], index) => ({
           id: null,
           room_number: `${category}-${index + 1}`,
           category,
           price_per_night: basePrice,
-          vendor_id: null,
-          tax_percent: null,
-          tax_amount: null
+          vendor_id: null, tax_percent: null, tax_amount: null,
         }));
-
     const pricedRooms = sourceRooms.map((room) => {
       const roomCategory = normalizeRoomCategory(room.category);
       const baseFromCategory = basePricesByCategory.get(roomCategory);
       const fallbackBase = toNumber(room.price_per_night, 0);
-      const basePrice = Number.isFinite(baseFromCategory) && baseFromCategory > 0
-        ? baseFromCategory
-        : fallbackBase;
-
-      return {
-        room,
-        roomCategory,
-        basePrice
-      };
+      const basePrice = Number.isFinite(baseFromCategory) && baseFromCategory > 0 ? baseFromCategory : fallbackBase;
+      return { room, roomCategory, basePrice };
     }).filter((item) => Number.isFinite(item.basePrice) && item.basePrice > 0);
 
-    const roomRecommendations = pricedRooms.map((item, index) => {
-      const { room, roomCategory, basePrice } = item;
-
-      const recommendation = computeRecommendedPrice({
-        basePrice,
+    const hotelIdx = hotelMeta.length;
+    hotelMeta.push({ id: hotel.id, name: hotel.name, pricedRooms });
+    pricedRooms.forEach((item) => {
+      flat.push({
+        hotelIdx,
+        room: item.room,
+        roomCategory: item.roomCategory,
+        basePrice: item.basePrice,
         hotelId,
-        roomCategory,
-        minPrice: toNumber(room.min_price, null),
-        maxPrice: toNumber(room.max_price, null),
-        checkInDate,
-        checkOutDate,
+        hotelName: hotel.name,
+        // Pass the city/district so v2's source adapters resolve the region
+        // by city — N hotels in the same city collapse to one cache key
+        // instead of N parallel region lookups (which burn through the
+        // free tier on cold cache).
+        location: hotel.location || null,
+        district: hotel.district || null,
+        minPrice: toNumber(item.room.min_price, null),
+        maxPrice: toNumber(item.room.max_price, null),
       });
+    });
+  });
 
-      const otherPrices = pricedRooms
-        .filter((_, i) => i !== index)
-        .map((entry) => entry.basePrice)
-        .filter((price) => Number.isFinite(price) && price > 0);
+  // Step 2: ask v2 for all of them in one batch call. v2 caps internal
+  // concurrency at 8, so RapidAPI sees max 8 parallel requests no matter
+  // how many rooms we ask for. Cache hits within v2 (per docId) make
+  // subsequent rooms of the same hotel near-instant.
+  const v2Inputs = flat.map((f) => ({
+    hotelId: f.hotelId,
+    hotelName: f.hotelName,
+    location: f.location,
+    district: f.district,
+    roomCategory: f.roomCategory,
+    basePrice: f.basePrice,
+    minPrice: f.minPrice,
+    maxPrice: f.maxPrice,
+    checkInDate,
+    checkOutDate,
+  }));
+  const v2Results = await pricingV2.getRecommendedPricesBatch(v2Inputs);
 
-      const averageOtherPrices = otherPrices.length
-        ? Number((otherPrices.reduce((sum, price) => sum + price, 0) / otherPrices.length).toFixed(2))
-        : Number(basePrice.toFixed(2));
-
-      const vendorId = room.vendor_id || room.vendorid || room.vendorId || room.provider_id || room.providerid || `hotel-${hotelId}`;
-      const taxPercent = toNumber(room.tax_percent ?? room.tax_rate ?? room.taxpercentage, 0);
-      const explicitTaxAmount = toNumber(room.tax_amount ?? room.taxes ?? room.tax_value ?? room.taxamount, 0);
-      const computedTaxAmount = explicitTaxAmount > 0
-        ? explicitTaxAmount
-        : Number(((recommendation.recommendedPrice * taxPercent) / 100).toFixed(2));
-      const totalWithTaxes = Number((recommendation.recommendedPrice + computedTaxAmount).toFixed(2));
-
-      return {
+  // Step 3: build final per-hotel recommendations, falling back to legacy
+  // formula for any v2 miss.
+  const flatRecommendations = flat.map((f, i) => {
+    const v2 = v2Results[i];
+    const adapted = adaptV2Response(v2, {
+      basePrice: f.basePrice, roomCategory: f.roomCategory,
+      minPrice: f.minPrice, maxPrice: f.maxPrice,
+    });
+    const recommendation = adapted || computeRecommendedPrice({
+      basePrice: f.basePrice,
+      hotelId: f.hotelId,
+      roomCategory: f.roomCategory,
+      minPrice: f.minPrice,
+      maxPrice: f.maxPrice,
+      checkInDate,
+      checkOutDate,
+    });
+    if (process.env.PRICING_V2_DEBUG === 'true') {
+      console.log(`[pricing-v2] hotel=${f.hotelId} cat=${f.roomCategory} → ${adapted ? 'hit ' + adapted.pricingSource + ' $' + adapted.recommendedPrice : 'miss (legacy fallback)'}`);
+    }
+    const room = f.room;
+    const otherPrices = flat
+      .filter((g) => g.hotelIdx === f.hotelIdx && g !== f)
+      .map((g) => g.basePrice);
+    const averageOtherPrices = otherPrices.length
+      ? Number((otherPrices.reduce((s, p) => s + p, 0) / otherPrices.length).toFixed(2))
+      : Number(f.basePrice.toFixed(2));
+    const vendorId = room.vendor_id || room.vendorid || room.vendorId || room.provider_id || room.providerid || `hotel-${f.hotelId}`;
+    const taxPercent = toNumber(room.tax_percent ?? room.tax_rate ?? room.taxpercentage, 0);
+    const explicitTaxAmount = toNumber(room.tax_amount ?? room.taxes ?? room.tax_value ?? room.taxamount, 0);
+    const computedTaxAmount = explicitTaxAmount > 0
+      ? explicitTaxAmount
+      : Number(((recommendation.recommendedPrice * taxPercent) / 100).toFixed(2));
+    const totalWithTaxes = Number((recommendation.recommendedPrice + computedTaxAmount).toFixed(2));
+    return {
+      hotelIdx: f.hotelIdx,
+      record: {
         roomId: room.id,
         roomNumber: room.room_number,
         category: room.category,
         vendorId,
         averageOtherPrices,
-        taxes: {
-          percent: Number(taxPercent.toFixed(2)),
-          amount: computedTaxAmount,
-          totalWithTaxes
-        },
-        ...recommendation
-      };
-    }).filter((item) => item.recommendedPrice !== null && typeof item.recommendedPrice !== 'undefined');
-
-    return {
-      hotelId: hotel.id,
-      hotelName: hotel.name,
-      recommendedPrices: roomRecommendations
+        taxes: { percent: Number(taxPercent.toFixed(2)), amount: computedTaxAmount, totalWithTaxes },
+        ...recommendation,
+      },
     };
   });
+
+  const hotelsWithRecommendations = hotelMeta.map((meta, i) => ({
+    hotelId: meta.id,
+    hotelName: meta.name,
+    recommendedPrices: flatRecommendations
+      .filter((fr) => fr.hotelIdx === i)
+      .map((fr) => fr.record)
+      .filter((rec) => rec.recommendedPrice !== null && typeof rec.recommendedPrice !== 'undefined'),
+  }));
 
   const payload = {
     status,
@@ -1459,10 +1568,20 @@ const getPublicHotelById = async (req, res) => {
 
 const getAllHotelsRecommendedPrices = async (req, res) => {
   try {
-    const { status = 'active', refresh = 'false' } = req.query;
+    const {
+      status = 'active',
+      refresh = 'false',
+      checkInDate = null,
+      checkOutDate = null,
+      checkin = null,
+      checkout = null,
+    } = req.query;
+    // Accept either casing (?checkInDate= or ?checkin=) so existing clients keep working.
     const payload = await buildAllHotelsRecommendedPricing({
       status,
-      forceRefresh: String(refresh).toLowerCase() === 'true'
+      forceRefresh: String(refresh).toLowerCase() === 'true',
+      checkInDate: checkInDate || checkin,
+      checkOutDate: checkOutDate || checkout,
     });
     return res.json(payload);
   } catch (error) {

@@ -3,11 +3,13 @@ import { Link, useNavigate, useLocation } from "react-router";
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle, Loader } from "lucide-react";
 import svgPaths from "../../imports/svg-nnzqmx1xjq";
 import { authService, RegisterRequest, LoginRequest } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 
 export function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login: authLogin } = useAuth();
 
   // Determine where to go after auth: use returnUrl query param, state, or sessionStorage
   const getReturnUrl = () => {
@@ -68,8 +70,12 @@ export function AuthPage() {
         password: formData.password,
       };
 
-      const response = await authService.login(credentials);
-      
+      // Going through AuthContext.login keeps the in-memory user state in
+      // sync with the freshly-fetched /me response — so the rest of the app
+      // (Navigation, BookingStep2 prefill, RequireAdmin) sees us logged in
+      // immediately, without waiting for a remount or a localStorage read.
+      await authLogin(credentials);
+
       toast.success("Login successful!");
       doRedirect();
     } catch (error: any) {

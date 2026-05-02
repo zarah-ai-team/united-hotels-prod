@@ -1097,12 +1097,16 @@ html.dark {
   box-shadow: 0 14px 30px -8px rgba(20, 184, 166, 0.6);
 }
 
-/* Hero label colors track theme via the glass surface */
+/* Hero label colors — the hero sits on top of a dark photographic backdrop
+   so we keep the labels light in both themes for legibility. The subtle
+   text-shadow keeps them readable even on bright sky regions of the image. */
 .hero-glass-label {
-  color: rgba(15, 15, 15, 0.78);
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 .dark .hero-glass-label {
-  color: rgba(245, 245, 245, 0.82);
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════

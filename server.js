@@ -34,8 +34,9 @@ app.use((req, _res, next) => {
 
 const parseCorsOrigins = () => {
     const raw = process.env.CORS_ORIGIN || process.env.CORS_ORIGINS || '';
-    if (!raw || raw === '*') {
-        return '*';
+    // Wildcard short-hands: '', '*', 'true', 'all', 'any' all mean "allow any origin".
+    if (!raw || raw === '*' || /^(true|all|any)$/i.test(raw)) {
+        return true; // cors() treats `true` as reflect-request-origin (works with credentials).
     }
 
     const origins = raw
@@ -43,7 +44,7 @@ const parseCorsOrigins = () => {
         .map((item) => item.trim())
         .filter(Boolean);
 
-    return origins.length ? origins : '*';
+    return origins.length ? origins : true;
 };
 
 const allowedOrigins = parseCorsOrigins();

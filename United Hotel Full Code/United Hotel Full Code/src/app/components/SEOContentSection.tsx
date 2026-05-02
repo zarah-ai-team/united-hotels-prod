@@ -83,7 +83,7 @@ export function SEOContentSection() {
   ];
 
   return (
-    <section className="relative overflow-hidden py-20 md:py-32">
+    <section className="relative overflow-hidden py-10 md:py-32">
       {/* Aurora blob backdrop — richer than glass-section-bg */}
       <div className="absolute inset-0 -z-10">
         <div

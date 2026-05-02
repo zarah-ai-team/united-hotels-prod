@@ -277,12 +277,10 @@ export const authService = {
     if (response.token) {
       localStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
     }
-    // Persist the user record so guards like RequireAdmin can check
-    // isAdmin/isManager without an extra round-trip on every protected route.
-    if ((response as any).user) {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify((response as any).user));
-    }
-
+    // The user object is no longer cached in localStorage — AuthContext owns
+    // it in React state and re-fetches /me on every app boot. This keeps user
+    // data (role, country, profile fields) always fresh and avoids stale
+    // role caches sticking around after a server-side change.
     return response;
   },
 
@@ -331,10 +329,7 @@ export const authService = {
     );
 
     const user = response?.user ?? response;
-    // Keep the cached user in sync so RequireAdmin sees fresh role info on reload.
-    if (user && typeof user === 'object') {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-    }
+    // No localStorage write here — AuthContext owns the in-memory user state.
     return user;
   },
 
@@ -416,11 +411,21 @@ export const hotelService = {
     }
   },
 
-  async getAllRecommended(status = 'active', refresh = false): Promise<any> {
+  async getAllRecommended(
+    status = 'active',
+    refresh = false,
+    checkInDate?: string | null,
+    checkOutDate?: string | null,
+  ): Promise<any> {
     const query = new URLSearchParams({
       status,
       refresh: String(refresh),
     });
+    // Forward the user's selected stay window — the v2 engine needs dates
+    // to fetch live OTA anchors. Without them the engine falls back to the
+    // analytical formula and live prices never engage.
+    if (checkInDate) query.set('checkInDate', checkInDate);
+    if (checkOutDate) query.set('checkOutDate', checkOutDate);
 
     return apiCall(
       `${API_ENDPOINTS.HOTELS.GET_RECOMMENDED_ALL}?${query.toString()}`,

@@ -2,53 +2,37 @@
  * Real auth-aware role display for the admin layout.
  *
  * Shows the logged-in user's role (admin / vendor) — no fake "switch to admin"
- * modal or demo credentials. The role is fetched once from `/api/users/me`
- * after login and cached in localStorage so the sidebar can filter without
- * re-hitting the server on every render.
+ * modal or demo credentials. The role + name come from AuthContext (which
+ * hydrates from /api/users/me on every app boot), so we never read a stale
+ * cached blob from localStorage.
  */
 
 import { useEffect, useState } from 'react';
 import { ShieldCheck, Tag, LogOut } from 'lucide-react';
-import { authService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 export type Role = 'admin' | 'vendor';
 
-const ROLE_KEY = 'uh_active_role';
-const NAME_KEY = 'uh_active_name';
-
-const readCachedRole = (): Role | null => {
-  const raw = localStorage.getItem(ROLE_KEY);
-  return raw === 'admin' || raw === 'vendor' ? raw : null;
-};
+function deriveRole(user: any): Role | null {
+  if (!user) return null;
+  if (user.isAdmin || user.role === 'admin') return 'admin';
+  if (user.isManager || user.role === 'vendor') return 'vendor';
+  return null;
+}
 
 export function RoleSwitcher() {
-  const [role, setRole] = useState<Role | null>(readCachedRole());
-  const [name, setName] = useState<string>(localStorage.getItem(NAME_KEY) || '');
+  const { user, logout } = useAuth();
+  const role = deriveRole(user);
+  const name = (user?.name || user?.email || '') as string;
 
+  // Notify legacy listeners (sidebar menus etc.) so they re-filter when role
+  // becomes available. Cheap, fires once per role change.
   useEffect(() => {
-    let active = true;
-    authService.getCurrentUser()
-      .then((user: any) => {
-        if (!active) return;
-        const r: Role | null =
-          user?.isAdmin || user?.role === 'admin' ? 'admin' :
-          user?.role === 'vendor' || user?.isManager ? 'vendor' : null;
-        if (r) {
-          setRole(r);
-          setName(user?.name || user?.email || '');
-          localStorage.setItem(ROLE_KEY, r);
-          localStorage.setItem(NAME_KEY, user?.name || user?.email || '');
-          window.dispatchEvent(new CustomEvent('roleChanged', { detail: r }));
-        }
-      })
-      .catch(() => { /* not logged in — gating happens in AdminLayout */ });
-    return () => { active = false; };
-  }, []);
+    if (role) window.dispatchEvent(new CustomEvent('roleChanged', { detail: role }));
+  }, [role]);
 
   const handleLogout = () => {
-    authService.logout();
-    localStorage.removeItem(ROLE_KEY);
-    localStorage.removeItem(NAME_KEY);
+    logout();
     window.location.href = '/admin/login';
   };
 
@@ -88,28 +72,20 @@ export function RoleSwitcher() {
 }
 
 export function useRole(): Role | null {
-  const [role, setRole] = useState<Role | null>(readCachedRole());
+  const { user } = useAuth();
+  const [role, setRole] = useState<Role | null>(deriveRole(user));
 
+  useEffect(() => {
+    setRole(deriveRole(user));
+  }, [user]);
+
+  // Listen for legacy 'roleChanged' events emitted elsewhere in the app.
   useEffect(() => {
     const handler = (e: Event) => {
       const r = (e as CustomEvent<Role>).detail;
       if (r === 'admin' || r === 'vendor') setRole(r);
     };
     window.addEventListener('roleChanged', handler);
-
-    // Resync from server in case localStorage is stale.
-    authService.getCurrentUser()
-      .then((user: any) => {
-        const r: Role | null =
-          user?.isAdmin || user?.role === 'admin' ? 'admin' :
-          user?.role === 'vendor' || user?.isManager ? 'vendor' : null;
-        if (r) {
-          setRole(r);
-          localStorage.setItem(ROLE_KEY, r);
-        }
-      })
-      .catch(() => { /* leave as-is */ });
-
     return () => window.removeEventListener('roleChanged', handler);
   }, []);
 

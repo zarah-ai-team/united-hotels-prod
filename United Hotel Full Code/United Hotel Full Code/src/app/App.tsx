@@ -2,6 +2,7 @@
 import './utils/suppressRechartsWarnings';
 
 import { RouterProvider } from 'react-router';
+import { AuthProvider } from './context/AuthContext';
 import { BookingProvider } from './context/BookingContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -20,12 +21,14 @@ export default function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <BookingProvider>
-          <ErrorBoundary label="root">
-            <RouterProvider router={router} />
-          </ErrorBoundary>
-          <Toaster position="top-right" richColors />
-        </BookingProvider>
+        <AuthProvider>
+          <BookingProvider>
+            <ErrorBoundary label="root">
+              <RouterProvider router={router} />
+            </ErrorBoundary>
+            <Toaster position="top-right" richColors />
+          </BookingProvider>
+        </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
   );

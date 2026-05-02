@@ -20,6 +20,7 @@ import {
   Mail,
   Phone,
   User,
+  MessageCircle,
 } from "lucide-react";
 import { useBooking } from "../context/BookingContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -725,6 +726,29 @@ export function BookingStep3() {
                     </>
                   )}
                 </button>
+
+                {/* When card payment is disabled, give the user a way out
+                    to talk to support directly via WhatsApp. The number is
+                    pulled from VITE_SUPPORT_WHATSAPP at build time so the
+                    operator can change it without a code edit. */}
+                {isCardPaymentPending && (() => {
+                  const rawNumber = import.meta.env.VITE_SUPPORT_WHATSAPP || '15551234567';
+                  const phoneDigits = String(rawNumber).replace(/[^\d]/g, '');
+                  const hotelName = currentHotel?.name || 'a hotel';
+                  const text = `Hi! I'd like to book ${hotelName} from ${booking.checkIn} to ${booking.checkOut} (${roomCount} room${roomCount > 1 ? 's' : ''}, ${nights} night${nights > 1 ? 's' : ''}). Card payment isn't enabled — can you help me complete the booking?`;
+                  const href = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(text)}`;
+                  return (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 bg-[#25D366] text-white py-3 rounded-xl hover:bg-[#1da851] transition-all font-['Inter:Bold',sans-serif] text-[14px] mb-2.5"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Chat with us on WhatsApp
+                    </a>
+                  );
+                })()}
 
                 <p className="font-['Inter:Regular',sans-serif] text-[11px] text-[#8c8c8c] text-center leading-[16px]">
                   By completing this booking, you agree to our{" "}

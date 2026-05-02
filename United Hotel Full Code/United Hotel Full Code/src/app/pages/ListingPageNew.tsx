@@ -104,8 +104,9 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
       onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "auto" })}
       className="group glass-card is-interactive rounded-2xl overflow-hidden block"
     >
-      {/* Image zone */}
-      <div className="relative overflow-hidden aspect-[4/3]">
+      {/* Image zone — taller (4:3) on tablet+; shorter (16:11) on mobile so
+          more cards fit per scroll without changing the desktop hero look. */}
+      <div className="relative overflow-hidden aspect-[16/11] sm:aspect-[4/3]">
         <img
           src={hotel.image}
           alt={hotel.name}
@@ -206,7 +207,10 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
           className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 rounded-r-full bg-gradient-to-b from-[#1abc9c] to-[#2dd4bf]"
         />
 
-        <div className="flex items-end justify-between gap-3">
+        {/* Stack price + CTA vertically on mobile so the View pill never
+            collides with the price text on narrow viewports; revert to a
+            horizontal split from sm: upward where there's room. */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="font-['Inter:SemiBold',sans-serif] text-[10px] tracking-[0.22em] uppercase text-[#1abc9c]">
@@ -220,7 +224,7 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
             </div>
             {hasPrice ? (
               <div className="flex items-baseline gap-1.5 flex-wrap">
-                <span className="font-['Poppins:Bold',sans-serif] text-[26px] leading-none tracking-[-0.025em] text-[#0f9b86] dark:text-[#2dd4bf]">
+                <span className="font-['Poppins:Bold',sans-serif] text-[22px] sm:text-[26px] leading-none tracking-[-0.025em] text-[#0f9b86] dark:text-[#2dd4bf]">
                   {formatCurrency(hotel.directPrice, language)}
                 </span>
                 <span className="font-['Inter:Medium',sans-serif] text-[12px] text-[#6b7280] dark:text-white/55">
@@ -242,7 +246,7 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
 
           <span
             aria-hidden
-            className="shrink-0 inline-flex items-center gap-1.5 px-3.5 h-10 rounded-full bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white font-['Inter:SemiBold',sans-serif] text-[12px] shadow-[0_8px_22px_-8px_rgba(26,188,156,0.6)] transition-all duration-300 group-hover:shadow-[0_12px_28px_-8px_rgba(26,188,156,0.8)] group-hover:translate-x-0.5"
+            className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 h-10 rounded-full bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white font-['Inter:SemiBold',sans-serif] text-[12px] shadow-[0_8px_22px_-8px_rgba(26,188,156,0.6)] transition-all duration-300 group-hover:shadow-[0_12px_28px_-8px_rgba(26,188,156,0.8)] group-hover:translate-x-0.5"
           >
             {t("View")}
             <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.4} />
@@ -307,8 +311,14 @@ export function ListingPageNew() {
           allHotels.push(...(nextResponse.hotels || []));
         }
 
+        // Forward the user's selected dates so the v2 engine fetches LIVE
+        // OTA anchors for that stay window. Without dates the engine has
+        // to fall back to the analytical formula.
+        const params = new URLSearchParams(location.search);
+        const checkInDate = params.get("checkInDate") || params.get("checkin") || null;
+        const checkOutDate = params.get("checkOutDate") || params.get("checkout") || null;
         const pricingPayload = await hotelService
-          .getAllRecommended("active", true)
+          .getAllRecommended("active", true, checkInDate, checkOutDate)
           .catch(() => null);
 
         const recommendedByHotelId = new Map<string, any[]>();

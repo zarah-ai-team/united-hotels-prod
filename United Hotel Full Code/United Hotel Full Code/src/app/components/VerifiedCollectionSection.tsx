@@ -67,7 +67,7 @@ function CollectionCard({ hotel, format, t, variant }: CardProps) {
         isFeature ? "h-full" : ""
       }`}
     >
-      <div className={`relative overflow-hidden ${isFeature ? "aspect-[4/5] md:aspect-auto md:h-full" : "aspect-[16/11]"}`}>
+      <div className={`relative overflow-hidden ${isFeature ? "aspect-[16/11] md:aspect-[4/5] md:h-full" : "aspect-[16/11]"}`}>
         <img
           src={hotel.image}
           alt={hotel.name}
@@ -207,7 +207,7 @@ export function VerifiedCollectionSection() {
   return (
     <section
       id="verified-collection"
-      className="relative overflow-hidden pt-24 md:pt-28 pb-20 md:pb-28"
+      className="relative overflow-hidden pt-12 md:pt-28 pb-10 md:pb-28"
     >
       {/* Decorative gradient blob backdrop — adds richness without imagery */}
       <div className="absolute inset-0 -z-10">

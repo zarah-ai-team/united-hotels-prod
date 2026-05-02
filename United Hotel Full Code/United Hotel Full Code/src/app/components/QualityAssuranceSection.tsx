@@ -66,7 +66,7 @@ export function QualityAssuranceSection() {
   ];
 
   return (
-    <section id="quality" className="relative py-20 md:py-32 overflow-hidden">
+    <section id="quality" className="relative py-10 md:py-32 overflow-hidden">
       {/* Cinematic backdrop — same image language as the numbers section */}
       <div className="absolute inset-0">
         <img
