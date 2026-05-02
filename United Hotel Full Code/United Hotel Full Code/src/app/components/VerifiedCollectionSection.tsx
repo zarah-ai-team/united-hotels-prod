@@ -3,11 +3,7 @@ import { Link } from "react-router";
 import { MapPin, Star, ArrowUpRight, BadgeCheck, ShieldCheck } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { hotelService, type PublicHotel } from "../services/api";
-import imgImageHotel from "figma:asset/24b94370ae50cf05c8eda404c2045b52c5b68320.png";
-import imgImageHotel1 from "figma:asset/126d7e43c8c296ca95f6cc5a2e933adaced67080.png";
-import imgImageHotel2 from "figma:asset/2192c11a429594d69f4c28f4fc3ed22cdc4449b5.png";
-
-const STATIC_IMAGES = [imgImageHotel, imgImageHotel1, imgImageHotel2];
+import { pickHotelImage, makeImageFallback } from "../utils/hotelImages";
 
 type CollectionHotel = {
   id: string;
@@ -19,7 +15,7 @@ type CollectionHotel = {
   image: string;
 };
 
-const mapHotel = (hotel: PublicHotel, index: number): CollectionHotel => {
+const mapHotel = (hotel: PublicHotel): CollectionHotel => {
   const rooms = Array.isArray(hotel.rooms) ? hotel.rooms : [];
   const recommended = Array.isArray(hotel.recommendedPrices) ? hotel.recommendedPrices : [];
 
@@ -46,7 +42,7 @@ const mapHotel = (hotel: PublicHotel, index: number): CollectionHotel => {
     rating: Number(hotel.rating || hotel.starRating || hotel.star_rating || 4),
     reviews: Number(hotel.reviewCount || 0),
     price: recommendedMin || roomMin || 0,
-    image: STATIC_IMAGES[index % STATIC_IMAGES.length],
+    image: pickHotelImage(hotel),
   };
 };
 
@@ -71,6 +67,8 @@ function CollectionCard({ hotel, format, t, variant }: CardProps) {
         <img
           src={hotel.image}
           alt={hotel.name}
+          loading="lazy"
+          onError={makeImageFallback({ id: hotel.id, name: hotel.name })}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]"
         />
         {/* Stronger bottom gradient — deeper in dark mode for crisp copy contrast */}
@@ -111,7 +109,7 @@ function CollectionCard({ hotel, format, t, variant }: CardProps) {
           <h3
             className={`font-['Poppins:Bold',sans-serif] text-white line-clamp-2 ${
               isFeature
-                ? "text-[26px] md:text-[34px] lg:text-[40px] leading-[1.05] tracking-[-0.028em] drop-shadow-[0_4px_18px_rgba(0,0,0,0.6)]"
+                ? "text-[20px] md:text-[24px] lg:text-[28px] leading-[1.12] tracking-[-0.025em] drop-shadow-[0_4px_18px_rgba(0,0,0,0.6)]"
                 : "text-[19px] md:text-[21px] leading-[1.18] tracking-[-0.02em] drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
             }`}
           >
@@ -138,7 +136,7 @@ function CollectionCard({ hotel, format, t, variant }: CardProps) {
               <div className="flex items-baseline gap-1.5">
                 <span
                   className={`font-['Poppins:Bold',sans-serif] text-white leading-none tracking-[-0.025em] ${
-                    isFeature ? "text-[28px] md:text-[34px]" : "text-[22px]"
+                    isFeature ? "text-[22px] md:text-[26px]" : "text-[22px]"
                   }`}
                 >
                   {hotel.price > 0 ? format(hotel.price) : "—"}
@@ -156,10 +154,10 @@ function CollectionCard({ hotel, format, t, variant }: CardProps) {
             <span
               aria-hidden
               className={`shrink-0 inline-flex items-center justify-center rounded-full bg-white/15 dark:bg-white/10 backdrop-blur-md ring-1 ring-white/30 dark:ring-white/20 text-white shadow-[0_6px_18px_-6px_rgba(0,0,0,0.5)] transition-all duration-300 group-hover:bg-[#1abc9c] group-hover:ring-[#1abc9c]/50 group-hover:translate-x-0.5 group-hover:scale-105 ${
-                isFeature ? "w-12 h-12 md:w-14 md:h-14" : "w-10 h-10"
+                isFeature ? "w-11 h-11 md:w-12 md:h-12" : "w-10 h-10"
               }`}
             >
-              <ArrowUpRight className={isFeature ? "w-5 h-5 md:w-[22px] md:h-[22px]" : "w-4 h-4"} strokeWidth={2.2} />
+              <ArrowUpRight className={isFeature ? "w-[18px] h-[18px] md:w-5 md:h-5" : "w-4 h-4"} strokeWidth={2.2} />
             </span>
           </div>
         </div>
@@ -188,7 +186,7 @@ export function VerifiedCollectionSection() {
         const list = Array.isArray(res.hotels) ? res.hotels : [];
         // Sort by review count → highest "real engagement" surfaces first
         const sorted = [...list].sort((a, b) => Number(b.reviewCount || 0) - Number(a.reviewCount || 0));
-        setHotels(sorted.slice(0, 5).map((h, i) => mapHotel(h, i)));
+        setHotels(sorted.slice(0, 5).map((h) => mapHotel(h)));
       })
       .catch(() => {
         if (active) setHotels([]);

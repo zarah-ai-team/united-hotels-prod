@@ -385,6 +385,21 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const buildLoginNotificationHtml = ({ name, email, when, ip, userAgent }) => `
+  <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1f2937">
+    <h2 style="margin:0 0 12px;color:#1abc9c">New sign-in to your United Hotels account</h2>
+    <p style="margin:0 0 16px">Hi ${name || 'there'},</p>
+    <p style="margin:0 0 16px">We're letting you know that your account (<strong>${email}</strong>) was just signed in to.</p>
+    <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:0 0 16px">
+      <tr><td style="padding:6px 0;color:#6b7280">Time</td><td style="padding:6px 0">${when}</td></tr>
+      <tr><td style="padding:6px 0;color:#6b7280">IP address</td><td style="padding:6px 0">${ip || 'unknown'}</td></tr>
+      <tr><td style="padding:6px 0;color:#6b7280">Device</td><td style="padding:6px 0">${userAgent || 'unknown'}</td></tr>
+    </table>
+    <p style="margin:0 0 8px">If this was you, no further action is needed.</p>
+    <p style="margin:0;color:#dc2626"><strong>If this wasn't you</strong>, please reset your password immediately.</p>
+  </div>
+`;
+
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -407,6 +422,15 @@ const loginUser = async (req, res) => {
 
     const user = mapUser(row, meta);
     const token = generateToken(user.id, user.isAdmin, user.isManager);
+
+    const ip = (req.headers['x-forwarded-for']?.split(',')[0] || req.ip || '').trim();
+    const userAgent = req.headers['user-agent'] || '';
+    const when = new Date().toUTCString();
+    sendMail(
+      user.email,
+      buildLoginNotificationHtml({ name: user.name, email: user.email, when, ip, userAgent }),
+      'New sign-in to your United Hotels account'
+    ).catch((err) => console.error('[auth] login email failed:', err.message));
 
     return res.json({
       message: 'Login successful',

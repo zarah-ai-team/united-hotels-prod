@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { lookupTranslation } from "./translations";
+import { API_BASE_URL, API_ENDPOINTS, joinUrl } from "../config/api";
 
 export type LanguageCode =
   | "en"
@@ -266,7 +267,7 @@ function flushBatch(language: LanguageCode) {
   pendingByLanguage.set(language, []);
 
   const texts = queue.map((item) => item.text);
-  fetch("/api/translate", {
+  fetch(joinUrl(API_BASE_URL, API_ENDPOINTS.TRANSLATE), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ q: texts, target: language, source: "en" }),
@@ -279,7 +280,8 @@ function flushBatch(language: LanguageCode) {
         item.resolve(typeof t === "string" && t && t !== item.text ? t : null);
       });
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error("[api] translate batch failed:", err);
       queue.forEach((item) => item.resolve(null));
     });
 }

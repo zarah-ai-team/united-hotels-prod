@@ -1,39 +1,34 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { ShieldCheck, Loader2, AlertCircle, Building2, Users, Tag, BarChart3 } from 'lucide-react';
-import { authService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 export function AdminLoginPage() {
   const navigate = useNavigate();
+  const { user, loading: authLoading, login, logout } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // If already logged in as admin or staff (vendor), jump straight to the dashboard.
+  // If already logged in as admin or staff, jump straight to the dashboard.
+  // Read from AuthContext so the gate matches RequireAdmin's gate exactly —
+  // anything else and the bounce/redirect ping-pongs.
   useEffect(() => {
-    let active = true;
-    authService.getCurrentUser()
-      .then((user) => {
-        if (!active) return;
-        const allowed = user?.isAdmin || user?.role === 'admin' || user?.role === 'vendor' || user?.isManager;
-        if (allowed) navigate('/admin', { replace: true });
-      })
-      .catch(() => { /* not logged in — stay on form */ });
-    return () => { active = false; };
-  }, [navigate]);
+    if (authLoading) return;
+    const allowed = Boolean(user?.isAdmin || user?.isManager);
+    if (allowed) navigate('/admin', { replace: true });
+  }, [authLoading, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
     try {
-      const res = await authService.login({ email: email.trim(), password });
-      const user: any = (res as any).user;
-      const allowed = Boolean(user?.isAdmin || user?.role === 'admin' || user?.role === 'vendor' || user?.isManager);
+      const fresh = await login({ email: email.trim(), password });
+      const allowed = Boolean(fresh?.isAdmin || fresh?.isManager);
       if (!allowed) {
-        // Token is stored, but this account isn't admin or staff — clear and reject.
-        authService.logout();
+        logout();
         setError('This account does not have staff or admin access. Use the Guest Portal instead.');
         return;
       }

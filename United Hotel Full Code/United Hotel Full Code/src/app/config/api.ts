@@ -1,101 +1,122 @@
 /**
  * API Configuration
- * Centralized configuration for API endpoints and base URL
+ *
+ * Two upstreams sit behind nginx in production:
+ *   /api      → backend          (port 5000)
+ *   /pricing  → pricing engine   (port 5050)
+ *
+ * Frontend talks to relative paths so there is no CORS dependency.
  */
 
-// API Base URL - defaults to same-origin for production static serving.
-// Set VITE_API_URL for cross-origin deployments.
-export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// Strip a trailing slash so `${BASE}/foo` never produces `//foo`.
+const stripTrailingSlash = (s: string) => s.replace(/\/+$/, '');
+// Force a leading slash so endpoint concatenation is always well-formed.
+const ensureLeadingSlash = (s: string) => (s.startsWith('/') ? s : `/${s}`);
 
-// API Endpoints
+export const API_BASE_URL = stripTrailingSlash(
+  import.meta.env.VITE_API_URL || '/api',
+);
+
+export const PRICING_BASE_URL = stripTrailingSlash(
+  import.meta.env.VITE_PRICING_URL || '/pricing',
+);
+
+/** Safe URL joiner — collapses any double slashes between base and path. */
+export const joinUrl = (base: string, path: string) =>
+  `${stripTrailingSlash(base)}${ensureLeadingSlash(path)}`;
+
+// Backend endpoints (joined onto API_BASE_URL — do NOT prefix with `/api`).
 export const API_ENDPOINTS = {
-  // Authentication
   AUTH: {
-    REGISTER: '/api/users/register',
-    LOGIN: '/api/users/login',
-    ME: '/api/users/me',
-    VERIFY_EMAIL: '/api/users/verify-email',
-    FORGOT_PASSWORD: '/api/users/forgot-password',
-    RESET_PASSWORD: '/api/users/reset-password',
+    REGISTER: '/users/register',
+    LOGIN: '/users/login',
+    ME: '/users/me',
+    VERIFY_EMAIL: '/users/verify-email',
+    FORGOT_PASSWORD: '/users/forgot-password',
+    RESET_PASSWORD: '/users/reset-password',
+    SEND_REGISTER_OTP: '/users/send-register-otp',
+    VERIFY_REGISTER_OTP: '/users/verify-register-otp',
   },
 
-  // Hotels
   HOTELS: {
-    GET_PUBLIC: '/api/hotels/public',
-    GET_BY_ID: (id: string) => `/api/hotels/public/${id}`,
-    GET_RECOMMENDED_ALL: '/api/hotels/pricing/all',
-    GET_ADMIN: '/api/hotels/admin',
-    CREATE: '/api/hotels/admin/create',
-    UPDATE: (id: string) => `/api/hotels/admin/${id}/update`,
-    DELETE: (id: string) => `/api/hotels/admin/${id}/delete`,
+    GET_PUBLIC: '/hotels/public',
+    GET_BY_ID: (id: string) => `/hotels/public/${id}`,
+    GET_RECOMMENDED_ALL: '/hotels/pricing/all',
+    GET_ADMIN: '/hotels/admin',
+    CREATE: '/hotels/admin/create',
+    UPDATE: (id: string) => `/hotels/admin/${id}/update`,
+    DELETE: (id: string) => `/hotels/admin/${id}/delete`,
   },
 
-  // Rooms
   ROOMS: {
-    GET_ALL: '/api/rooms',
-    GET_BY_ID: (id: string) => `/api/rooms/${id}`,
-    CREATE: '/api/rooms',
-    UPDATE: (id: string) => `/api/rooms/${id}`,
-    DELETE: (id: string) => `/api/rooms/${id}`,
+    GET_ALL: '/rooms',
+    GET_BY_ID: (id: string) => `/rooms/${id}`,
+    CREATE: '/rooms',
+    UPDATE: (id: string) => `/rooms/${id}`,
+    DELETE: (id: string) => `/rooms/${id}`,
   },
 
-  // Itineraries
   ITINERARIES: {
-    GET_ALL: '/api/itineraries',
-    GET_BY_ID: (id: string) => `/api/itineraries/${id}`,
-    CREATE: '/api/itineraries',
-    UPDATE: (id: string) => `/api/itineraries/${id}`,
-    DELETE: (id: string) => `/api/itineraries/${id}`,
+    GET_ALL: '/itineraries',
+    GET_BY_ID: (id: string) => `/itineraries/${id}`,
+    CREATE: '/itineraries',
+    UPDATE: (id: string) => `/itineraries/${id}`,
+    DELETE: (id: string) => `/itineraries/${id}`,
   },
 
-  // Room Itineraries
   ROOM_ITINERARIES: {
-    GET_BY_ITINERARY: (id: string) => `/api/room-itineraries/itinerary/${id}`,
-    CREATE: '/api/room-itineraries',
-    UPDATE: (id: string) => `/api/room-itineraries/${id}`,
-    DELETE: (id: string) => `/api/room-itineraries/${id}`,
+    GET_BY_ITINERARY: (id: string) => `/room-itineraries/itinerary/${id}`,
+    CREATE: '/room-itineraries',
+    UPDATE: (id: string) => `/room-itineraries/${id}`,
+    DELETE: (id: string) => `/room-itineraries/${id}`,
   },
 
-  // Pricing
+  // Pricing routes that live on the backend (port 5000) — these wrap the
+  // pricing engine internally. Distinct from PRICING_ENGINE below.
   PRICING: {
-    GET_RECOMMENDED: '/api/rooms/getrecommendedprice',
-    GET_AVAILABILITY: '/api/rooms/gethotelavailability',
-    GET_ALL_AVAILABILITY: '/api/rooms/getallhotelavailability',
+    GET_RECOMMENDED: '/rooms/getrecommendedprice',
+    GET_AVAILABILITY: '/rooms/gethotelavailability',
+    GET_ALL_AVAILABILITY: '/rooms/getallhotelavailability',
   },
 
-  // Bookings
   BOOKINGS: {
-    GET_ALL: '/api/bookings',
-    GET_BY_USER: '/api/bookings/getbookingsbyuserid',
-    BOOK_ROOM: '/api/bookings/bookroom',
+    GET_ALL: '/bookings',
+    GET_BY_USER: '/bookings/getbookingsbyuserid',
+    BOOK_ROOM: '/bookings/bookroom',
   },
 
-  // Admin (admin-only)
   ADMIN: {
-    STATS: '/api/admin/stats',
-    ANALYTICS: '/api/admin/analytics',
-    BOOKINGS_BY_COUNTRY: '/api/admin/bookings-by-country',
-    USERS_BY_COUNTRY: '/api/admin/users-by-country',
-    USERS: '/api/admin/users',
-    USER_ROLE: (id: string) => `/api/admin/users/${id}/role`,
-    USER_DELETE: (id: string) => `/api/admin/users/${id}`,
-    ASSIGN_VENDOR: (hotelId: string) => `/api/admin/hotels/${hotelId}/assign-vendor`,
-    ROOM_PRICE: (id: string) => `/api/admin/rooms/${id}/price`,
-    EMAIL_LOGS: '/api/admin/email-logs',
+    STATS: '/admin/stats',
+    ANALYTICS: '/admin/analytics',
+    BOOKINGS_BY_COUNTRY: '/admin/bookings-by-country',
+    USERS_BY_COUNTRY: '/admin/users-by-country',
+    USERS: '/admin/users',
+    USER_ROLE: (id: string) => `/admin/users/${id}/role`,
+    USER_DELETE: (id: string) => `/admin/users/${id}`,
+    ASSIGN_VENDOR: (hotelId: string) => `/admin/hotels/${hotelId}/assign-vendor`,
+    ROOM_PRICE: (id: string) => `/admin/rooms/${id}/price`,
+    EMAIL_LOGS: '/admin/email-logs',
   },
 
-  // Vendor (vendor + admin)
   VENDOR: {
-    STATS: '/api/vendor/stats',
-    ANALYTICS: '/api/vendor/analytics',
-    HOTELS: '/api/vendor/hotels',
-    ROOMS: '/api/vendor/rooms',
-    ROOM_PRICE_BAND: (id: string) => `/api/vendor/rooms/${id}/price-band`,
-    BOOKINGS: '/api/vendor/bookings',
+    STATS: '/vendor/stats',
+    ANALYTICS: '/vendor/analytics',
+    HOTELS: '/vendor/hotels',
+    ROOMS: '/vendor/rooms',
+    ROOM_PRICE_BAND: (id: string) => `/vendor/rooms/${id}/price-band`,
+    BOOKINGS: '/vendor/bookings',
   },
+
+  TRANSLATE: '/translate',
 };
 
-// Headers configuration
+// Pricing-engine endpoints (joined onto PRICING_BASE_URL).
+export const PRICING_ENGINE_ENDPOINTS = {
+  PRICE: '/v2/price',
+  PRICES_BATCH: '/v2/prices/batch',
+  HEALTH: '/v2/health',
+};
+
 export const getAuthHeaders = (token?: string) => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -108,7 +129,6 @@ export const getAuthHeaders = (token?: string) => {
   return headers;
 };
 
-// Storage keys
 export const STORAGE_KEYS = {
   TOKEN: 'uh_auth_token',
   USER: 'uh_user',

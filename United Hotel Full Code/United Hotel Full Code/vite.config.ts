@@ -1,4 +1,4 @@
-import { defineConfig, Plugin } from 'vite'
+import { defineConfig, loadEnv, Plugin } from 'vite'
 import path from 'path'
 import fs from 'fs'
 import tailwindcss from '@tailwindcss/vite'
@@ -22,30 +22,39 @@ function figmaAssetResolver(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [
-    figmaAssetResolver(),
-    react(),
-    tailwindcss(),
-  ],
-  resolve: {
-    alias: {
-      // Alias @ to the src directory
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const apiTarget = env.VITE_API_PROXY || 'http://localhost:5000'
+  const pricingTarget = env.VITE_PRICING_PROXY || 'http://localhost:5050'
 
-  server: {
-    host: true,
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: process.env.VITE_API_PROXY || 'http://localhost:5000',
-        changeOrigin: true,
+  return {
+    plugins: [
+      figmaAssetResolver(),
+      react(),
+      tailwindcss(),
+    ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
       },
     },
-  },
 
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
-  assetsInclude: ['**/*.svg', '**/*.csv'],
+    server: {
+      host: true,
+      port: 5173,
+      proxy: {
+        '/api': {
+          target: apiTarget,
+          changeOrigin: true,
+        },
+        '/pricing': {
+          target: pricingTarget,
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/pricing/, ''),
+        },
+      },
+    },
+
+    assetsInclude: ['**/*.svg', '**/*.csv'],
+  }
 })

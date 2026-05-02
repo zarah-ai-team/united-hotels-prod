@@ -3,7 +3,15 @@
  * Handles all HTTP requests to the backend API
  */
 
-import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, STORAGE_KEYS } from '../config/api';
+import {
+  API_BASE_URL,
+  API_ENDPOINTS,
+  PRICING_BASE_URL,
+  PRICING_ENGINE_ENDPOINTS,
+  getAuthHeaders,
+  joinUrl,
+  STORAGE_KEYS,
+} from '../config/api';
 
 // Types
 export interface ApiResponse<T = any> {
@@ -200,13 +208,15 @@ export interface BookingData {
   phoneNumber?: string;
 }
 
-// Helper function to make API calls
-async function apiCall<T = any>(
+// Core fetch wrapper. `base` lets us point at either backend (/api) or
+// pricing engine (/pricing) without duplicating error handling.
+async function request<T = any>(
+  base: string,
   endpoint: string,
   options: RequestInit = {},
-  token?: string
+  token?: string,
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = joinUrl(base, endpoint);
   const headers = getAuthHeaders(token);
 
   const config: RequestInit = {
@@ -232,27 +242,39 @@ async function apiCall<T = any>(
         // Response is not JSON
       }
 
+      console.error(`[api] ${options.method || 'GET'} ${url} failed:`, error);
       throw error;
     }
 
-    // Handle empty responses (like DELETE)
     if (response.status === 204 || response.headers.get('content-length') === '0') {
       return {} as T;
     }
 
     return await response.json();
   } catch (error: any) {
-    // Re-throw API errors
-    if (error.status) {
-      throw error;
-    }
+    if (error.status) throw error;
 
-    // Handle network errors
+    console.error(`[api] network error on ${url}:`, error);
     throw {
       message: error.message || 'Network error',
       status: 0,
     } as ApiError;
   }
+}
+
+async function apiCall<T = any>(
+  endpoint: string,
+  options: RequestInit = {},
+  token?: string,
+): Promise<T> {
+  return request<T>(API_BASE_URL, endpoint, options, token);
+}
+
+async function pricingCall<T = any>(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> {
+  return request<T>(PRICING_BASE_URL, endpoint, options);
 }
 
 // Get stored token
@@ -298,7 +320,7 @@ export const authService = {
 
   async sendRegisterOtp(data: OtpRequest): Promise<any> {
     return apiCall(
-      '/api/users/send-register-otp',
+      API_ENDPOINTS.AUTH.SEND_REGISTER_OTP,
       {
         method: 'POST',
         body: JSON.stringify(data),
@@ -308,7 +330,7 @@ export const authService = {
 
   async verifyRegisterOtp(data: OtpVerifyRequest): Promise<{ otpVerifiedToken: string; message?: string }> {
     return apiCall(
-      '/api/users/verify-register-otp',
+      API_ENDPOINTS.AUTH.VERIFY_REGISTER_OTP,
       {
         method: 'POST',
         body: JSON.stringify(data),
@@ -954,6 +976,78 @@ export const vendorService = {
 };
 
 // ─────────────────────────────────────────────
+// Pricing Engine Service (direct calls to /pricing → port 5050)
+// ─────────────────────────────────────────────
+
+export interface PricingEngineQuoteRequest {
+  hotelId: number | string;
+  checkIn: string;
+  checkOut: string;
+  roomCategory?: string;
+  guests?: number;
+  rooms?: number;
+  currency?: string;
+  hotelName?: string;
+  location?: string;
+  district?: string;
+  basePrice?: number;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+export const pricingEngineService = {
+  async getPrice(data: PricingEngineQuoteRequest): Promise<any> {
+    return pricingCall(PRICING_ENGINE_ENDPOINTS.PRICE, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getPricesBatch(items: PricingEngineQuoteRequest[]): Promise<any> {
+    return pricingCall(PRICING_ENGINE_ENDPOINTS.PRICES_BATCH, {
+      method: 'POST',
+      body: JSON.stringify({ items }),
+    });
+  },
+
+  async getHealth(): Promise<any> {
+    return pricingCall(PRICING_ENGINE_ENDPOINTS.HEALTH, { method: 'GET' });
+  },
+};
+
+// ─────────────────────────────────────────────
+// Centralized helpers — the names the rest of the app should reach for
+// ─────────────────────────────────────────────
+
+export async function getHotels(
+  params: Parameters<typeof hotelService.getPublicHotels>[0] = {},
+): Promise<PublicHotel[]> {
+  const response = await hotelService.getPublicHotels(params);
+  return Array.isArray(response.hotels) ? response.hotels : [];
+}
+
+export async function searchHotels(query: {
+  q?: string;
+  location?: string;
+  checkInDate?: string;
+  checkOutDate?: string;
+  guests?: number;
+}): Promise<PublicHotel[]> {
+  const hotels = await getHotels({ limit: 200, offset: 0 });
+  const needle = (query.q || query.location || '').trim().toLowerCase();
+  if (!needle) return hotels;
+  return hotels.filter((h) => {
+    const name = (h.name || h.hotel_name || '').toLowerCase();
+    const loc = (h.location || h.location_raw || '').toLowerCase();
+    return name.includes(needle) || loc.includes(needle);
+  });
+}
+
+export async function getPricing(data: PricingEngineQuoteRequest): Promise<any> {
+  return pricingEngineService.getPrice(data);
+}
+
+// ─────────────────────────────────────────────
 // Utility exports
 // ─────────────────────────────────────────────
 
@@ -964,7 +1058,11 @@ export default {
   itineraries: itineraryService,
   roomItineraries: roomItineraryService,
   pricing: pricingService,
+  pricingEngine: pricingEngineService,
   bookings: bookingService,
   admin: adminService,
   vendor: vendorService,
+  getHotels,
+  searchHotels,
+  getPricing,
 };

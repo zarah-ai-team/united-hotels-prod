@@ -12,7 +12,6 @@ import { useScrollProgress } from "../hooks/useScrollProgress";
 import { useParallax } from "../hooks/useParallax";
 import { useLanguage } from "../context/LanguageContext";
 import { useBooking } from "../context/BookingContext";
-import imgRectangle10 from "figma:asset/2e73560823491cb7aae2b44b94830399bada8384.png";
 import imgKadikoy from "figma:asset/250023f532e568305b14dfb57c614f51c1fba582.png";
 import heroFigma1 from "../../assets/hero-figma-1.webp";
 import heroFigma2 from "../../assets/hero-figma-2.webp";
@@ -124,7 +123,7 @@ function HeroSection() {
   return (
     <div
       id="home"
-      className="relative -mt-16 md:-mt-[68px] h-[100svh] min-h-[600px] overflow-hidden"
+      className="relative -mt-16 md:-mt-[68px] h-[88svh] min-h-[540px] md:h-[100svh] md:min-h-[600px] overflow-hidden"
     >
       {/* Slideshow — wrapper extends 160px above and below the hero so the
           parallax translation never reveals empty space. The hero container
@@ -153,16 +152,16 @@ function HeroSection() {
       {/* Content */}
       <div className="relative h-full flex flex-col">
         {/* Centered Hero Text — minimal */}
-        <div className="flex-1 flex items-center justify-center px-4 md:px-10 pt-20 md:pt-8">
+        <div className="flex-1 flex items-center justify-center px-4 md:px-10 pt-16 md:pt-8">
           <div ref={heroTextParallax} className="text-center max-w-[820px] parallax">
-            <span className="inline-flex items-center gap-2 mb-3 md:mb-4 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-[11px] md:text-[12px] tracking-[0.18em] uppercase font-['Inter:Medium',sans-serif] animate-in fade-in slide-in-from-bottom-2 duration-700">
+            <span className="inline-flex items-center gap-1.5 md:gap-2 mb-2 md:mb-4 px-2.5 md:px-3 py-0.5 md:py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-[10px] md:text-[12px] tracking-[0.16em] md:tracking-[0.18em] uppercase font-['Inter:Medium',sans-serif] animate-in fade-in slide-in-from-bottom-2 duration-700">
               <span className="w-1 h-1 rounded-full bg-white/80" />
               {HERO_SLIDES[activeSlide].caption}, {t("Turkey")}
             </span>
-            <h1 className="font-['Poppins:Bold',sans-serif] text-[32px] md:text-[54px] leading-[40px] md:leading-[62px] text-white mb-3 md:mb-4 tracking-[-0.01em] animate-in fade-in slide-in-from-bottom-3 duration-700">
+            <h1 className="font-['Poppins:Bold',sans-serif] text-[26px] md:text-[54px] leading-[32px] md:leading-[62px] text-white mb-2 md:mb-4 tracking-[-0.01em] animate-in fade-in slide-in-from-bottom-3 duration-700">
               {t("Stay Smart. Stay United.")}
             </h1>
-            <p className="font-['Inter:Regular',sans-serif] text-[14px] md:text-[17px] leading-[22px] md:leading-[26px] text-white/80 max-w-[620px] mx-auto animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100">
+            <p className="font-['Inter:Regular',sans-serif] text-[12.5px] md:text-[17px] leading-[18px] md:leading-[26px] text-white/80 max-w-[440px] md:max-w-[620px] mx-auto animate-in fade-in slide-in-from-bottom-3 duration-700 delay-100">
               {t(
                 "Handpicked stays in Turkey's most loved neighborhoods. Verified, transparent, and quietly excellent.",
               )}
@@ -171,11 +170,11 @@ function HeroSection() {
         </div>
 
         {/* Glass Search Container */}
-        <div className="px-4 md:px-10 pb-6 md:pb-10">
+        <div className="px-4 md:px-10 pb-4 md:pb-10">
           <div className="max-w-[1280px] mx-auto">
             <form
               onSubmit={handleSearch}
-              className="hero-glass p-4 md:p-6 lg:p-7 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
+              className="hero-glass p-3 md:p-6 lg:p-7 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
             >
               {/* Desktop layout */}
               <div className="hidden md:grid grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-3 lg:gap-4 items-end">
@@ -262,49 +261,49 @@ function HeroSection() {
               </div>
 
               {/* Mobile layout */}
-              <div className="md:hidden flex flex-col gap-3">
+              <div className="md:hidden flex flex-col gap-2">
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-current opacity-60" strokeWidth={2} />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-current opacity-60" strokeWidth={2} />
                   <input
                     id="destination-mobile"
                     type="text"
                     value={searchData.destination}
                     onChange={(e) => setSearchData({ ...searchData, destination: e.target.value })}
                     placeholder={t("Where are you going?")}
-                    className="w-full h-[52px] pl-12 pr-4 rounded-xl font-['Inter:Regular',sans-serif] text-[15px]"
+                    className="w-full h-[42px] pl-9 pr-3 rounded-lg font-['Inter:Regular',sans-serif] text-[13.5px]"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-current opacity-60" />
+                    <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-current opacity-60" />
                     <input
                       id="checkIn-mobile"
                       type="date"
                       value={searchData.checkIn}
                       onChange={(e) => setSearchData({ ...searchData, checkIn: e.target.value })}
                       min={new Date().toISOString().split("T")[0]}
-                      className="w-full h-[52px] pl-10 pr-2 rounded-xl text-[14px] font-['Inter:Regular',sans-serif]"
+                      className="w-full h-[42px] pl-8 pr-1.5 rounded-lg text-[12.5px] font-['Inter:Regular',sans-serif]"
                     />
                   </div>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-current opacity-60" />
+                    <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-current opacity-60" />
                     <input
                       id="checkOut-mobile"
                       type="date"
                       value={searchData.checkOut}
                       onChange={(e) => setSearchData({ ...searchData, checkOut: e.target.value })}
                       min={searchData.checkIn || new Date().toISOString().split("T")[0]}
-                      className="w-full h-[52px] pl-10 pr-2 rounded-xl text-[14px] font-['Inter:Regular',sans-serif]"
+                      className="w-full h-[42px] pl-8 pr-1.5 rounded-lg text-[12.5px] font-['Inter:Regular',sans-serif]"
                     />
                   </div>
                 </div>
                 <div className="relative">
-                  <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-current opacity-60" strokeWidth={2} />
+                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-current opacity-60" strokeWidth={2} />
                   <select
                     id="guests-mobile"
                     value={searchData.guests}
                     onChange={(e) => setSearchData({ ...searchData, guests: e.target.value })}
-                    className="w-full h-[52px] pl-12 pr-10 rounded-xl text-[15px] font-['Inter:Regular',sans-serif] appearance-none"
+                    className="w-full h-[42px] pl-9 pr-9 rounded-lg text-[13.5px] font-['Inter:Regular',sans-serif] appearance-none"
                   >
                     <option value="">{t("Add guests")}</option>
                     <option value="1">{t("1 guest")}</option>
@@ -312,20 +311,20 @@ function HeroSection() {
                     <option value="3">{t("3 guests")}</option>
                     <option value="4">{t("4+ guests")}</option>
                   </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-current opacity-60 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-current opacity-60 pointer-events-none" />
                 </div>
                 <button
                   type="submit"
-                  className="hero-cta-btn w-full h-[52px] rounded-xl font-['Inter:SemiBold',sans-serif] text-[15px] flex items-center justify-center gap-2 mt-1"
+                  className="hero-cta-btn w-full h-[44px] rounded-lg font-['Inter:SemiBold',sans-serif] text-[13.5px] flex items-center justify-center gap-1.5 mt-0.5"
                 >
-                  <Search className="w-5 h-5" strokeWidth={2.4} />
+                  <Search className="w-4 h-4" strokeWidth={2.4} />
                   {t("Search Hotels")}
                 </button>
               </div>
             </form>
 
             {/* Slide indicators */}
-            <div className="flex items-center justify-center gap-2 mt-4 md:mt-5">
+            <div className="flex items-center justify-center gap-2 mt-3 md:mt-5">
               {HERO_SLIDES.map((_, i) => (
                 <button
                   key={i}
@@ -358,9 +357,11 @@ function StatsBand() {
       {/* Cinematic backdrop — same image language as the hero */}
       <div className="absolute inset-0">
         <img
-          src={imgRectangle10}
+          src={heroFigma6}
           alt=""
           aria-hidden
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover scale-[1.04]"
         />
         {/* Layered vignette + warm gradient for legibility */}
