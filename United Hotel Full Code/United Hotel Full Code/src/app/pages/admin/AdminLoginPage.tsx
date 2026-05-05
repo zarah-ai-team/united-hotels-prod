@@ -40,17 +40,11 @@ export function AdminLoginPage() {
     }
   };
 
-  // Helper: prefill the email + password fields when the user clicks a demo card.
-  const useDemo = (demoEmail: string, demoPassword: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f766e] via-[#1ABC9C] to-[#22d3ee] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#1E5FBC] via-[#2F80ED] to-[#5DA0F8] flex items-center justify-center p-4">
       <div className="w-full max-w-5xl grid md:grid-cols-2 gap-0 rounded-3xl overflow-hidden shadow-2xl bg-white">
         {/* Left: feature panel */}
-        <div className="hidden md:flex flex-col justify-between bg-gradient-to-br from-[#0f766e] to-[#1ABC9C] text-white p-10">
+        <div className="hidden md:flex flex-col justify-between bg-gradient-to-br from-[#1E5FBC] to-[#2F80ED] text-white p-10">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <ShieldCheck className="w-7 h-7" />
@@ -103,7 +97,7 @@ export function AdminLoginPage() {
         {/* Right: login form */}
         <div className="p-8 md:p-12 flex flex-col justify-center">
           <div className="md:hidden flex items-center gap-2 mb-8">
-            <ShieldCheck className="w-6 h-6 text-[#1ABC9C]" />
+            <ShieldCheck className="w-6 h-6 text-[#2F80ED]" />
             <span className="font-['Poppins'] font-bold text-[18px] text-[#3b3b3b]">United Hotels Admin</span>
           </div>
 
@@ -127,7 +121,7 @@ export function AdminLoginPage() {
                 placeholder="admin@unitedhotels.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-[#eaeaea] px-4 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/30 focus:border-[#1ABC9C]"
+                className="w-full rounded-lg border border-[#eaeaea] px-4 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/30 focus:border-[#2F80ED]"
               />
             </div>
 
@@ -140,91 +134,19 @@ export function AdminLoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-[#eaeaea] px-4 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/30 focus:border-[#1ABC9C]"
+                className="w-full rounded-lg border border-[#eaeaea] px-4 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/30 focus:border-[#2F80ED]"
               />
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#2F80ED] hover:bg-[#1E5FBC] disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 transition-colors"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
               {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
-
-          {/* Demo credentials — click any card to autofill the form. Removed
-              when running against real Postgres + a non-seeded user table. */}
-          <div className="mt-6">
-            <div className="text-[10.5px] font-semibold text-[#9aa0a6] uppercase tracking-[0.1em] mb-2">
-              Demo accounts (click to autofill)
-            </div>
-            <div className="grid grid-cols-1 gap-2">
-              <button
-                type="button"
-                onClick={() => useDemo('admin@unitedhotels.com', 'admin123')}
-                className="text-left rounded-lg border border-[#eaeaea] hover:border-[#1ABC9C]/40 hover:bg-[#1ABC9C]/[0.04] transition-colors px-3 py-2 flex items-center gap-3"
-              >
-                <span
-                  className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
-                  style={{ background: 'linear-gradient(135deg, rgba(26,188,156,0.15), rgba(26,188,156,0.30))' }}
-                  aria-hidden
-                >
-                  <ShieldCheck className="w-4 h-4 text-[#0f9b86]" strokeWidth={2} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[12.5px] font-semibold text-[#1f2937] flex items-center gap-1.5">
-                    Admin
-                    <span className="text-[10px] font-medium text-[#0f9b86] bg-[#1ABC9C]/15 rounded-full px-1.5 py-px">All access</span>
-                  </div>
-                  <div className="text-[11px] text-[#6b7280] font-mono">admin@unitedhotels.com · admin123</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => useDemo('staff.royan@unitedhotels.com', 'vendor123')}
-                className="text-left rounded-lg border border-[#eaeaea] hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/[0.04] transition-colors px-3 py-2 flex items-center gap-3"
-              >
-                <span
-                  className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
-                  style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.30))' }}
-                  aria-hidden
-                >
-                  <Building2 className="w-4 h-4 text-[#3b82f6]" strokeWidth={2} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[12.5px] font-semibold text-[#1f2937] flex items-center gap-1.5">
-                    Staff — Royan Hotel
-                    <span className="text-[10px] font-medium text-[#3b82f6] bg-[#3b82f6]/15 rounded-full px-1.5 py-px">Single property</span>
-                  </div>
-                  <div className="text-[11px] text-[#6b7280] font-mono">staff.royan@unitedhotels.com · vendor123</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => useDemo('staff.ramada@unitedhotels.com', 'vendor123')}
-                className="text-left rounded-lg border border-[#eaeaea] hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/[0.04] transition-colors px-3 py-2 flex items-center gap-3"
-              >
-                <span
-                  className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
-                  style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.30))' }}
-                  aria-hidden
-                >
-                  <Building2 className="w-4 h-4 text-[#3b82f6]" strokeWidth={2} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[12.5px] font-semibold text-[#1f2937] flex items-center gap-1.5">
-                    Staff — Ramada TRYP Beyoğlu
-                    <span className="text-[10px] font-medium text-[#3b82f6] bg-[#3b82f6]/15 rounded-full px-1.5 py-px">Single property</span>
-                  </div>
-                  <div className="text-[11px] text-[#6b7280] font-mono">staff.ramada@unitedhotels.com · vendor123</div>
-                </div>
-              </button>
-            </div>
-          </div>
 
           <div className="mt-6 pt-5 border-t border-[#eaeaea] flex items-center justify-between text-sm">
             <Link to="/auth" className="text-[#6b7280] hover:text-[#3b3b3b] transition-colors">

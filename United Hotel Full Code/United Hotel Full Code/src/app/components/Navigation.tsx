@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import svgPaths from "../../imports/svg-nkrjt6kvoj";
 import {
   ChevronDown,
@@ -13,16 +13,39 @@ import {
   Search,
   UserCircle2,
   ShieldCheck,
+  LogOut,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
-const NAV_LINKS = [
-  { id: "home", label: "Home", href: "/#home" },
-  { id: "why-choose-united-hotels", label: "Why Choose United Hotels", href: "/#why-choose-united-hotels" },
-  { id: "featured-hotels", label: "Featured Hotels", href: "/#featured-hotels" },
-  { id: "quality", label: "Quality", href: "/#quality" },
-  { id: "faqs", label: "FAQ", href: "/#faqs" },
+function pickDisplayName(user: { name?: string | null; email?: string | null } | null): string {
+  if (!user) return "";
+  const n = (user.name || "").trim();
+  if (n) return n.split(/\s+/)[0];
+  const e = (user.email || "").trim();
+  if (e) return e.split("@")[0];
+  return "Account";
+}
+
+function pickInitial(user: { name?: string | null; email?: string | null } | null): string {
+  const src = (user?.name || user?.email || "?").trim();
+  return (src[0] || "?").toUpperCase();
+}
+
+// Nav links mix routes (route: true â†’ renders as <Link>) and same-page anchors
+// (route: false â†’ renders as <a href> for browser-native scroll). Active-state
+// highlighting only applies to anchor items on the home route.
+type NavLink = { id: string; label: string; href: string; route?: boolean };
+
+const NAV_LINKS: NavLink[] = [
+  { id: "home", label: "Home", href: "/", route: true },
+  { id: "hotels", label: "Hotels", href: "/listing", route: true },
+  { id: "for-travelers", label: "For Travelers", href: "/#for-travelers" },
+  { id: "for-groups", label: "For Groups", href: "/groups", route: true },
+  { id: "why-choose-united-hotels", label: "Why Us", href: "/#why-choose-united-hotels" },
+  { id: "standards", label: "Standards", href: "/#standards" },
+  { id: "contact", label: "Contact", href: "/support", route: true },
 ];
 
 function useScrolled(threshold = 80) {
@@ -88,11 +111,24 @@ export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { region, regions, setRegion, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const displayName = pickDisplayName(user);
+  const initial = pickInitial(user);
+  const isAdmin = Boolean(user?.isAdmin);
+  const handleSignOut = () => {
+    logout();
+    setIsLoginOpen(false);
+    setIsMobileMenuOpen(false);
+    navigate("/");
+  };
 
   const isHomeRoute = location.pathname === "/";
-  const scrolled = useScrolled(80);
-  const showFrosted = scrolled || !isHomeRoute;
+  // Hero is now a flat white card (no more dark cinematic backdrop), so the
+  // nav always uses its solid surface state — never the transparent overlay.
+  useScrolled(80); // kept for future use; result intentionally ignored
+  const showFrosted = true;
   const activeId = useActiveSection(NAV_LINKS.map((l) => l.id), isHomeRoute);
 
   const languageRef = useClickOutside<HTMLDivElement>(() => setIsLanguageOpen(false));
@@ -129,7 +165,7 @@ export function Navigation() {
                   <mask fill="white" id="path-1-inside-1_20_512">
                     <path d={svgPaths.p32095b00} />
                   </mask>
-                  <path d={svgPaths.p32095b00} fill="#1ABC9C" mask="url(#path-1-inside-1_20_512)" stroke="#1ABC9C" strokeWidth="0.4" />
+                  <path d={svgPaths.p32095b00} fill="#2F80ED" mask="url(#path-1-inside-1_20_512)" stroke="#2F80ED" strokeWidth="0.4" />
                 </svg>
               </div>
               <span className="uh-logo-mark font-['Poppins:SemiBold',sans-serif] text-[16px] md:text-[18px] tracking-[-0.01em]">
@@ -138,16 +174,26 @@ export function Navigation() {
             </Link>
 
             {/* Desktop links */}
-            <div className="hidden lg:flex items-center gap-1">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.href}
-                  className={`uh-link ${activeId === link.id ? "is-active" : ""}`}
-                >
-                  {t(link.label)}
-                </a>
-              ))}
+            <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
+              {NAV_LINKS.map((link) => {
+                // Anchor items use IntersectionObserver-driven active state when
+                // we're on the home route; route items use the URL path instead.
+                const routeActive =
+                  link.route && link.href !== "/"
+                    ? location.pathname === link.href || location.pathname.startsWith(link.href + "/")
+                    : false;
+                const isActive = link.route ? routeActive : activeId === link.id;
+                const className = `uh-link ${isActive ? "is-active" : ""}`;
+                return link.route ? (
+                  <Link key={link.id} to={link.href} className={className}>
+                    {t(link.label)}
+                  </Link>
+                ) : (
+                  <a key={link.id} href={link.href} className={className}>
+                    {t(link.label)}
+                  </a>
+                );
+              })}
             </div>
 
             {/* Desktop right cluster */}
@@ -180,7 +226,7 @@ export function Navigation() {
                 >
                   <Globe className="w-4 h-4" strokeWidth={2} />
                   <span className="hidden xl:inline">{region.flag}</span>
-                  <span>{region.language.toUpperCase()} · {region.currency}</span>
+                  <span>{region.language.toUpperCase()} Â· {region.currency}</span>
                   <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform ${isLanguageOpen ? "rotate-180" : ""}`} />
                 </button>
                 {isLanguageOpen && (
@@ -199,9 +245,9 @@ export function Navigation() {
                             <span className="uh-region-flag" aria-hidden>{r.flag}</span>
                             <span className="uh-region-text">
                               <span className="uh-region-label">{r.label}</span>
-                              <span className="uh-region-sub">{r.languageLabel} · {r.currency}</span>
+                              <span className="uh-region-sub">{r.languageLabel} Â· {r.currency}</span>
                             </span>
-                            {isActive && <Check className="w-4 h-4 text-[#1abc9c] shrink-0" />}
+                            {isActive && <Check className="w-4 h-4 text-[#2F80ED] shrink-0" />}
                           </button>
                         );
                       })}
@@ -217,15 +263,54 @@ export function Navigation() {
                   className="uh-icon-btn"
                   aria-expanded={isLoginOpen}
                   aria-haspopup="menu"
+                  aria-label={isAuthenticated ? `Signed in as ${displayName}` : "Account"}
                 >
-                  <User className="w-4 h-4" strokeWidth={2} />
-                  <span>{t("Account")}</span>
+                  {isAuthenticated ? (
+                    <>
+                      <span
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-['Inter:Bold',sans-serif] text-white"
+                        style={{ background: 'linear-gradient(135deg, #2F80ED, #5DA0F8)' }}
+                        aria-hidden
+                      >
+                        {initial}
+                      </span>
+                      <span className="max-w-[120px] truncate">{displayName}</span>
+                      <span
+                        className="ml-1 hidden xl:inline rounded-full px-1.5 py-[1px] text-[10px] font-['Inter:SemiBold',sans-serif] tracking-wide uppercase"
+                        style={{
+                          color: '#0f9d58',
+                          background: 'rgba(16,185,129,0.12)',
+                          boxShadow: 'inset 0 0 0 1px rgba(16,185,129,0.30)',
+                        }}
+                      >
+                        {t("Signed in")}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <User className="w-4 h-4" strokeWidth={2} />
+                      <span>{t("Account")}</span>
+                    </>
+                  )}
                   <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform ${isLoginOpen ? "rotate-180" : ""}`} />
                 </button>
                 {isLoginOpen && (
                   <div className="uh-dropdown" role="menu">
+                    {isAuthenticated && (
+                      <div className="px-3 py-2 border-b border-current/10 mb-1">
+                        <div className="text-[11px] uppercase tracking-[0.14em] opacity-60 font-['Inter:Medium',sans-serif]">
+                          {t("Signed in as")}
+                        </div>
+                        <div className="font-['Inter:SemiBold',sans-serif] text-[14px] truncate">
+                          {user?.name || displayName}
+                        </div>
+                        {user?.email && (
+                          <div className="text-[12px] opacity-70 truncate">{user.email}</div>
+                        )}
+                      </div>
+                    )}
                     <Link
-                      to="/portal"
+                      to={isAuthenticated ? "/portal" : "/auth"}
                       role="menuitem"
                       className="uh-dropdown-item !justify-start gap-3"
                       onClick={() => setIsLoginOpen(false)}
@@ -233,39 +318,68 @@ export function Navigation() {
                       <span
                         className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(26,188,156,0.15), rgba(45,212,191,0.25))',
-                          boxShadow: 'inset 0 0 0 1px rgba(26,188,156,0.30)',
+                          background: 'linear-gradient(135deg, rgba(47, 128, 237,0.15), rgba(93, 160, 248,0.25))',
+                          boxShadow: 'inset 0 0 0 1px rgba(47, 128, 237,0.30)',
                         }}
                         aria-hidden
                       >
-                        <UserCircle2 className="w-4 h-4 text-[#0f9b86]" strokeWidth={2} />
+                        <UserCircle2 className="w-4 h-4 text-[#1E5FBC]" strokeWidth={2} />
                       </span>
                       <span className="flex flex-col items-start min-w-0">
-                        <span className="font-['Inter:SemiBold',sans-serif]">{t("Guest Portal")}</span>
-                        <span className="item-sub">{t("Manage bookings")}</span>
+                        <span className="font-['Inter:SemiBold',sans-serif]">
+                          {t(isAuthenticated ? "Guest Portal" : "Guest Login")}
+                        </span>
+                        <span className="item-sub">
+                          {t(isAuthenticated ? "Manage bookings" : "Sign in to your account")}
+                        </span>
                       </span>
                     </Link>
-                    <Link
-                      to="/admin/login"
-                      role="menuitem"
-                      className="uh-dropdown-item !justify-start gap-3"
-                      onClick={() => setIsLoginOpen(false)}
-                    >
-                      <span
-                        className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.25))',
-                          boxShadow: 'inset 0 0 0 1px rgba(99,102,241,0.30)',
-                        }}
-                        aria-hidden
+                    {(!isAuthenticated || isAdmin) && (
+                      <Link
+                        to={isAdmin ? "/admin" : "/admin/login"}
+                        role="menuitem"
+                        className="uh-dropdown-item !justify-start gap-3"
+                        onClick={() => setIsLoginOpen(false)}
                       >
-                        <ShieldCheck className="w-4 h-4 text-[#6366f1]" strokeWidth={2} />
-                      </span>
-                      <span className="flex flex-col items-start min-w-0">
-                        <span className="font-['Inter:SemiBold',sans-serif]">{t("Admin Login")}</span>
-                        <span className="item-sub">{t("Staff access")}</span>
-                      </span>
-                    </Link>
+                        <span
+                          className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.25))',
+                            boxShadow: 'inset 0 0 0 1px rgba(99,102,241,0.30)',
+                          }}
+                          aria-hidden
+                        >
+                          <ShieldCheck className="w-4 h-4 text-[#6366f1]" strokeWidth={2} />
+                        </span>
+                        <span className="flex flex-col items-start min-w-0">
+                          <span className="font-['Inter:SemiBold',sans-serif]">{t(isAdmin ? "Admin Dashboard" : "Admin Login")}</span>
+                          <span className="item-sub">{t("Staff access")}</span>
+                        </span>
+                      </Link>
+                    )}
+                    {isAuthenticated && (
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={handleSignOut}
+                        className="uh-dropdown-item !justify-start gap-3 w-full text-left"
+                      >
+                        <span
+                          className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
+                          style={{
+                            background: 'rgba(239,68,68,0.10)',
+                            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.30)',
+                          }}
+                          aria-hidden
+                        >
+                          <LogOut className="w-4 h-4 text-[#ef4444]" strokeWidth={2} />
+                        </span>
+                        <span className="flex flex-col items-start min-w-0">
+                          <span className="font-['Inter:SemiBold',sans-serif]">{t("Sign out")}</span>
+                          <span className="item-sub">{t("End this session")}</span>
+                        </span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -273,7 +387,7 @@ export function Navigation() {
               {/* Primary CTA */}
               <Link to="/listing" className="uh-cta ml-1">
                 <Search className="w-4 h-4" strokeWidth={2.4} />
-                {t("Book stay")}
+                {t("Book Now")}
               </Link>
             </div>
 
@@ -321,32 +435,100 @@ export function Navigation() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.href}
-                  className={`uh-drawer-link ${activeId === link.id ? "is-active" : ""}`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {t(link.label)}
-                </a>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const routeActive =
+                  link.route && link.href !== "/"
+                    ? location.pathname === link.href || location.pathname.startsWith(link.href + "/")
+                    : false;
+                const isActive = link.route ? routeActive : activeId === link.id;
+                const className = `uh-drawer-link ${isActive ? "is-active" : ""}`;
+                return link.route ? (
+                  <Link
+                    key={link.id}
+                    to={link.href}
+                    className={className}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {t(link.label)}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.id}
+                    href={link.href}
+                    className={className}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {t(link.label)}
+                  </a>
+                );
+              })}
 
               <div className="px-3 pt-6 pb-2 text-[11px] tracking-[0.16em] uppercase opacity-50 font-['Inter:Medium',sans-serif]">
                 {t("Account")}
               </div>
-              <Link to="/portal" className="uh-drawer-link" onClick={() => setIsMobileMenuOpen(false)}>
+              {isAuthenticated && (
+                <div className="mx-3 mb-2 flex items-center gap-3 rounded-xl border border-current/10 px-3 py-3">
+                  <span
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-['Inter:Bold',sans-serif] text-white shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #2F80ED, #5DA0F8)' }}
+                    aria-hidden
+                  >
+                    {initial}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-['Inter:SemiBold',sans-serif] text-[14px] truncate">
+                      {user?.name || displayName}
+                    </div>
+                    {user?.email && (
+                      <div className="text-[12px] opacity-70 truncate">{user.email}</div>
+                    )}
+                  </div>
+                  <span
+                    className="rounded-full px-2 py-[2px] text-[10px] font-['Inter:SemiBold',sans-serif] tracking-wide uppercase"
+                    style={{
+                      color: '#0f9d58',
+                      background: 'rgba(16,185,129,0.12)',
+                      boxShadow: 'inset 0 0 0 1px rgba(16,185,129,0.30)',
+                    }}
+                  >
+                    {t("Signed in")}
+                  </span>
+                </div>
+              )}
+              <Link
+                to={isAuthenticated ? "/portal" : "/auth"}
+                className="uh-drawer-link"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 <span className="flex items-center gap-3">
                   <User className="w-4 h-4 opacity-70" />
-                  {t("Guest Portal")}
+                  {t(isAuthenticated ? "Guest Portal" : "Guest Login")}
                 </span>
               </Link>
-              <Link to="/admin/login" className="uh-drawer-link" onClick={() => setIsMobileMenuOpen(false)}>
-                <span className="flex items-center gap-3">
-                  <User className="w-4 h-4 opacity-70" />
-                  {t("Admin Login")}
-                </span>
-              </Link>
+              {(!isAuthenticated || isAdmin) && (
+                <Link
+                  to={isAdmin ? "/admin" : "/admin/login"}
+                  className="uh-drawer-link"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="flex items-center gap-3">
+                    <ShieldCheck className="w-4 h-4 opacity-70" />
+                    {t(isAdmin ? "Admin Dashboard" : "Admin Login")}
+                  </span>
+                </Link>
+              )}
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  className="uh-drawer-link w-full text-left"
+                  onClick={handleSignOut}
+                >
+                  <span className="flex items-center gap-3 text-[#ef4444]">
+                    <LogOut className="w-4 h-4" />
+                    {t("Sign out")}
+                  </span>
+                </button>
+              )}
 
               <div className="px-3 pt-6 pb-2 text-[11px] tracking-[0.16em] uppercase opacity-50 font-['Inter:Medium',sans-serif]">
                 {t("Region")}
@@ -361,14 +543,14 @@ export function Navigation() {
                         onClick={() => setRegion(r.code)}
                         className={`flex items-center gap-3 h-12 px-3 rounded-xl text-[13px] font-['Inter:Medium',sans-serif] border transition-colors text-left ${
                           isActive
-                            ? "border-[#1abc9c] text-[#1abc9c] bg-[#1abc9c]/8"
+                            ? "border-[#2F80ED] text-[#2F80ED] bg-[#2F80ED]/8"
                             : "border-current/10 opacity-80 hover:opacity-100"
                         }`}
                       >
                         <span className="text-[18px] leading-none" aria-hidden>{r.flag}</span>
                         <span className="flex-1 flex flex-col leading-tight">
                           <span>{r.label}</span>
-                          <span className="text-[11px] opacity-60">{r.languageLabel} · {r.currency}</span>
+                          <span className="text-[11px] opacity-60">{r.languageLabel} Â· {r.currency}</span>
                         </span>
                         {isActive && <Check className="w-4 h-4 shrink-0" />}
                       </button>
@@ -385,7 +567,7 @@ export function Navigation() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Search className="w-4 h-4" strokeWidth={2.4} />
-                {t("Book stay")}
+                {t("Book Now")}
               </Link>
             </div>
           </aside>

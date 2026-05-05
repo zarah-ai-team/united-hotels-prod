@@ -79,7 +79,14 @@ export function AuthPage() {
       toast.success("Login successful!");
       doRedirect();
     } catch (error: any) {
-      const errorMessage = error?.data?.message || error?.message || "Login failed. Please try again.";
+      // Backend returns `{ error: '...' }` (key: error, not message). Pull
+      // that first so the user sees the helpful message instead of the
+      // generic "HTTP 401: Unauthorized" wrapper text.
+      const errorMessage =
+        error?.data?.error ||
+        error?.data?.message ||
+        error?.message ||
+        "Login failed. Please try again.";
       setErrors({ submit: errorMessage });
       toast.error(errorMessage);
       console.error("Login error:", error);
@@ -149,10 +156,10 @@ export function AuthPage() {
                 <mask fill="white" id="path-1-inside-1_20_512">
                   <path d={svgPaths.p32095b00} />
                 </mask>
-                <path d={svgPaths.p32095b00} fill="#1ABC9C" mask="url(#path-1-inside-1_20_512)" stroke="#1ABC9C" strokeWidth="0.4" />
+                <path d={svgPaths.p32095b00} fill="#2F80ED" mask="url(#path-1-inside-1_20_512)" stroke="#2F80ED" strokeWidth="0.4" />
               </svg>
             </div>
-            <span className="font-['Poppins:SemiBold',sans-serif] text-[18px] text-[#1abc9c]">
+            <span className="font-['Poppins:SemiBold',sans-serif] text-[18px] text-[#2F80ED]">
               United Hotels
             </span>
           </Link>
@@ -173,7 +180,7 @@ export function AuthPage() {
               onClick={() => setActiveTab("login")}
               className={`flex-1 py-2 rounded-lg font-['Inter:SemiBold',sans-serif] text-[13.5px] transition-all ${
                 activeTab === "login"
-                  ? "bg-[#1abc9c] text-white"
+                  ? "bg-[#2F80ED] text-white"
                   : "text-[#6b7280] hover:text-[#3b3b3b]"
               }`}
             >
@@ -183,7 +190,7 @@ export function AuthPage() {
               onClick={() => setActiveTab("register")}
               className={`flex-1 py-2 rounded-lg font-['Inter:SemiBold',sans-serif] text-[13.5px] transition-all ${
                 activeTab === "register"
-                  ? "bg-[#1abc9c] text-white"
+                  ? "bg-[#2F80ED] text-white"
                   : "text-[#6b7280] hover:text-[#3b3b3b]"
               }`}
             >
@@ -193,7 +200,7 @@ export function AuthPage() {
               onClick={() => setActiveTab("guest")}
               className={`flex-1 py-2 rounded-lg font-['Inter:SemiBold',sans-serif] text-[13.5px] transition-all ${
                 activeTab === "guest"
-                  ? "bg-[#1abc9c] text-white"
+                  ? "bg-[#2F80ED] text-white"
                   : "text-[#6b7280] hover:text-[#3b3b3b]"
               }`}
             >
@@ -230,7 +237,7 @@ export function AuthPage() {
                     className={`w-full pl-11 pr-4 py-2.5 border rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:ring-2 transition-all ${
                       errors.email
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                        : "border-[#eaeaea] focus:border-[#1abc9c] focus:ring-[#1abc9c]/20"
+                        : "border-[#eaeaea] focus:border-[#2F80ED] focus:ring-[#2F80ED]/20"
                     }`}
                     placeholder="you@example.com"
                     disabled={loading}
@@ -257,7 +264,7 @@ export function AuthPage() {
                     className={`w-full pl-11 pr-11 py-2.5 border rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:ring-2 transition-all ${
                       errors.password
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                        : "border-[#eaeaea] focus:border-[#1abc9c] focus:ring-[#1abc9c]/20"
+                        : "border-[#eaeaea] focus:border-[#2F80ED] focus:ring-[#2F80ED]/20"
                     }`}
                     placeholder="••••••••"
                     disabled={loading}
@@ -278,7 +285,7 @@ export function AuthPage() {
               <div className="text-right">
                 <Link
                   to="/auth/forgot"
-                  className="font-['Inter:Medium',sans-serif] text-[14px] text-[#1abc9c] hover:text-[#16a085] transition-colors"
+                  className="font-['Inter:Medium',sans-serif] text-[14px] text-[#2F80ED] hover:text-[#1E5FBC] transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -288,7 +295,7 @@ export function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#1abc9c] text-white py-2.5 rounded-xl hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14.5px] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full bg-[#2F80ED] text-white py-2.5 rounded-xl hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[14.5px] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -334,7 +341,7 @@ export function AuthPage() {
                     className={`w-full pl-11 pr-4 py-2.5 border rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:ring-2 transition-all ${
                       errors.name
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                        : "border-[#eaeaea] focus:border-[#1abc9c] focus:ring-[#1abc9c]/20"
+                        : "border-[#eaeaea] focus:border-[#2F80ED] focus:ring-[#2F80ED]/20"
                     }`}
                     placeholder="John Doe"
                     disabled={loading}
@@ -361,7 +368,7 @@ export function AuthPage() {
                     className={`w-full pl-11 pr-4 py-2.5 border rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:ring-2 transition-all ${
                       errors.email
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                        : "border-[#eaeaea] focus:border-[#1abc9c] focus:ring-[#1abc9c]/20"
+                        : "border-[#eaeaea] focus:border-[#2F80ED] focus:ring-[#2F80ED]/20"
                     }`}
                     placeholder="you@example.com"
                     disabled={loading}
@@ -379,7 +386,7 @@ export function AuthPage() {
                   type="tel"
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/20 transition-all"
+                  className="w-full px-4 py-2.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 transition-all"
                   placeholder="+1 (555) 123-4567"
                   disabled={loading}
                 />
@@ -403,7 +410,7 @@ export function AuthPage() {
                     className={`w-full pl-11 pr-11 py-2.5 border rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:ring-2 transition-all ${
                       errors.password
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                        : "border-[#eaeaea] focus:border-[#1abc9c] focus:ring-[#1abc9c]/20"
+                        : "border-[#eaeaea] focus:border-[#2F80ED] focus:ring-[#2F80ED]/20"
                     }`}
                     placeholder="••••••••"
                     disabled={loading}
@@ -438,7 +445,7 @@ export function AuthPage() {
                     className={`w-full pl-11 pr-11 py-2.5 border rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:ring-2 transition-all ${
                       errors.confirmPassword
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                        : "border-[#eaeaea] focus:border-[#1abc9c] focus:ring-[#1abc9c]/20"
+                        : "border-[#eaeaea] focus:border-[#2F80ED] focus:ring-[#2F80ED]/20"
                     }`}
                     placeholder="••••••••"
                     disabled={loading}
@@ -451,7 +458,7 @@ export function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#1abc9c] text-white py-2.5 rounded-xl hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14.5px] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full bg-[#2F80ED] text-white py-2.5 rounded-xl hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[14.5px] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -469,9 +476,9 @@ export function AuthPage() {
               {/* Terms */}
               <p className="text-center font-['Inter:Regular',sans-serif] text-[13px] text-[#6b7280]">
                 By creating an account, you agree to our{" "}
-                <a href="#" className="text-[#1abc9c] hover:underline">Terms of Service</a>
+                <a href="#" className="text-[#2F80ED] hover:underline">Terms of Service</a>
                 {" "}and{" "}
-                <a href="#" className="text-[#1abc9c] hover:underline">Privacy Policy</a>
+                <a href="#" className="text-[#2F80ED] hover:underline">Privacy Policy</a>
               </p>
             </form>
           )}
@@ -479,7 +486,7 @@ export function AuthPage() {
           {/* Guest Checkout */}
           {activeTab === "guest" && (
             <div className="space-y-4">
-              <div className="bg-[#f0fdf4] border border-[#1abc9c]/20 rounded-xl p-4">
+              <div className="bg-[#f0fdf4] border border-[#2F80ED]/20 rounded-xl p-4">
                 <h3 className="font-['Poppins:SemiBold',sans-serif] text-[16px] text-[#3b3b3b] mb-1.5">
                   Continue as Guest
                 </h3>
@@ -514,7 +521,7 @@ export function AuthPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full pl-11 pr-4 py-2.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/20 transition-all"
+                    className="w-full pl-11 pr-4 py-2.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[14px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 transition-all"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -522,7 +529,7 @@ export function AuthPage() {
 
               <button
                 onClick={handleGuestContinue}
-                className="w-full bg-[#1abc9c] text-white py-2.5 rounded-xl hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14.5px] flex items-center justify-center gap-2"
+                className="w-full bg-[#2F80ED] text-white py-2.5 rounded-xl hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[14.5px] flex items-center justify-center gap-2"
               >
                 Continue as Guest
                 <ArrowRight className="w-5 h-5" />
@@ -541,7 +548,7 @@ export function AuthPage() {
           <div className="mt-5 pt-4 border-t border-[#eaeaea] flex items-center justify-between gap-3">
             <Link
               to="/booking/step1"
-              className="font-['Inter:Medium',sans-serif] text-[12.5px] text-[#6b7280] hover:text-[#1abc9c] transition-colors"
+              className="font-['Inter:Medium',sans-serif] text-[12.5px] text-[#6b7280] hover:text-[#2F80ED] transition-colors"
             >
               ← Back to Booking
             </Link>
@@ -549,7 +556,7 @@ export function AuthPage() {
               Hotel partner?{' '}
               <Link
                 to="/admin/login"
-                className="font-['Inter:Medium',sans-serif] text-[#1abc9c] hover:text-[#16a085] transition-colors"
+                className="font-['Inter:Medium',sans-serif] text-[#2F80ED] hover:text-[#1E5FBC] transition-colors"
               >
                 Staff Portal
               </Link>
@@ -561,7 +568,7 @@ export function AuthPage() {
       {/* Right Side - Benefits. Pinned to viewport via h-screen on root +
           overflow-hidden on this column. Density tuned so the headline,
           benefit list and testimonial all fit a 720px-tall viewport. */}
-      <div className="hidden lg:flex flex-1 bg-linear-to-br from-[#1abc9c] to-[#16a085] p-10 xl:p-12 items-center justify-center overflow-hidden">
+      <div className="hidden lg:flex flex-1 bg-linear-to-br from-[#2F80ED] to-[#1E5FBC] p-10 xl:p-12 items-center justify-center overflow-hidden">
         <div className="max-w-[460px] w-full">
           <h2 className="font-['Poppins:Bold',sans-serif] text-[28px] xl:text-[32px] leading-[1.15] text-white mb-5">
             Why Create an Account?

@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Navigation } from '../components/Navigation';
 import { Footer } from '../components/Footer';
 import { resolveImage, handleImageError } from '../data/siteConfig';
 import { bookingService } from '../services/api';
 import { STORAGE_KEYS } from '../config/api';
-import { 
-  Calendar, MapPin, X, Clock, Users, Download, 
+import {
+  Calendar, MapPin, X, Clock, Users, Download,
   Mail, Phone, CheckCircle2, XCircle, History,
   ArrowRight, Star, AlertCircle, Loader
 } from 'lucide-react';
@@ -64,7 +64,6 @@ export function GuestPortal() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'cancelled'>('upcoming');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -86,7 +85,7 @@ export function GuestPortal() {
           navigate('/auth?returnUrl=/portal', { replace: true });
           return;
         }
-        setFetchError(err?.message || 'Failed to load bookings');
+        setBookings([]);
       })
       .finally(() => setLoading(false));
   }, [navigate]);
@@ -127,26 +126,11 @@ export function GuestPortal() {
         {/* Loading state */}
         {loading && (
           <div className="flex items-center justify-center py-32">
-            <Loader className="w-10 h-10 text-[#1abc9c] animate-spin" />
+            <Loader className="w-10 h-10 text-[#2F80ED] animate-spin" />
           </div>
         )}
 
-        {/* Error state */}
-        {!loading && fetchError && (
-          <div className="bg-white rounded-2xl border border-[#fee2e2] p-12 text-center max-w-lg mx-auto mt-12">
-            <AlertCircle className="w-12 h-12 text-[#ef4444] mx-auto mb-4" />
-            <h3 className="font-['Poppins:SemiBold',sans-serif] text-[22px] text-[#3b3b3b] mb-2">Could not load bookings</h3>
-            <p className="font-['Inter:Regular',sans-serif] text-[15px] text-[#6b7280] mb-6">{fetchError}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-[#1abc9c] text-white px-6 py-3 rounded-xl hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
-
-        {!loading && !fetchError && (<>
+        {!loading && (<>
           {/* Header Section */}
           <div className="mb-6 md:mb-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-6">
@@ -165,7 +149,7 @@ export function GuestPortal() {
                 <div className="font-['Inter:Regular',sans-serif] text-[13px] text-[#8c8c8c] mb-1">
                   Total Bookings
                 </div>
-                <div className="font-['Poppins:Bold',sans-serif] text-[24px] md:text-[28px] text-[#1abc9c]">
+                <div className="font-['Poppins:Bold',sans-serif] text-[24px] md:text-[28px] text-[#2F80ED]">
                   {bookings.length}
                 </div>
               </div>
@@ -180,7 +164,7 @@ export function GuestPortal() {
               className={`
                 px-6 py-3 rounded-lg font-['Inter:SemiBold',sans-serif] text-[15px] transition-all flex items-center gap-2
                 ${activeTab === 'upcoming' 
-                  ? 'bg-[#1abc9c] text-white shadow-lg' 
+                  ? 'bg-[#2F80ED] text-white shadow-lg' 
                   : 'text-[#6b7280] hover:text-[#3b3b3b] hover:bg-[#fafafa]'
                 }
               `}
@@ -189,7 +173,7 @@ export function GuestPortal() {
               Upcoming
               {upcomingCount > 0 && (
                 <span className={`px-2 py-0.5 rounded-full text-[12px] font-['Inter:Bold',sans-serif] ${
-                  activeTab === 'upcoming' ? 'bg-white/20' : 'bg-[#1abc9c]/10 text-[#1abc9c]'
+                  activeTab === 'upcoming' ? 'bg-white/20' : 'bg-[#2F80ED]/10 text-[#2F80ED]'
                 }`}>
                   {upcomingCount}
                 </span>
@@ -201,7 +185,7 @@ export function GuestPortal() {
               className={`
                 px-6 py-3 rounded-lg font-['Inter:SemiBold',sans-serif] text-[15px] transition-all flex items-center gap-2
                 ${activeTab === 'past' 
-                  ? 'bg-[#1abc9c] text-white shadow-lg' 
+                  ? 'bg-[#2F80ED] text-white shadow-lg' 
                   : 'text-[#6b7280] hover:text-[#3b3b3b] hover:bg-[#fafafa]'
                 }
               `}
@@ -210,7 +194,7 @@ export function GuestPortal() {
               Past
               {pastCount > 0 && (
                 <span className={`px-2 py-0.5 rounded-full text-[12px] font-['Inter:Bold',sans-serif] ${
-                  activeTab === 'past' ? 'bg-white/20' : 'bg-[#1abc9c]/10 text-[#1abc9c]'
+                  activeTab === 'past' ? 'bg-white/20' : 'bg-[#2F80ED]/10 text-[#2F80ED]'
                 }`}>
                   {pastCount}
                 </span>
@@ -222,7 +206,7 @@ export function GuestPortal() {
               className={`
                 px-6 py-3 rounded-lg font-['Inter:SemiBold',sans-serif] text-[15px] transition-all flex items-center gap-2
                 ${activeTab === 'cancelled' 
-                  ? 'bg-[#1abc9c] text-white shadow-lg' 
+                  ? 'bg-[#2F80ED] text-white shadow-lg' 
                   : 'text-[#6b7280] hover:text-[#3b3b3b] hover:bg-[#fafafa]'
                 }
               `}
@@ -231,7 +215,7 @@ export function GuestPortal() {
               Cancelled
               {cancelledCount > 0 && (
                 <span className={`px-2 py-0.5 rounded-full text-[12px] font-['Inter:Bold',sans-serif] ${
-                  activeTab === 'cancelled' ? 'bg-white/20' : 'bg-[#1abc9c]/10 text-[#1abc9c]'
+                  activeTab === 'cancelled' ? 'bg-white/20' : 'bg-[#2F80ED]/10 text-[#2F80ED]'
                 }`}>
                   {cancelledCount}
                 </span>
@@ -285,7 +269,7 @@ export function GuestPortal() {
                           </h3>
                           
                           <div className="flex items-center gap-2 mb-3">
-                            <MapPin className="w-4 h-4 text-[#1abc9c]" />
+                            <MapPin className="w-4 h-4 text-[#2F80ED]" />
                             <span className="font-['Inter:Regular',sans-serif] text-[15px] text-[#6b7280]">
                               {booking.location}
                             </span>
@@ -313,7 +297,7 @@ export function GuestPortal() {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-4">
                         <div className="bg-[#fafafa] rounded-xl p-4 border border-[#eaeaea]">
                           <div className="flex items-center gap-2 mb-2">
-                            <Calendar className="w-4 h-4 text-[#1abc9c]" />
+                            <Calendar className="w-4 h-4 text-[#2F80ED]" />
                             <span className="font-['Inter:Medium',sans-serif] text-[12px] text-[#8c8c8c] uppercase tracking-wide">
                               Check-in
                             </span>
@@ -328,7 +312,7 @@ export function GuestPortal() {
 
                         <div className="bg-[#fafafa] rounded-xl p-4 border border-[#eaeaea]">
                           <div className="flex items-center gap-2 mb-2">
-                            <Calendar className="w-4 h-4 text-[#1abc9c]" />
+                            <Calendar className="w-4 h-4 text-[#2F80ED]" />
                             <span className="font-['Inter:Medium',sans-serif] text-[12px] text-[#8c8c8c] uppercase tracking-wide">
                               Check-out
                             </span>
@@ -343,7 +327,7 @@ export function GuestPortal() {
 
                         <div className="bg-[#fafafa] rounded-xl p-4 border border-[#eaeaea]">
                           <div className="flex items-center gap-2 mb-2">
-                            <Clock className="w-4 h-4 text-[#1abc9c]" />
+                            <Clock className="w-4 h-4 text-[#2F80ED]" />
                             <span className="font-['Inter:Medium',sans-serif] text-[12px] text-[#8c8c8c] uppercase tracking-wide">
                               Duration
                             </span>
@@ -358,10 +342,10 @@ export function GuestPortal() {
                       </div>
 
                       {/* Booking ID */}
-                      <div className="bg-gradient-to-r from-[#1abc9c]/10 to-transparent rounded-xl p-4 border border-[#1abc9c]/20 mb-4">
+                      <div className="bg-gradient-to-r from-[#2F80ED]/10 to-transparent rounded-xl p-4 border border-[#2F80ED]/20 mb-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="bg-[#1abc9c] text-white px-2 py-1 rounded text-[11px] font-['Inter:Bold',sans-serif]">
+                            <div className="bg-[#2F80ED] text-white px-2 py-1 rounded text-[11px] font-['Inter:Bold',sans-serif]">
                               ID
                             </div>
                             <div>
@@ -396,7 +380,7 @@ export function GuestPortal() {
                     <div className="flex flex-wrap gap-3 pt-4 border-t border-[#eaeaea]">
                       <Link
                         to={`/hotel/${booking.id}`}
-                        className="px-5 py-2.5 border-2 border-[#1abc9c] text-[#1abc9c] rounded-lg hover:bg-[#1abc9c] hover:text-white transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2"
+                        className="px-5 py-2.5 border-2 border-[#2F80ED] text-[#2F80ED] rounded-lg hover:bg-[#2F80ED] hover:text-white transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2"
                       >
                         View Details
                         <ArrowRight className="w-4 h-4" />
@@ -404,12 +388,12 @@ export function GuestPortal() {
                       
                       {booking.status === 'upcoming' && (
                         <>
-                          <button className="px-5 py-2.5 border border-[#eaeaea] text-[#3b3b3b] rounded-lg hover:border-[#1abc9c] hover:bg-[#1abc9c]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2">
+                          <button className="px-5 py-2.5 border border-[#eaeaea] text-[#3b3b3b] rounded-lg hover:border-[#2F80ED] hover:bg-[#2F80ED]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2">
                             <Download className="w-4 h-4" />
                             Download Voucher
                           </button>
                           
-                          <button className="px-5 py-2.5 border border-[#eaeaea] text-[#3b3b3b] rounded-lg hover:border-[#1abc9c] hover:bg-[#1abc9c]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2">
+                          <button className="px-5 py-2.5 border border-[#eaeaea] text-[#3b3b3b] rounded-lg hover:border-[#2F80ED] hover:bg-[#2F80ED]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2">
                             <Mail className="w-4 h-4" />
                             Email Confirmation
                           </button>
@@ -427,7 +411,7 @@ export function GuestPortal() {
                       {booking.status === 'past' && (
                         <>
                           {!booking.rating && (
-                            <button className="px-5 py-2.5 bg-[#1abc9c] text-white rounded-lg hover:bg-[#16a085] transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2">
+                            <button className="px-5 py-2.5 bg-[#2F80ED] text-white rounded-lg hover:bg-[#1E5FBC] transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2">
                               <Star className="w-4 h-4" />
                               Leave a Review
                             </button>
@@ -435,7 +419,7 @@ export function GuestPortal() {
                           
                           <Link
                             to="/listing"
-                            className="px-5 py-2.5 border border-[#eaeaea] text-[#3b3b3b] rounded-lg hover:border-[#1abc9c] hover:bg-[#1abc9c]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2"
+                            className="px-5 py-2.5 border border-[#eaeaea] text-[#3b3b3b] rounded-lg hover:border-[#2F80ED] hover:bg-[#2F80ED]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[14px] flex items-center gap-2"
                           >
                             Book Again
                             <ArrowRight className="w-4 h-4" />
@@ -471,7 +455,7 @@ export function GuestPortal() {
               
               <Link
                 to="/listing"
-                className="inline-flex items-center gap-2 bg-[#1abc9c] text-white px-8 py-4 rounded-xl hover:bg-[#16a085] transition-all font-['Inter:Bold',sans-serif] text-[16px]"
+                className="inline-flex items-center gap-2 bg-[#2F80ED] text-white px-8 py-4 rounded-xl hover:bg-[#1E5FBC] transition-all font-['Inter:Bold',sans-serif] text-[16px]"
               >
                 Browse Hotels in Turkey
                 <ArrowRight className="w-5 h-5" />
@@ -481,9 +465,9 @@ export function GuestPortal() {
         )}
 
         {/* Help Section */}
-        <div className="mt-8 md:mt-12 bg-gradient-to-br from-[#1abc9c]/10 to-[#1abc9c]/5 rounded-2xl p-5 md:p-8 border border-[#1abc9c]/20">
+        <div className="mt-8 md:mt-12 bg-gradient-to-br from-[#2F80ED]/10 to-[#2F80ED]/5 rounded-2xl p-5 md:p-8 border border-[#2F80ED]/20">
           <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
-            <div className="w-12 h-12 bg-[#1abc9c] rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-[#2F80ED] rounded-xl flex items-center justify-center flex-shrink-0">
               <Phone className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
@@ -496,13 +480,13 @@ export function GuestPortal() {
               <div className="flex flex-wrap items-center gap-3 md:gap-4">
                 <Link
                   to="/support"
-                  className="bg-[#1abc9c] text-white px-6 py-3 rounded-lg hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]"
+                  className="bg-[#2F80ED] text-white px-6 py-3 rounded-lg hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]"
                 >
                   Contact Support
                 </Link>
                 <a
                   href="tel:+905551234567"
-                  className="text-[#1abc9c] font-['Inter:SemiBold',sans-serif] text-[14px] hover:text-[#16a085] transition-colors"
+                  className="text-[#2F80ED] font-['Inter:SemiBold',sans-serif] text-[14px] hover:text-[#1E5FBC] transition-colors"
                 >
                   Call: +90 555 123 4567
                 </a>
@@ -538,7 +522,7 @@ export function GuestPortal() {
 
             <div className="mb-6">
               <p className="font-['Inter:Regular',sans-serif] text-[16px] text-[#3b3b3b] mb-4 leading-[26px]">
-                Are you sure you want to cancel your booking at <strong className="text-[#1abc9c]">{selectedBooking.hotelName}</strong>?
+                Are you sure you want to cancel your booking at <strong className="text-[#2F80ED]">{selectedBooking.hotelName}</strong>?
               </p>
 
               {/* Booking Summary */}
@@ -588,7 +572,7 @@ export function GuestPortal() {
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowCancelModal(false)}
-                className="flex-1 px-6 py-4 border-2 border-[#eaeaea] text-[#3b3b3b] rounded-xl hover:border-[#1abc9c] hover:bg-[#1abc9c]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[16px]"
+                className="flex-1 px-6 py-4 border-2 border-[#eaeaea] text-[#3b3b3b] rounded-xl hover:border-[#2F80ED] hover:bg-[#2F80ED]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[16px]"
               >
                 Keep Booking
               </button>

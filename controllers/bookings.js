@@ -759,8 +759,11 @@ const getBookingById = async (req, res) => {
             return res.status(400).json({ error: 'userid is required' });
         }
 
+        const meta = await getBookingMeta(pool);
+        const userIdCol = quoteIdentifier(meta.userIdCol || 'userid');
+        const orderCol = meta.createdCol ? quoteIdentifier(meta.createdCol) : '"id"';
         const bookingsResult = await pool.query(
-            'SELECT * FROM bookings WHERE userid = $1 ORDER BY created_at DESC',
+            `SELECT * FROM bookings WHERE ${userIdCol} = $1 ORDER BY ${orderCol} DESC`,
             [effectiveUserId]
         );
         res.json({
