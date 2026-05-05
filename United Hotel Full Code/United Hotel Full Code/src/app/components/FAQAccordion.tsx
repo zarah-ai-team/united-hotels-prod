@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 interface FAQItem {
@@ -28,7 +28,7 @@ export function FAQAccordion({ items }: FAQAccordionProps) {
               {item.question}
             </span>
             <ChevronDown 
-              className={`w-[20px] h-[20px] text-[#1ABC9C] flex-shrink-0 transition-transform ${
+              className={`w-[20px] h-[20px] text-[#2F80ED] flex-shrink-0 transition-transform ${
                 openIndex === index ? 'rotate-180' : ''
               }`}
             />

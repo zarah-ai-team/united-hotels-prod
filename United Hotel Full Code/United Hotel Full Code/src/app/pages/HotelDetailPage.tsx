@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { MapPin, Star, ChevronLeft, ChevronRight, Wifi, Coffee, Car, Wind } from 'lucide-react';
 import { RoomCard } from '../components/RoomCard';
@@ -75,12 +75,12 @@ export function HotelDetailPage() {
       <header className="bg-white border-b border-[rgba(0,0,0,0.1)] sticky top-0 z-50">
         <div className="max-w-[1400px] mx-auto px-[16px] md:px-[32px]">
           <div className="flex items-center justify-between h-[64px]">
-            <a href="/" className="font-['Poppins'] font-bold text-[20px] text-[#1ABC9C]">
+            <a href="/" className="font-['Poppins'] font-bold text-[20px] text-[#2F80ED]">
               United Hotels
             </a>
             
             <nav className="hidden md:flex items-center gap-[32px]">
-              <a href="/listing" className="font-['Inter'] text-[14px] text-[#3b3b3b] hover:text-[#1ABC9C]">
+              <a href="/listing" className="font-['Inter'] text-[14px] text-[#3b3b3b] hover:text-[#2F80ED]">
                 Back to Search
               </a>
             </nav>
@@ -171,25 +171,25 @@ export function HotelDetailPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-[16px]">
                   <div className="flex items-center gap-[12px]">
                     <div className="w-[40px] h-[40px] bg-white rounded-[8px] flex items-center justify-center">
-                      <Wifi className="w-[20px] h-[20px] text-[#1ABC9C]" />
+                      <Wifi className="w-[20px] h-[20px] text-[#2F80ED]" />
                     </div>
                     <span className="font-['Inter'] text-[14px] text-[#3b3b3b]">Free WiFi</span>
                   </div>
                   <div className="flex items-center gap-[12px]">
                     <div className="w-[40px] h-[40px] bg-white rounded-[8px] flex items-center justify-center">
-                      <Coffee className="w-[20px] h-[20px] text-[#1ABC9C]" />
+                      <Coffee className="w-[20px] h-[20px] text-[#2F80ED]" />
                     </div>
                     <span className="font-['Inter'] text-[14px] text-[#3b3b3b]">Breakfast</span>
                   </div>
                   <div className="flex items-center gap-[12px]">
                     <div className="w-[40px] h-[40px] bg-white rounded-[8px] flex items-center justify-center">
-                      <Car className="w-[20px] h-[20px] text-[#1ABC9C]" />
+                      <Car className="w-[20px] h-[20px] text-[#2F80ED]" />
                     </div>
                     <span className="font-['Inter'] text-[14px] text-[#3b3b3b]">Airport Shuttle</span>
                   </div>
                   <div className="flex items-center gap-[12px]">
                     <div className="w-[40px] h-[40px] bg-white rounded-[8px] flex items-center justify-center">
-                      <Wind className="w-[20px] h-[20px] text-[#1ABC9C]" />
+                      <Wind className="w-[20px] h-[20px] text-[#2F80ED]" />
                     </div>
                     <span className="font-['Inter'] text-[14px] text-[#3b3b3b]">Air Conditioning</span>
                   </div>
@@ -292,7 +292,7 @@ export function HotelDetailPage() {
 
                     <div className="flex justify-between items-center mb-[24px] pb-[20px] border-b border-[#eaeaea]">
                       <span className="font-['Poppins'] font-bold text-[18px] text-[#3b3b3b]">Total</span>
-                      <span className="font-['Poppins'] font-bold text-[24px] text-[#1ABC9C]">
+                      <span className="font-['Poppins'] font-bold text-[24px] text-[#2F80ED]">
                         ${(hotel.rooms?.find(r => r.id === selectedRoomId)?.directPrice || 0) * 3 + 12}
                       </span>
                     </div>
@@ -317,7 +317,7 @@ export function HotelDetailPage() {
             <div className="flex items-center justify-between mb-[12px]">
               <div>
                 <span className="font-['Inter'] text-[14px] text-[#8c8c8c]">Total</span>
-                <div className="font-['Poppins'] font-bold text-[24px] text-[#1ABC9C]">
+                <div className="font-['Poppins'] font-bold text-[24px] text-[#2F80ED]">
                   ${(hotel.rooms?.find(r => r.id === selectedRoomId)?.directPrice || 0) * 3 + 12}
                 </div>
               </div>

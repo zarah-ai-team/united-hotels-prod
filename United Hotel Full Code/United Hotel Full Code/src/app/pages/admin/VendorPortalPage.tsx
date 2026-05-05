@@ -117,7 +117,7 @@ export function VendorPortalPage() {
                   onClick={() => setActiveHotelId(h.id)}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     activeHotelId === h.id
-                      ? 'bg-[#1abc9c] text-white'
+                      ? 'bg-[#2F80ED] text-white'
                       : 'bg-[#eaeaea] text-[#3b3b3b] hover:bg-[#d4d4d4]'
                   }`}
                 >

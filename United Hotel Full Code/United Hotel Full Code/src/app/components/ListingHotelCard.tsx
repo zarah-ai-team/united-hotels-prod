@@ -1,4 +1,4 @@
-import { MapPin, Star } from 'lucide-react';
+﻿import { MapPin, Star } from 'lucide-react';
 import { Link } from 'react-router';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -35,7 +35,7 @@ export function ListingHotelCard({
     <Link 
       to={`/hotel/${id}`}
       onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "auto" })}
-      className="block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group border border-[#e5e7eb] hover:border-[#1abc9c]"
+      className="block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all group border border-[#e5e7eb] hover:border-[#2F80ED]"
     >
       {/* Image Section - Better proportions for single column mobile */}
       <div className="relative aspect-[4/3] md:aspect-[4/3] overflow-hidden">
@@ -61,7 +61,7 @@ export function ListingHotelCard({
               <MapPin className="w-4 h-4 text-[#8c8c8c] flex-shrink-0" />
               <span className="font-['Inter:Medium',sans-serif] text-[12px] md:text-[12px] text-[#8c8c8c] truncate">{location}</span>
             </div>
-            <h3 className="font-['Inter:SemiBold',sans-serif] text-[16px] md:text-[18px] text-[#3b3b3b] group-hover:text-[#1abc9c] transition-colors line-clamp-2 leading-tight">
+            <h3 className="font-['Inter:SemiBold',sans-serif] text-[16px] md:text-[18px] text-[#3b3b3b] group-hover:text-[#2F80ED] transition-colors line-clamp-2 leading-tight">
               {name}
             </h3>
           </div>

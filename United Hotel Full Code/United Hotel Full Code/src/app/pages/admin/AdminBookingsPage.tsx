@@ -145,7 +145,7 @@ export function AdminBookingsPage() {
               </div>
               <div className="px-5 py-3">
                 <div className="admin-strip-cell">Filtered revenue</div>
-                <div className="text-[18px] font-semibold text-[#5eead4] tabular-nums leading-none mt-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                <div className="text-[18px] font-semibold text-[#5DA0F8] tabular-nums leading-none mt-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
                   {fmtUsd(totalRevenue)}
                 </div>
               </div>
@@ -232,7 +232,7 @@ export function AdminBookingsPage() {
                     >
                       {/* Booking ID + created date */}
                       <td className="px-4 py-3 align-top whitespace-nowrap">
-                        <div className="font-mono text-[12px] font-semibold text-[#0f9b86] dark:text-[#5eead4]">BK-{b.id}</div>
+                        <div className="font-mono text-[12px] font-semibold text-[#1E5FBC] dark:text-[#5DA0F8]">BK-{b.id}</div>
                         <div className="text-[10.5px] mt-0.5" style={{ color: 'var(--admin-text-faint)' }}>
                           {fmtShortDate(b.created_at)}
                         </div>
@@ -244,8 +244,8 @@ export function AdminBookingsPage() {
                           <div
                             className="flex h-8 w-8 items-center justify-center rounded-full text-white text-[10.5px] font-semibold shrink-0"
                             style={{
-                              background: 'linear-gradient(135deg, #1ABC9C, #16A085)',
-                              boxShadow: '0 4px 10px -4px rgba(26,188,156,0.45)',
+                              background: 'linear-gradient(135deg, #2F80ED, #1E5FBC)',
+                              boxShadow: '0 4px 10px -4px rgba(47, 128, 237,0.45)',
                             }}
                           >
                             {initials(b.user_name, b.user_email)}
@@ -287,9 +287,9 @@ export function AdminBookingsPage() {
                         <span
                           className="inline-flex items-center justify-center min-w-[28px] h-6 rounded-md text-[11px] font-semibold tabular-nums"
                           style={{
-                            background: 'rgba(26,188,156,0.10)',
-                            color: '#0f9b86',
-                            border: '1px solid rgba(26,188,156,0.20)',
+                            background: 'rgba(47, 128, 237,0.10)',
+                            color: '#1E5FBC',
+                            border: '1px solid rgba(47, 128, 237,0.20)',
                           }}
                         >
                           {nightsBetween(b.check_in_date, b.check_out_date)}
@@ -336,7 +336,7 @@ export function AdminBookingsPage() {
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="font-mono text-[11px] font-semibold mb-1 text-[#0f9b86] dark:text-[#5eead4]">BK-{selected.id}</div>
+            <div className="font-mono text-[11px] font-semibold mb-1 text-[#1E5FBC] dark:text-[#5DA0F8]">BK-{selected.id}</div>
             <h2 className="text-[18px] font-bold" style={{ fontFamily: 'Poppins, sans-serif', color: 'var(--admin-text)' }}>
               {selected.user_name || 'Booking detail'}
             </h2>
@@ -396,11 +396,11 @@ function Field({
       <div
         className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
         style={{
-          background: 'linear-gradient(135deg, rgba(26,188,156,0.12), rgba(26,188,156,0.22))',
-          boxShadow: 'inset 0 0 0 1px rgba(26,188,156,0.25)',
+          background: 'linear-gradient(135deg, rgba(47, 128, 237,0.12), rgba(47, 128, 237,0.22))',
+          boxShadow: 'inset 0 0 0 1px rgba(47, 128, 237,0.25)',
         }}
       >
-        <Icon className="w-3.5 h-3.5 text-[#0f9b86] dark:text-[#5eead4]" />
+        <Icon className="w-3.5 h-3.5 text-[#1E5FBC] dark:text-[#5DA0F8]" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[10.5px] uppercase tracking-[0.08em] font-semibold" style={{ color: 'var(--admin-text-faint)' }}>

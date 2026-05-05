@@ -24,10 +24,10 @@ export function Button({
   const baseStyles = "font-['Inter'] font-semibold rounded-[8px] transition-all inline-flex items-center justify-center gap-[8px]";
   
   const variantStyles = {
-    primary: "bg-[#1ABC9C] text-white hover:bg-[#16a085] disabled:bg-[#8c8c8c] disabled:cursor-not-allowed",
-    secondary: "bg-white text-[#1ABC9C] border-2 border-[#1ABC9C] hover:bg-[#f0fdf4] disabled:opacity-50 disabled:cursor-not-allowed",
-    outline: "bg-transparent text-[#3b3b3b] border border-[#eaeaea] hover:border-[#1ABC9C] hover:text-[#1ABC9C] disabled:opacity-50 disabled:cursor-not-allowed",
-    ghost: "bg-transparent text-[#1ABC9C] hover:bg-[rgba(26,188,156,0.1)] disabled:opacity-50 disabled:cursor-not-allowed"
+    primary: "bg-[#2F80ED] text-white hover:bg-[#1E5FBC] disabled:bg-[#8c8c8c] disabled:cursor-not-allowed",
+    secondary: "bg-white text-[#2F80ED] border-2 border-[#2F80ED] hover:bg-[#f0fdf4] disabled:opacity-50 disabled:cursor-not-allowed",
+    outline: "bg-transparent text-[#3b3b3b] border border-[#eaeaea] hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:opacity-50 disabled:cursor-not-allowed",
+    ghost: "bg-transparent text-[#2F80ED] hover:bg-[rgba(47, 128, 237,0.1)] disabled:opacity-50 disabled:cursor-not-allowed"
   };
   
   const sizeStyles = {

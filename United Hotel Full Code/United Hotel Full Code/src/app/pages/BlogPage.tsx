@@ -1,62 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { MapPin, Calendar, Clock, ArrowRight, Search } from "lucide-react";
-import svgPaths from "../../imports/svg-nnzqmx1xjq";
-
-// Navigation Component
-function Navigation() {
-  return (
-    <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100">
-      <div className="max-w-[1840px] mx-auto px-10">
-        <div className="flex items-center justify-between h-18">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-[26px] w-[28px]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28 26">
-                <mask fill="white" id="path-1-inside-1_20_512">
-                  <path d={svgPaths.p32095b00} />
-                </mask>
-                <path d={svgPaths.p32095b00} fill="#1ABC9C" mask="url(#path-1-inside-1_20_512)" stroke="#1ABC9C" strokeWidth="0.4" />
-              </svg>
-            </div>
-            <span className="font-['Poppins:SemiBold',sans-serif] text-[20px] text-[#1abc9c]">
-              United Hotels
-            </span>
-          </Link>
-
-          {/* Main Navigation */}
-          <div className="flex items-center gap-8">
-            <a href="/#home" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Home
-            </a>
-            <a href="/#why-choose-united-hotels" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Why Choose United Hotels
-            </a>
-            <a href="/#featured-hotels" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Featured Hotels
-            </a>
-            <a href="/#quality" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Quality
-            </a>
-            <a href="/#faqs" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              FAQ
-            </a>
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-6">
-            <Link to="/portal" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors text-[14px] font-['Inter:Medium',sans-serif]">
-              Login / Register
-            </Link>
-            <Link to="/listing" className="bg-[#1abc9c] text-white px-6 py-2.5 rounded-lg hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]">
-              Find Hotels
-            </Link>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-}
+import { Navigation } from "../components/Navigation";
 
 // Blog Article Card
 interface BlogCardProps {
@@ -81,7 +26,7 @@ function BlogCard({ image, category, title, excerpt, date, readTime, slug }: Blo
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
           <div className="absolute top-4 left-4">
-            <span className="bg-[#1abc9c] text-white px-3 py-1.5 rounded-lg font-['Inter:SemiBold',sans-serif] text-[13px]">
+            <span className="bg-[#2F80ED] text-white px-3 py-1.5 rounded-lg font-['Inter:SemiBold',sans-serif] text-[13px]">
               {category}
             </span>
           </div>
@@ -102,7 +47,7 @@ function BlogCard({ image, category, title, excerpt, date, readTime, slug }: Blo
           </div>
 
           {/* Title */}
-          <h3 className="font-['Poppins:SemiBold',sans-serif] text-[22px] text-[#3b3b3b] mb-3 group-hover:text-[#1abc9c] transition-colors">
+          <h3 className="font-['Poppins:SemiBold',sans-serif] text-[22px] text-[#3b3b3b] mb-3 group-hover:text-[#2F80ED] transition-colors">
             {title}
           </h3>
 
@@ -112,7 +57,7 @@ function BlogCard({ image, category, title, excerpt, date, readTime, slug }: Blo
           </p>
 
           {/* Read More */}
-          <div className="flex items-center gap-2 text-[#1abc9c] font-['Inter:SemiBold',sans-serif] text-[14px]">
+          <div className="flex items-center gap-2 text-[#2F80ED] font-['Inter:SemiBold',sans-serif] text-[14px]">
             Read More
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -210,7 +155,7 @@ export function BlogPage() {
               <input
                 type="text"
                 placeholder="Search travel guides..."
-                className="w-full pl-12 pr-4 py-4 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/20 transition-all"
+                className="w-full pl-12 pr-4 py-4 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 transition-all"
               />
             </div>
           </div>
@@ -227,8 +172,8 @@ export function BlogPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-5 py-2.5 rounded-lg font-['Inter:SemiBold',sans-serif] text-[14px] whitespace-nowrap transition-all ${
                   selectedCategory === category
-                    ? 'bg-[#1abc9c] text-white'
-                    : 'bg-white border border-[#eaeaea] text-[#3b3b3b] hover:border-[#1abc9c]'
+                    ? 'bg-[#2F80ED] text-white'
+                    : 'bg-white border border-[#eaeaea] text-[#3b3b3b] hover:border-[#2F80ED]'
                 }`}
               >
                 {category}
@@ -272,9 +217,9 @@ export function BlogPage() {
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-5 py-4 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/20"
+              className="flex-1 px-5 py-4 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20"
             />
-            <button className="bg-[#1abc9c] text-white px-8 py-4 rounded-xl hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[16px]">
+            <button className="bg-[#2F80ED] text-white px-8 py-4 rounded-xl hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[16px]">
               Subscribe
             </button>
           </div>

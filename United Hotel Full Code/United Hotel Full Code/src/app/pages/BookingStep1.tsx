@@ -67,10 +67,7 @@ export function BookingStep1() {
 
   return (
     <div className="min-h-screen glass-section-bg pb-0 md:pb-0">
-      {/* Mobile Navigation */}
-      <div className="md:hidden">
-        <Navigation />
-      </div>
+      <Navigation />
 
       {/* Progress Stepper - Mobile & Desktop */}
       <div className="bg-white/65 dark:bg-white/[0.04] backdrop-blur-md border-b border-black/[0.05] dark:border-white/[0.06] md:hidden">
@@ -78,7 +75,7 @@ export function BookingStep1() {
           <div className="flex items-center justify-center gap-3">
             {/* Step 1 - Active */}
             <div className="flex flex-col items-center gap-1">
-              <div className="w-6 h-6 bg-gradient-to-br from-[#1abc9c] to-[#2dd4bf] rounded-full flex items-center justify-center text-white font-['Inter:Bold',sans-serif] shadow-[0_6px_16px_-6px_rgba(26,188,156,0.55)] ring-2 ring-white/40 dark:ring-white/10 text-[11px]">
+              <div className="w-6 h-6 bg-gradient-to-br from-[#2F80ED] to-[#5DA0F8] rounded-full flex items-center justify-center text-white font-['Inter:Bold',sans-serif] shadow-[0_6px_16px_-6px_rgba(47, 128, 237,0.55)] ring-2 ring-white/40 dark:ring-white/10 text-[11px]">
                 1
               </div>
               <div className="text-center">
@@ -121,57 +118,6 @@ export function BookingStep1() {
         </div>
       </div>
 
-      {/* Desktop Header */}
-      <header className="hidden md:block bg-white/72 dark:bg-[#0a0a0a]/72 backdrop-blur-xl backdrop-saturate-150 border-b border-black/[0.06] dark:border-white/[0.06] sticky top-0 z-50 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.08)]">
-        <div className="max-w-[1840px] mx-auto px-4 md:px-10">
-          <div className="flex items-center justify-between h-16 md:h-18">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <div className="h-[22px] w-6 md:h-[26px] md:w-7">
-                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28 26">
-                  <mask fill="white" id="path-1-inside-1_20_512">
-                    <path d={svgPaths.p32095b00} />
-                  </mask>
-                  <path d={svgPaths.p32095b00} fill="#1ABC9C" mask="url(#path-1-inside-1_20_512)" stroke="#1ABC9C" strokeWidth="0.4" />
-                </svg>
-              </div>
-              <span className="font-['Poppins:SemiBold',sans-serif] text-[16px] md:text-[20px] text-[#1abc9c]">
-                United Hotels
-              </span>
-            </Link>
-
-            {/* Navigation Links - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-8">
-              <a href="/#home" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-                Home
-              </a>
-              <a href="/#why-choose-united-hotels" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-                Why Choose United Hotels
-              </a>
-              <a href="/#featured-hotels" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-                Featured Hotels
-              </a>
-              <a href="/#quality" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-                Quality
-              </a>
-              <a href="/#faqs" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-                FAQ
-              </a>
-            </div>
-
-            {/* Support - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-4">
-              <span className="font-['Inter:Regular',sans-serif] text-[14px] text-[#8c8c8c]">
-                Need help?
-              </span>
-              <Link to="/support" className="font-['Inter:SemiBold',sans-serif] text-[14px] text-[#1abc9c] hover:text-[#16a085] transition-colors">
-                Contact Support
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Progress Stepper - Desktop Only */}
       <div className="hidden md:block bg-white/55 dark:bg-white/[0.03] backdrop-blur-md border-b border-black/[0.05] dark:border-white/[0.06]">
         <div className="max-w-[1840px] mx-auto px-10 py-4">
@@ -179,7 +125,7 @@ export function BookingStep1() {
             {/* Step 1 - Active */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#1abc9c] to-[#2dd4bf] rounded-full flex items-center justify-center text-white font-['Inter:Bold',sans-serif] shadow-[0_6px_16px_-6px_rgba(26,188,156,0.55)] ring-2 ring-white/40 dark:ring-white/10 text-[13px]">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#2F80ED] to-[#5DA0F8] rounded-full flex items-center justify-center text-white font-['Inter:Bold',sans-serif] shadow-[0_6px_16px_-6px_rgba(47, 128, 237,0.55)] ring-2 ring-white/40 dark:ring-white/10 text-[13px]">
                   1
                 </div>
                 <div>
@@ -234,7 +180,7 @@ export function BookingStep1() {
         {/* Back Button */}
         <Link
           to={`/hotel/${booking.hotel.id}`}
-          className="inline-flex items-center gap-1.5 text-[#1abc9c] hover:text-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[13px] md:text-[14px] mb-3 md:mb-4"
+          className="inline-flex items-center gap-1.5 text-[#2F80ED] hover:text-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[13px] md:text-[14px] mb-3 md:mb-4"
         >
           <ChevronLeft className="w-4 h-4" />
           Go Back
@@ -263,7 +209,7 @@ export function BookingStep1() {
                       {booking.hotel.name}
                     </h3>
                     <div className="flex items-center gap-2 mb-3">
-                      <MapPin className="w-4 h-4 text-[#1abc9c]" />
+                      <MapPin className="w-4 h-4 text-[#2F80ED]" />
                       <span className="font-['Inter:Regular',sans-serif] text-[14px] text-[#6b7280]">
                         {booking.hotel.location}
                       </span>
@@ -283,7 +229,7 @@ export function BookingStep1() {
 
                   {/* Room Type */}
                   <div className="inline-flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded-lg border border-[#eaeaea]">
-                    <Bed className="w-4 h-4 text-[#1abc9c]" />
+                    <Bed className="w-4 h-4 text-[#2F80ED]" />
                     <span className="font-['Inter:SemiBold',sans-serif] text-[14px] text-[#3b3b3b]">
                       {booking.room.name}
                     </span>
@@ -304,13 +250,13 @@ export function BookingStep1() {
                     {booking.hotel.name}
                   </h3>
                   <div className="flex items-center gap-1.5 mb-2">
-                    <MapPin className="w-3.5 h-3.5 text-[#1abc9c]" />
-                    <span className="font-['Inter:Regular',sans-serif] text-[13px] text-[#6b7280] dark:text-white/65">
+                    <MapPin className="w-3.5 h-3.5 text-[#2F80ED]" />
+                    <span className="font-['Inter:Regular',sans-serif] text-[13px] text-[#6b7280] dark:text-white/70">
                       {booking.hotel.location}
                     </span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 bg-[#f9fafb] dark:bg-white/[0.05] px-2.5 py-1 rounded-lg border border-[#eaeaea] dark:border-white/10">
-                    <Bed className="w-3.5 h-3.5 text-[#1abc9c]" />
+                    <Bed className="w-3.5 h-3.5 text-[#2F80ED]" />
                     <span className="font-['Inter:SemiBold',sans-serif] text-[12.5px] text-[#3b3b3b] dark:text-white/85">
                       {booking.room.name}
                     </span>
@@ -330,8 +276,8 @@ export function BookingStep1() {
               {/* Mobile: Vertical Layout */}
               <div className="md:hidden space-y-4 pt-6 border-t border-[#eaeaea]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#1abc9c]/10 rounded-lg flex items-center justify-center">
-                    <Maximize2 className="w-5 h-5 text-[#1abc9c]" />
+                  <div className="w-10 h-10 bg-[#2F80ED]/10 rounded-lg flex items-center justify-center">
+                    <Maximize2 className="w-5 h-5 text-[#2F80ED]" />
                   </div>
                   <div>
                     <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#8c8c8c]">
@@ -344,8 +290,8 @@ export function BookingStep1() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#1abc9c]/10 rounded-lg flex items-center justify-center">
-                    <Bed className="w-5 h-5 text-[#1abc9c]" />
+                  <div className="w-10 h-10 bg-[#2F80ED]/10 rounded-lg flex items-center justify-center">
+                    <Bed className="w-5 h-5 text-[#2F80ED]" />
                   </div>
                   <div>
                     <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#8c8c8c]">
@@ -358,8 +304,8 @@ export function BookingStep1() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#1abc9c]/10 rounded-lg flex items-center justify-center">
-                    <Users className="w-5 h-5 text-[#1abc9c]" />
+                  <div className="w-10 h-10 bg-[#2F80ED]/10 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#2F80ED]" />
                   </div>
                   <div>
                     <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#8c8c8c]">
@@ -375,8 +321,8 @@ export function BookingStep1() {
               {/* Desktop: Grid Layout */}
               <div className="hidden md:grid md:grid-cols-3 gap-3 pt-4 border-t border-[#eaeaea] dark:border-white/[0.06]">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 rounded-lg flex items-center justify-center">
-                    <Maximize2 className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                  <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                    <Maximize2 className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                   </div>
                   <div>
                     <div className="font-['Inter:Regular',sans-serif] text-[11px] text-[#8c8c8c]">
@@ -389,8 +335,8 @@ export function BookingStep1() {
                 </div>
 
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 rounded-lg flex items-center justify-center">
-                    <Bed className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                  <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                    <Bed className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                   </div>
                   <div>
                     <div className="font-['Inter:Regular',sans-serif] text-[11px] text-[#8c8c8c]">
@@ -403,8 +349,8 @@ export function BookingStep1() {
                 </div>
 
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 rounded-lg flex items-center justify-center">
-                    <Users className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                  <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                    <Users className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                   </div>
                   <div>
                     <div className="font-['Inter:Regular',sans-serif] text-[11px] text-[#8c8c8c]">
@@ -429,7 +375,7 @@ export function BookingStep1() {
                 {/* Check-in */}
                 <div className="bg-[#fafafa] rounded-xl p-4 border border-[#eaeaea]">
                   <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="w-5 h-5 text-[#1abc9c]" />
+                    <Calendar className="w-5 h-5 text-[#2F80ED]" />
                     <span className="font-['Inter:Medium',sans-serif] text-[13px] text-[#8c8c8c] uppercase tracking-wide">
                       Check-in
                     </span>
@@ -445,7 +391,7 @@ export function BookingStep1() {
                 {/* Check-out */}
                 <div className="bg-[#fafafa] rounded-xl p-4 border border-[#eaeaea]">
                   <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="w-5 h-5 text-[#1abc9c]" />
+                    <Calendar className="w-5 h-5 text-[#2F80ED]" />
                     <span className="font-['Inter:Medium',sans-serif] text-[13px] text-[#8c8c8c] uppercase tracking-wide">
                       Check-out
                     </span>
@@ -461,7 +407,7 @@ export function BookingStep1() {
                 {/* Duration & Guests - Stacked */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 bg-[#f9fafb] rounded-xl p-4 border border-[#eaeaea]">
-                    <div className="w-12 h-12 bg-[#1abc9c] rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-[#2F80ED] rounded-lg flex items-center justify-center">
                       <Clock className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -475,7 +421,7 @@ export function BookingStep1() {
                   </div>
 
                   <div className="flex items-center gap-4 bg-[#f9fafb] rounded-xl p-4 border border-[#eaeaea]">
-                    <div className="w-12 h-12 bg-[#1abc9c] rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-[#2F80ED] rounded-lg flex items-center justify-center">
                       <Users className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -495,7 +441,7 @@ export function BookingStep1() {
                 {/* Check-in */}
                 <div className="bg-[#fafafa] dark:bg-white/[0.04] rounded-xl p-3.5 border border-[#eaeaea] dark:border-white/[0.06]">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Calendar className="w-4 h-4 text-[#1abc9c]" />
+                    <Calendar className="w-4 h-4 text-[#2F80ED]" />
                     <span className="font-['Inter:Medium',sans-serif] text-[11px] text-[#8c8c8c] uppercase tracking-wide">
                       Check-in
                     </span>
@@ -503,7 +449,7 @@ export function BookingStep1() {
                   <div className="font-['Inter:Bold',sans-serif] text-[14px] text-[#3b3b3b] dark:text-white">
                     {formatDate(booking.checkIn)}
                   </div>
-                  <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#6b7280] dark:text-white/55">
+                  <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#6b7280] dark:text-white/60">
                     From 2:00 PM
                   </div>
                 </div>
@@ -511,7 +457,7 @@ export function BookingStep1() {
                 {/* Check-out */}
                 <div className="bg-[#fafafa] dark:bg-white/[0.04] rounded-xl p-3.5 border border-[#eaeaea] dark:border-white/[0.06]">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Calendar className="w-4 h-4 text-[#1abc9c]" />
+                    <Calendar className="w-4 h-4 text-[#2F80ED]" />
                     <span className="font-['Inter:Medium',sans-serif] text-[11px] text-[#8c8c8c] uppercase tracking-wide">
                       Check-out
                     </span>
@@ -519,7 +465,7 @@ export function BookingStep1() {
                   <div className="font-['Inter:Bold',sans-serif] text-[14px] text-[#3b3b3b] dark:text-white">
                     {formatDate(booking.checkOut)}
                   </div>
-                  <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#6b7280] dark:text-white/55">
+                  <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#6b7280] dark:text-white/60">
                     Until 12:00 PM
                   </div>
                 </div>
@@ -528,7 +474,7 @@ export function BookingStep1() {
               {/* Duration & Guests - Desktop */}
               <div className="hidden md:grid md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3 bg-[#f9fafb] dark:bg-white/[0.04] rounded-xl p-3 border border-[#eaeaea] dark:border-white/[0.06]">
-                  <div className="w-9 h-9 bg-[#1abc9c] rounded-lg flex items-center justify-center">
+                  <div className="w-9 h-9 bg-[#2F80ED] rounded-lg flex items-center justify-center">
                     <Clock className="w-4.5 h-4.5 text-white" />
                   </div>
                   <div>
@@ -542,7 +488,7 @@ export function BookingStep1() {
                 </div>
 
                 <div className="flex items-center gap-3 bg-[#f9fafb] dark:bg-white/[0.04] rounded-xl p-3 border border-[#eaeaea] dark:border-white/[0.06]">
-                  <div className="w-9 h-9 bg-[#1abc9c] rounded-lg flex items-center justify-center">
+                  <div className="w-9 h-9 bg-[#2F80ED] rounded-lg flex items-center justify-center">
                     <Users className="w-4.5 h-4.5 text-white" />
                   </div>
                   <div>
@@ -572,7 +518,7 @@ export function BookingStep1() {
                   { icon: <Check className="w-5 h-5" />, name: 'Air Conditioning', desc: 'Climate control' }
                 ].map((amenity, index) => (
                   <div key={index} className="flex items-start gap-3 p-3 bg-[#fafafa] rounded-lg border border-[#eaeaea]">
-                    <div className="w-8 h-8 bg-[#1abc9c]/10 rounded-lg flex items-center justify-center text-[#1abc9c] shrink-0">
+                    <div className="w-8 h-8 bg-[#2F80ED]/10 rounded-lg flex items-center justify-center text-[#2F80ED] shrink-0">
                       {amenity.icon}
                     </div>
                     <div>
@@ -596,7 +542,7 @@ export function BookingStep1() {
                   { icon: <Check className="w-4 h-4" />, name: 'Air Conditioning', desc: 'Climate control' }
                 ].map((amenity, index) => (
                   <div key={index} className="flex items-start gap-2.5 p-2.5 bg-[#fafafa] dark:bg-white/[0.04] rounded-lg border border-[#eaeaea] dark:border-white/[0.06]">
-                    <div className="w-7 h-7 bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 rounded-lg flex items-center justify-center text-[#1abc9c] dark:text-[#2dd4bf] shrink-0">
+                    <div className="w-7 h-7 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center text-[#2F80ED] dark:text-[#5DA0F8] shrink-0">
                       {amenity.icon}
                     </div>
                     <div>
@@ -615,7 +561,7 @@ export function BookingStep1() {
             {/* Cancellation Policy — bright pastel green in light mode, a
                 muted emerald-on-charcoal tint in dark mode so it doesn't glare. */}
             <div className="rounded-2xl p-4 md:p-5 border
-              bg-gradient-to-br from-[#d1fae5]/70 to-[#a7f3d0]/60 border-[#86efac]
+              bg-gradient-to-br from-[#d1fae5]/70 to-[#BFD9F8]/60 border-[#86efac]
               dark:bg-none dark:bg-emerald-500/[0.08] dark:border-emerald-400/25
               dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <div className="flex items-start gap-3">
@@ -644,7 +590,7 @@ export function BookingStep1() {
           <div className="hidden md:block">
             <div className="sticky top-24">
               {/* Price Summary Card */}
-              <div className="hero-glass rounded-2xl p-5 mb-4 ring-1 ring-[#1abc9c]/30 dark:ring-[#2dd4bf]/35">
+              <div className="hero-glass rounded-2xl p-5 mb-4 ring-1 ring-[#2F80ED]/30 dark:ring-[#5DA0F8]/35">
                 <h3 className="font-['Poppins:Bold',sans-serif] text-[18px] text-[#3b3b3b] dark:text-white mb-4">
                   Price Summary
                 </h3>
@@ -665,7 +611,7 @@ export function BookingStep1() {
                       <span className="font-['Inter:Regular',sans-serif] text-[13px] text-[#3b3b3b] dark:text-white/80">
                         Taxes & fees
                       </span>
-                      <button className="text-[#8c8c8c] hover:text-[#1abc9c]">
+                      <button className="text-[#8c8c8c] hover:text-[#2F80ED]">
                         <Info className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -705,7 +651,7 @@ export function BookingStep1() {
                     Total Amount
                   </span>
                   <div className="text-right">
-                    <div className="font-['Poppins:Bold',sans-serif] text-[26px] leading-tight text-[#1abc9c] dark:text-[#2dd4bf]">
+                    <div className="font-['Poppins:Bold',sans-serif] text-[26px] leading-tight text-[#2F80ED] dark:text-[#5DA0F8]">
                       {formatCurrency(total, language)}
                     </div>
                     <div className="font-['Inter:Regular',sans-serif] text-[11.5px] text-[#8c8c8c] mt-0.5">
@@ -717,7 +663,7 @@ export function BookingStep1() {
                 {/* CTA Button */}
                 <button
                   onClick={continueToNext}
-                  className="w-full bg-[#1abc9c] text-white py-3 rounded-xl hover:bg-[#16a085] transition-all font-['Inter:Bold',sans-serif] text-[14px] mb-2.5 relative overflow-hidden group"
+                  className="w-full bg-[#2F80ED] text-white py-3 rounded-xl hover:bg-[#1E5FBC] transition-all font-['Inter:Bold',sans-serif] text-[14px] mb-2.5 relative overflow-hidden group"
                 >
                   <span className="relative z-10">Continue to Guest Details</span>
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/20 to-transparent" />
@@ -780,7 +726,7 @@ export function BookingStep1() {
             {/* Price Info */}
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <span className="font-['Poppins:Bold',sans-serif] text-[24px] leading-6 text-[#1abc9c]">
+                <span className="font-['Poppins:Bold',sans-serif] text-[24px] leading-6 text-[#2F80ED]">
                   {formatCurrency(total, language)}
                 </span>
                 <span className="font-['Inter:Regular',sans-serif] text-[12px] text-[#6b7280]">
@@ -795,7 +741,7 @@ export function BookingStep1() {
             {/* CTA Button */}
             <button
                 onClick={continueToNext}
-              className="bg-[#1abc9c] text-white px-6 py-3 rounded-xl hover:bg-[#16a085] transition-all font-['Inter:Bold',sans-serif] text-[15px] min-h-12 flex items-center justify-center gap-2 shrink-0"
+              className="bg-[#2F80ED] text-white px-6 py-3 rounded-xl hover:bg-[#1E5FBC] transition-all font-['Inter:Bold',sans-serif] text-[15px] min-h-12 flex items-center justify-center gap-2 shrink-0"
             >
               Continue
               <ChevronRight className="w-4 h-4" />

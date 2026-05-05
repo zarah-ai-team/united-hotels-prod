@@ -6,8 +6,8 @@ export function HotelGridLoader({ count = 6 }: { count?: number }) {
       <div className="rounded-3xl border border-[#d9efe9] bg-[linear-gradient(135deg,#ffffff_0%,#f3fbf8_52%,#ecfdf7_100%)] p-6 md:p-8 shadow-[0_20px_60px_rgba(15,118,110,0.08)]">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#b7e5dc] bg-white/80 px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.24em] text-[#0f766e]">
-              <span className="h-2 w-2 rounded-full bg-[#1abc9c] animate-pulse" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#b7e5dc] bg-white/80 px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.24em] text-[#1E5FBC]">
+              <span className="h-2 w-2 rounded-full bg-[#2F80ED] animate-pulse" />
               Loading live inventory
             </div>
             <Skeleton className="h-10 w-[220px] rounded-xl bg-[#dff5ef]" />
@@ -52,7 +52,7 @@ export function HotelGridLoader({ count = 6 }: { count?: number }) {
                     <Skeleton className="h-9 w-32 bg-[#dff5ef]" />
                     <Skeleton className="h-4 w-16 rounded-full bg-[#eef8f5]" />
                   </div>
-                  <Skeleton className="h-11 w-24 rounded-2xl bg-[#1abc9c]/20" />
+                  <Skeleton className="h-11 w-24 rounded-2xl bg-[#2F80ED]/20" />
                 </div>
               </div>
             </div>
@@ -67,8 +67,8 @@ export function HotelDetailLoader() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="rounded-3xl border border-[#dcefe8] bg-[linear-gradient(135deg,#ffffff_0%,#f3fbf8_45%,#effcf8_100%)] p-6 md:p-8 shadow-[0_20px_60px_rgba(15,118,110,0.08)]">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#b7e5dc] bg-white/80 px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.24em] text-[#0f766e]">
-          <span className="h-2 w-2 rounded-full bg-[#1abc9c] animate-pulse" />
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#b7e5dc] bg-white/80 px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.24em] text-[#1E5FBC]">
+          <span className="h-2 w-2 rounded-full bg-[#2F80ED] animate-pulse" />
           Preparing hotel profile
         </div>
         <div className="grid gap-6 md:grid-cols-[1.4fr_0.9fr] md:items-center">
@@ -125,7 +125,7 @@ export function HotelDetailLoader() {
                   <div className="space-y-3 md:text-right">
                     <Skeleton className="h-4 w-20 rounded-full bg-[#eef8f5] md:ml-auto" />
                     <Skeleton className="h-9 w-28 bg-[#dff5ef] md:ml-auto" />
-                    <Skeleton className="h-11 w-28 rounded-2xl bg-[#1abc9c]/20 md:ml-auto" />
+                    <Skeleton className="h-11 w-28 rounded-2xl bg-[#2F80ED]/20 md:ml-auto" />
                   </div>
                 </div>
               ))}
@@ -140,7 +140,7 @@ export function HotelDetailLoader() {
             <Skeleton className="h-16 rounded-2xl bg-[#f4faf8]" />
             <Skeleton className="h-16 rounded-2xl bg-[#f4faf8]" />
           </div>
-          <Skeleton className="mt-6 h-12 w-full rounded-2xl bg-[#1abc9c]/20" />
+          <Skeleton className="mt-6 h-12 w-full rounded-2xl bg-[#2F80ED]/20" />
         </div>
       </div>
     </div>

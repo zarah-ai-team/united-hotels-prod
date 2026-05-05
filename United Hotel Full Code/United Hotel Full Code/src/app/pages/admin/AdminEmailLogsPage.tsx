@@ -15,7 +15,7 @@ type LogRow = {
 };
 
 const STATUS_META: Record<LogRow['status'], { label: string; color: string; bg: string; ring: string; Icon: typeof Mail }> = {
-  sent:    { label: 'Sent',    color: '#0f9b86', bg: 'rgba(26,188,156,0.10)', ring: 'rgba(26,188,156,0.35)', Icon: CheckCircle2 },
+  sent:    { label: 'Sent',    color: '#1E5FBC', bg: 'rgba(47, 128, 237,0.10)', ring: 'rgba(47, 128, 237,0.35)', Icon: CheckCircle2 },
   logged:  { label: 'Logged',  color: '#a16207', bg: 'rgba(245,158,11,0.10)',  ring: 'rgba(245,158,11,0.35)',  Icon: Clock },
   failed:  { label: 'Failed',  color: '#b91c1c', bg: 'rgba(239,68,68,0.10)',   ring: 'rgba(239,68,68,0.35)',   Icon: AlertCircle },
   skipped: { label: 'Skipped', color: '#52525b', bg: 'rgba(120,120,120,0.08)', ring: 'rgba(120,120,120,0.25)', Icon: Inbox },

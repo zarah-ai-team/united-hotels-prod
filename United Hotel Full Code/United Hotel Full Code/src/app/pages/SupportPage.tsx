@@ -1,65 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router";
-import { 
-  Phone, Mail, MessageCircle, Clock, 
-  ChevronDown, Send, MapPin, HelpCircle 
+import {
+  Phone, Mail, MessageCircle, Clock,
+  ChevronDown, Send, MapPin, HelpCircle
 } from "lucide-react";
-import svgPaths from "../../imports/svg-nnzqmx1xjq";
-
-// Navigation Component
-function Navigation() {
-  return (
-    <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100">
-      <div className="max-w-[1840px] mx-auto px-10">
-        <div className="flex items-center justify-between h-18">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-[26px] w-[28px]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28 26">
-                <mask fill="white" id="path-1-inside-1_20_512">
-                  <path d={svgPaths.p32095b00} />
-                </mask>
-                <path d={svgPaths.p32095b00} fill="#1ABC9C" mask="url(#path-1-inside-1_20_512)" stroke="#1ABC9C" strokeWidth="0.4" />
-              </svg>
-            </div>
-            <span className="font-['Poppins:SemiBold',sans-serif] text-[20px] text-[#1abc9c]">
-              United Hotels
-            </span>
-          </Link>
-
-          {/* Main Navigation */}
-          <div className="flex items-center gap-8">
-            <a href="/#home" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Home
-            </a>
-            <a href="/#why-choose-united-hotels" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Why Choose United Hotels
-            </a>
-            <a href="/#featured-hotels" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Featured Hotels
-            </a>
-            <a href="/#quality" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Quality
-            </a>
-            <a href="/#faqs" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              FAQ
-            </a>
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-6">
-            <Link to="/portal" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors text-[14px] font-['Inter:Medium',sans-serif]">
-              Login / Register
-            </Link>
-            <Link to="/listing" className="bg-[#1abc9c] text-white px-6 py-2.5 rounded-lg hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]">
-              Find Hotels
-            </Link>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-}
+import { Navigation } from "../components/Navigation";
 
 // FAQ Accordion Component
 function FAQAccordion() {
@@ -123,7 +67,7 @@ function FAQAccordion() {
               {faq.question}
             </span>
             <ChevronDown 
-              className={`w-5 h-5 text-[#1abc9c] flex-shrink-0 transition-transform ${
+              className={`w-5 h-5 text-[#2F80ED] flex-shrink-0 transition-transform ${
                 openIndex === index ? 'rotate-180' : ''
               }`}
             />
@@ -164,8 +108,8 @@ export function SupportPage() {
       <section className="bg-white py-20 border-b border-[#eaeaea]">
         <div className="max-w-[1840px] mx-auto px-10">
           <div className="max-w-[800px] mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#1abc9c]/10 rounded-2xl mb-6">
-              <HelpCircle className="w-8 h-8 text-[#1abc9c]" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#2F80ED]/10 rounded-2xl mb-6">
+              <HelpCircle className="w-8 h-8 text-[#2F80ED]" />
             </div>
             <h1 className="font-['Poppins:Bold',sans-serif] text-[56px] leading-[68px] text-[#3b3b3b] mb-6">
               How Can We Help?
@@ -207,8 +151,8 @@ export function SupportPage() {
 
             {/* Email Support */}
             <div className="bg-white border border-[#eaeaea] rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-[#1abc9c]/10 rounded-xl mb-5">
-                <Mail className="w-7 h-7 text-[#1abc9c]" />
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-[#2F80ED]/10 rounded-xl mb-5">
+                <Mail className="w-7 h-7 text-[#2F80ED]" />
               </div>
               <h3 className="font-['Poppins:SemiBold',sans-serif] text-[22px] text-[#3b3b3b] mb-3">
                 Email Support
@@ -221,7 +165,7 @@ export function SupportPage() {
               </p>
               <a 
                 href="mailto:hello@unitedhotels.com"
-                className="inline-block bg-[#1abc9c] text-white px-6 py-3 rounded-lg hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[15px]"
+                className="inline-block bg-[#2F80ED] text-white px-6 py-3 rounded-lg hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[15px]"
               >
                 Send Email
               </a>
@@ -229,8 +173,8 @@ export function SupportPage() {
 
             {/* Phone Support */}
             <div className="bg-white border border-[#eaeaea] rounded-2xl p-8 text-center hover:shadow-xl transition-shadow">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-[#1abc9c]/10 rounded-xl mb-5">
-                <Phone className="w-7 h-7 text-[#1abc9c]" />
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-[#2F80ED]/10 rounded-xl mb-5">
+                <Phone className="w-7 h-7 text-[#2F80ED]" />
               </div>
               <h3 className="font-['Poppins:SemiBold',sans-serif] text-[22px] text-[#3b3b3b] mb-3">
                 Phone Support
@@ -243,7 +187,7 @@ export function SupportPage() {
               </p>
               <a 
                 href="tel:+905551234567"
-                className="inline-block bg-[#1abc9c] text-white px-6 py-3 rounded-lg hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[15px]"
+                className="inline-block bg-[#2F80ED] text-white px-6 py-3 rounded-lg hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[15px]"
               >
                 Call Now
               </a>
@@ -251,8 +195,8 @@ export function SupportPage() {
           </div>
 
           {/* Operating Hours */}
-          <div className="mt-8 bg-[#f0fdf4] border border-[#1abc9c]/20 rounded-xl p-6 flex items-center gap-4">
-            <Clock className="w-6 h-6 text-[#1abc9c]" />
+          <div className="mt-8 bg-[#f0fdf4] border border-[#2F80ED]/20 rounded-xl p-6 flex items-center gap-4">
+            <Clock className="w-6 h-6 text-[#2F80ED]" />
             <div>
               <p className="font-['Inter:SemiBold',sans-serif] text-[16px] text-[#3b3b3b] mb-1">
                 Support Hours
@@ -305,7 +249,7 @@ export function SupportPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/20 transition-all"
+                  className="w-full px-4 py-3.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 transition-all"
                   placeholder="John Doe"
                 />
               </div>
@@ -320,7 +264,7 @@ export function SupportPage() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/20 transition-all"
+                  className="w-full px-4 py-3.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 transition-all"
                   placeholder="john@example.com"
                 />
               </div>
@@ -335,7 +279,7 @@ export function SupportPage() {
                 required
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                className="w-full px-4 py-3.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/20 transition-all appearance-none bg-white"
+                className="w-full px-4 py-3.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 transition-all appearance-none bg-white"
               >
                 <option value="">Select a topic</option>
                 <option value="booking">Booking Inquiry</option>
@@ -357,7 +301,7 @@ export function SupportPage() {
                 rows={6}
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                className="w-full px-4 py-3.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/20 transition-all resize-none"
+                className="w-full px-4 py-3.5 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 transition-all resize-none"
                 placeholder="How can we help you?"
               />
             </div>
@@ -365,7 +309,7 @@ export function SupportPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#1abc9c] text-white py-4 rounded-xl hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[16px] flex items-center justify-center gap-2"
+              className="w-full bg-[#2F80ED] text-white py-4 rounded-xl hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[16px] flex items-center justify-center gap-2"
             >
               <Send className="w-5 h-5" />
               Send Message
@@ -394,8 +338,8 @@ export function SupportPage() {
 
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="bg-[#1abc9c]/10 w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-[#1abc9c]" />
+                  <div className="bg-[#2F80ED]/10 w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-[#2F80ED]" />
                   </div>
                   <div>
                     <p className="font-['Inter:SemiBold',sans-serif] text-[16px] text-[#3b3b3b] mb-1">
@@ -409,8 +353,8 @@ export function SupportPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="bg-[#1abc9c]/10 w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-5 h-5 text-[#1abc9c]" />
+                  <div className="bg-[#2F80ED]/10 w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-[#2F80ED]" />
                   </div>
                   <div>
                     <p className="font-['Inter:SemiBold',sans-serif] text-[16px] text-[#3b3b3b] mb-1">

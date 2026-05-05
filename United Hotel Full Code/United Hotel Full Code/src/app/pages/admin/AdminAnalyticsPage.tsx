@@ -17,12 +17,12 @@ const RANGE_OPTIONS = [
 const fmtUsd = (n: number) => `$${Math.round(Number(n) || 0).toLocaleString()}`;
 
 function StatCard({
-  label, value, icon: Icon, accent = '#1ABC9C',
+  label, value, icon: Icon, accent = '#2F80ED',
 }: {
   label: string; value: string | number; icon: React.ComponentType<{ className?: string; strokeWidth?: number; style?: React.CSSProperties }>; accent?: string;
 }) {
   return (
-    <div className="admin-card p-3 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] hover:border-[#1ABC9C]/30 transition-all">
+    <div className="admin-card p-3 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.06)] hover:shadow-[0_8px_22px_-10px_rgba(47, 128, 237,0.25)] hover:border-[#2F80ED]/30 transition-all">
       <div className="flex items-center gap-2.5">
         <div
           className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0"
@@ -137,7 +137,7 @@ export function AdminAnalyticsPage() {
 
         {/* KPI strip — compact row of 4 (matches dashboard) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard label={`Bookings (${days}d)`} value={totals.bookings.toLocaleString()} icon={CalendarCheck} accent="#1ABC9C" />
+          <StatCard label={`Bookings (${days}d)`} value={totals.bookings.toLocaleString()} icon={CalendarCheck} accent="#2F80ED" />
           <StatCard label="Revenue" value={fmtUsd(totals.revenue)} icon={DollarSign} accent="#10b981" />
           <StatCard label="Avg booking" value={fmtUsd(totals.avgValue)} icon={TrendingUp} accent="#0ea5e9" />
           <StatCard label="Top hotel" value={totals.topHotelName} icon={Building2} accent="#8b5cf6" />
@@ -167,7 +167,7 @@ export function AdminAnalyticsPage() {
                     formatter={(v: any, n: any) => (n === 'Revenue' ? fmtUsd(Number(v)) : v)}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Bar yAxisId="left" dataKey="bookings" name="Bookings" fill="#1ABC9C" radius={[3, 3, 0, 0]} isAnimationActive={false} />
+                  <Bar yAxisId="left" dataKey="bookings" name="Bookings" fill="#2F80ED" radius={[3, 3, 0, 0]} isAnimationActive={false} />
                   <Bar yAxisId="right" dataKey="revenue" name="Revenue" fill="#3B82F6" radius={[3, 3, 0, 0]} isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
@@ -187,7 +187,7 @@ export function AdminAnalyticsPage() {
                     formatter={(v: any) => fmtUsd(Number(v))}
                     contentStyle={{ borderRadius: 8, border: '1px solid var(--admin-border)', fontSize: 12, background: 'var(--admin-surface-2)', color: 'var(--admin-text)' }}
                   />
-                  <Bar dataKey="revenue" name="Revenue" fill="#1ABC9C" radius={[0, 3, 3, 0]} isAnimationActive={false} />
+                  <Bar dataKey="revenue" name="Revenue" fill="#2F80ED" radius={[0, 3, 3, 0]} isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

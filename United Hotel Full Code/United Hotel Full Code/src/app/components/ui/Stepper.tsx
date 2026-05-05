@@ -25,7 +25,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
         </div>
         <div className="h-[4px] bg-[#eaeaea] rounded-full overflow-hidden">
           <div 
-            className="h-full bg-[#1ABC9C] transition-all duration-300"
+            className="h-full bg-[#2F80ED] transition-all duration-300"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
         </div>
@@ -45,8 +45,8 @@ export function Stepper({ steps, currentStep }: StepperProps) {
                 <div className={`
                   w-[40px] h-[40px] rounded-full flex items-center justify-center
                   font-['Inter'] font-semibold text-[16px] transition-all
-                  ${isCompleted ? 'bg-[#1ABC9C] text-white' : ''}
-                  ${isActive ? 'bg-[#1ABC9C] text-white ring-4 ring-[rgba(26,188,156,0.2)]' : ''}
+                  ${isCompleted ? 'bg-[#2F80ED] text-white' : ''}
+                  ${isActive ? 'bg-[#2F80ED] text-white ring-4 ring-[rgba(47, 128, 237,0.2)]' : ''}
                   ${isUpcoming ? 'bg-[#eaeaea] text-[#8c8c8c]' : ''}
                 `}>
                   {isCompleted ? <Check className="w-[20px] h-[20px]" /> : stepNumber}
@@ -70,7 +70,7 @@ export function Stepper({ steps, currentStep }: StepperProps) {
               {index < steps.length - 1 && (
                 <div className={`
                   flex-1 h-[2px] mx-[16px]
-                  ${stepNumber < currentStep ? 'bg-[#1ABC9C]' : 'bg-[#eaeaea]'}
+                  ${stepNumber < currentStep ? 'bg-[#2F80ED]' : 'bg-[#eaeaea]'}
                 `} />
               )}
             </div>

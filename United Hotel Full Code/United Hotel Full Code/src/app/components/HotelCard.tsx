@@ -1,4 +1,4 @@
-import { MapPin, Star } from 'lucide-react';
+﻿import { MapPin, Star } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 interface HotelCardProps {
@@ -62,7 +62,7 @@ export function HotelCard({ image, name, location, rating, price, savings, urgen
             <span className="font-['Inter'] text-[14px] text-[#8c8c8c]"> / night</span>
           </div>
           
-          <button className="bg-[#1ABC9C] text-white px-[20px] py-[12px] rounded-[8px] font-['Inter'] font-medium text-[14px] min-h-[44px] hover:bg-[#16a085] transition-colors">
+          <button className="bg-[#2F80ED] text-white px-[20px] py-[12px] rounded-[8px] font-['Inter'] font-medium text-[14px] min-h-[44px] hover:bg-[#1E5FBC] transition-colors">
             View Rooms
           </button>
         </div>

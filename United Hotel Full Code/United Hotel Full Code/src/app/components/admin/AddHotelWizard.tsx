@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { X, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { hotelService } from '../../services/api';
 
@@ -167,7 +167,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
         <div className="px-8 py-4 bg-[#FAFAFA] border-b border-[#EAEAEA]">
           <div className="flex items-center gap-2">
             {[1, 2, 3].map((step) => (
-              <div key={step} className={`h-2 flex-1 rounded-full ${step <= currentStep ? 'bg-[#1ABC9C]' : 'bg-[#EAEAEA]'}`} />
+              <div key={step} className={`h-2 flex-1 rounded-full ${step <= currentStep ? 'bg-[#2F80ED]' : 'bg-[#EAEAEA]'}`} />
             ))}
           </div>
         </div>
@@ -181,7 +181,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                 />
               </div>
 
@@ -191,7 +191,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
-                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                 />
               </div>
 
@@ -201,7 +201,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] resize-none"
+                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED] resize-none"
                 />
               </div>
 
@@ -211,7 +211,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                   <select
                     value={formData.starRating}
                     onChange={(e) => setFormData((prev) => ({ ...prev, starRating: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   >
                     <option value="5">5</option>
                     <option value="4">4</option>
@@ -225,7 +225,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as 'active' | 'inactive' }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   >
                     <option value="active">active</option>
                     <option value="inactive">inactive</option>
@@ -238,7 +238,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     min={1}
                     value={formData.totalRooms}
                     onChange={(e) => setFormData((prev) => ({ ...prev, totalRooms: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
               </div>
@@ -254,7 +254,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="text"
                     value={formData.contactPhone}
                     onChange={(e) => setFormData((prev) => ({ ...prev, contactPhone: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
                 <div>
@@ -263,7 +263,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
               </div>
@@ -275,7 +275,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="url"
                     value={formData.hotelLink}
                     onChange={(e) => setFormData((prev) => ({ ...prev, hotelLink: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
                 <div>
@@ -284,7 +284,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="url"
                     value={formData.googleMapsLink}
                     onChange={(e) => setFormData((prev) => ({ ...prev, googleMapsLink: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
               </div>
@@ -296,7 +296,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="time"
                     value={formData.checkInTime}
                     onChange={(e) => setFormData((prev) => ({ ...prev, checkInTime: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
                 <div>
@@ -305,7 +305,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="time"
                     value={formData.checkOutTime}
                     onChange={(e) => setFormData((prev) => ({ ...prev, checkOutTime: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
               </div>
@@ -321,7 +321,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="text"
                     value={formData.childPolicy}
                     onChange={(e) => setFormData((prev) => ({ ...prev, childPolicy: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
                 <div>
@@ -330,7 +330,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="text"
                     value={formData.petPolicy}
                     onChange={(e) => setFormData((prev) => ({ ...prev, petPolicy: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
                 <div>
@@ -339,7 +339,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                     type="text"
                     value={formData.smokingPolicy}
                     onChange={(e) => setFormData((prev) => ({ ...prev, smokingPolicy: e.target.value }))}
-                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                    className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                   />
                 </div>
               </div>
@@ -351,7 +351,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                   placeholder="wifi, breakfast, pool"
                   value={formData.amenitiesText}
                   onChange={(e) => setFormData((prev) => ({ ...prev, amenitiesText: e.target.value }))}
-                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
                 />
               </div>
 
@@ -362,7 +362,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
                   placeholder='[{"room_name":"Deluxe Room","room_category":"deluxe","base_price":2400,"currency_code":"TRY"}]'
                   value={formData.roomCategoriesJson}
                   onChange={(e) => setFormData((prev) => ({ ...prev, roomCategoriesJson: e.target.value }))}
-                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] font-mono text-sm resize-none"
+                  className="w-full px-4 py-3 border border-[#EAEAEA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F80ED] font-mono text-sm resize-none"
                 />
               </div>
             </>
@@ -388,7 +388,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
             <button
               onClick={nextStep}
               disabled={!canContinue || isSubmitting}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#1ABC9C] text-white font-semibold disabled:opacity-40"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#2F80ED] text-white font-semibold disabled:opacity-40"
             >
               Next <ChevronRight className="h-4 w-4" />
             </button>
@@ -396,7 +396,7 @@ export function AddHotelWizard({ isOpen, onClose }: AddHotelWizardProps) {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#1ABC9C] text-white font-semibold disabled:opacity-40"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#2F80ED] text-white font-semibold disabled:opacity-40"
             >
               <Check className="h-4 w-4" /> {isSubmitting ? 'Saving...' : 'Create Hotel'}
             </button>

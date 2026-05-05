@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+﻿import { ReactNode, useEffect, useState } from 'react';
 import { Navigate } from 'react-router';
 import { AdminSidebar, SIDEBAR_WIDTH } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
@@ -63,7 +63,7 @@ export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: 
   if (authState === 'checking') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
-        <Loader2 className="w-6 h-6 text-[#1ABC9C] animate-spin" />
+        <Loader2 className="w-6 h-6 text-[#2F80ED] animate-spin" />
       </div>
     );
   }
@@ -81,9 +81,9 @@ export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: 
   if (isMobile) {
     return (
       <div className="min-h-screen bg-[#f7f8fa] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-[#1ABC9C]/15 p-8 text-center">
-          <div className="h-20 w-20 rounded-full bg-[#1ABC9C]/10 flex items-center justify-center mx-auto mb-6">
-            <Monitor className="h-10 w-10 text-[#1ABC9C]" strokeWidth={1.5} />
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-[#2F80ED]/15 p-8 text-center">
+          <div className="h-20 w-20 rounded-full bg-[#2F80ED]/10 flex items-center justify-center mx-auto mb-6">
+            <Monitor className="h-10 w-10 text-[#2F80ED]" strokeWidth={1.5} />
           </div>
 
           <h1 className="text-2xl font-bold text-[#3B3B3B] mb-3" style={{ fontFamily: 'Poppins, sans-serif' }}>
@@ -96,7 +96,7 @@ export function AdminLayout({ children, title, breadcrumb, adminOnly = false }: 
 
           <a
             href="/"
-            className="inline-flex items-center justify-center px-6 py-3 bg-[#1ABC9C] text-white rounded-lg font-semibold hover:bg-[#16A085] transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 bg-[#2F80ED] text-white rounded-lg font-semibold hover:bg-[#1E5FBC] transition-colors"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Go to Homepage

@@ -33,9 +33,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               bg-white
               appearance-none
               focus:outline-none
-              focus:border-[#1ABC9C]
+              focus:border-[#2F80ED]
               focus:ring-2
-              focus:ring-[rgba(26,188,156,0.1)]
+              focus:ring-[rgba(47, 128, 237,0.1)]
               disabled:bg-[#fafafa]
               disabled:cursor-not-allowed
               transition-all

@@ -105,7 +105,7 @@ export function ResetPasswordPage() {
               </p>
               <Link
                 to="/auth/forgot"
-                className="inline-flex items-center justify-center mt-6 px-5 py-2.5 rounded-lg bg-[#1ABC9C] text-white font-semibold text-sm hover:bg-[#16A085] transition-colors"
+                className="inline-flex items-center justify-center mt-6 px-5 py-2.5 rounded-lg bg-[#2F80ED] text-white font-semibold text-sm hover:bg-[#1E5FBC] transition-colors"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 Request a new reset link
@@ -144,7 +144,7 @@ export function ResetPasswordPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-[#EAEAEA] dark:border-white/[0.12] bg-white dark:bg-white/[0.03] text-[#3B3B3B] dark:text-white placeholder:text-[#B0B0B0] dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/40 focus:border-[#1ABC9C]"
+                      className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-[#EAEAEA] dark:border-white/[0.12] bg-white dark:bg-white/[0.03] text-[#3B3B3B] dark:text-white placeholder:text-[#B0B0B0] dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/40 focus:border-[#2F80ED]"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                       required
                       autoFocus
@@ -177,7 +177,7 @@ export function ResetPasswordPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-[#EAEAEA] dark:border-white/[0.12] bg-white dark:bg-white/[0.03] text-[#3B3B3B] dark:text-white placeholder:text-[#B0B0B0] dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/40 focus:border-[#1ABC9C]"
+                      className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-[#EAEAEA] dark:border-white/[0.12] bg-white dark:bg-white/[0.03] text-[#3B3B3B] dark:text-white placeholder:text-[#B0B0B0] dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/40 focus:border-[#2F80ED]"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                       required
                     />
@@ -197,7 +197,7 @@ export function ResetPasswordPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#2F80ED] hover:bg-[#1E5FBC] text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}

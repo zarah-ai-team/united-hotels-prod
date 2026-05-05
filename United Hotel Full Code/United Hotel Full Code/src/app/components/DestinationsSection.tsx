@@ -71,7 +71,7 @@ function DestinationCard({ destination, format, t }: DestinationCardProps) {
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <div className="flex items-center justify-center gap-1 text-[#3b3b3b] mb-1">
-              <Building2 className="w-3.5 h-3.5 text-[#1abc9c]" strokeWidth={2} />
+              <Building2 className="w-3.5 h-3.5 text-[#2F80ED]" strokeWidth={2} />
               <span className="font-['Poppins:SemiBold',sans-serif] text-[15px] leading-none">
                 {destination.hotelCount}
               </span>
@@ -244,7 +244,7 @@ export function DestinationsSection() {
           <Link
             to="/listing"
             onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "auto" })}
-            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#eaeaea] bg-white/70 backdrop-blur-md font-['Inter:Medium',sans-serif] text-[14px] md:text-[15px] text-[#3b3b3b] hover:border-[#1abc9c] hover:text-[#1abc9c] transition-colors"
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#eaeaea] bg-white/70 backdrop-blur-md font-['Inter:Medium',sans-serif] text-[14px] md:text-[15px] text-[#3b3b3b] hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors"
           >
             {t("View all neighbourhoods")}
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
