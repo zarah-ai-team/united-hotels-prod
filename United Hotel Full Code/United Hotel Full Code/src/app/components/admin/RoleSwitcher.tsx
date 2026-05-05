@@ -40,7 +40,7 @@ export function RoleSwitcher() {
 
   const isAdmin = role === 'admin';
   const Icon = isAdmin ? ShieldCheck : Tag;
-  const accent = isAdmin ? '#1ABC9C' : '#3B82F6';
+  const accent = isAdmin ? '#2F80ED' : '#3B82F6';
   const label = isAdmin ? 'Admin' : 'Vendor';
 
   return (

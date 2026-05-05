@@ -36,7 +36,7 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/listing" className="font-['Inter:Regular',sans-serif] text-[14px] md:text-[15px] text-white/70 hover:text-white transition-colors">
-                  {t("Find Hotels")}
+                  {t("Hotels")}
                 </Link>
               </li>
               <li>

@@ -143,90 +143,7 @@ export function BookingStep3() {
 
   return (
     <div className="min-h-screen glass-section-bg">
-      {/* Mobile Navigation */}
-      <div className="md:hidden">
-        <Navigation />
-      </div>
-
-      {/* Desktop Header */}
-      <header className="hidden md:block bg-white/72 dark:bg-[#0a0a0a]/72 backdrop-blur-xl backdrop-saturate-150 border-b border-black/[0.06] dark:border-white/[0.06] sticky top-0 z-50 shadow-[0_8px_24px_-16px_rgba(0,0,0,0.08)]">
-        <div className="max-w-[1840px] mx-auto px-4 md:px-10">
-          <div className="flex items-center justify-between h-16 md:h-18">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <div className="h-[22px] w-6 md:h-[26px] md:w-7">
-                <svg
-                  className="block size-full"
-                  fill="none"
-                  preserveAspectRatio="none"
-                  viewBox="0 0 28 26"
-                >
-                  <mask fill="white" id="path-1-inside-1_20_512">
-                    <path d={svgPaths.p32095b00} />
-                  </mask>
-                  <path
-                    d={svgPaths.p32095b00}
-                    fill="#1ABC9C"
-                    mask="url(#path-1-inside-1_20_512)"
-                    stroke="#1ABC9C"
-                    strokeWidth="0.4"
-                  />
-                </svg>
-              </div>
-              <span className="font-['Poppins:SemiBold',sans-serif] text-[16px] md:text-[20px] text-[#1abc9c]">
-                United Hotels
-              </span>
-            </Link>
-
-            {/* Navigation Links - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-8">
-              <a
-                href="/#home"
-                className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]"
-              >
-                Home
-              </a>
-              <a
-                href="/#why-choose-united-hotels"
-                className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]"
-              >
-                Why Choose United Hotels
-              </a>
-              <a
-                href="/#featured-hotels"
-                className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]"
-              >
-                Featured Hotels
-              </a>
-              <a
-                href="/#quality"
-                className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]"
-              >
-                Quality
-              </a>
-              <a
-                href="/#faqs"
-                className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]"
-              >
-                FAQ
-              </a>
-            </div>
-
-            {/* Support - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-4">
-              <span className="font-['Inter:Regular',sans-serif] text-[14px] text-[#8c8c8c]">
-                Need help?
-              </span>
-              <Link
-                to="/support"
-                className="font-['Inter:SemiBold',sans-serif] text-[14px] text-[#1abc9c] hover:text-[#16a085] transition-colors"
-              >
-                Contact Support
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navigation />
 
       {/* Progress Stepper - Desktop */}
       <div className="hidden md:block bg-white/55 dark:bg-white/[0.03] backdrop-blur-md border-b border-black/[0.05] dark:border-white/[0.06]">
@@ -270,7 +187,7 @@ export function BookingStep3() {
 
             {/* Step 3 - Active */}
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-gradient-to-br from-[#1abc9c] to-[#2dd4bf] rounded-full flex items-center justify-center text-white font-['Inter:Bold',sans-serif] shadow-[0_6px_16px_-6px_rgba(26,188,156,0.55)] ring-2 ring-white/40 dark:ring-white/10 text-[13px]">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#2F80ED] to-[#5DA0F8] rounded-full flex items-center justify-center text-white font-['Inter:Bold',sans-serif] shadow-[0_6px_16px_-6px_rgba(47, 128, 237,0.55)] ring-2 ring-white/40 dark:ring-white/10 text-[13px]">
                 3
               </div>
               <div>
@@ -321,7 +238,7 @@ export function BookingStep3() {
 
             {/* Step 3 - Active */}
             <div className="flex flex-col items-center gap-1">
-              <div className="w-6 h-6 bg-gradient-to-br from-[#1abc9c] to-[#2dd4bf] rounded-full flex items-center justify-center text-white font-['Inter:Bold',sans-serif] shadow-[0_6px_16px_-6px_rgba(26,188,156,0.55)] ring-2 ring-white/40 dark:ring-white/10 text-[11px]">
+              <div className="w-6 h-6 bg-gradient-to-br from-[#2F80ED] to-[#5DA0F8] rounded-full flex items-center justify-center text-white font-['Inter:Bold',sans-serif] shadow-[0_6px_16px_-6px_rgba(47, 128, 237,0.55)] ring-2 ring-white/40 dark:ring-white/10 text-[11px]">
                 3
               </div>
               <div className="text-center">
@@ -337,7 +254,7 @@ export function BookingStep3() {
         {/* Back Button */}
         <Link
           to="/booking/step2"
-          className="inline-flex items-center gap-1.5 text-[#1abc9c] hover:text-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[13px] md:text-[14px] mb-3 md:mb-4"
+          className="inline-flex items-center gap-1.5 text-[#2F80ED] hover:text-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[13px] md:text-[14px] mb-3 md:mb-4"
         >
           <ChevronLeft className="w-4 h-4" />
           Back to Guest Details
@@ -349,15 +266,15 @@ export function BookingStep3() {
             <h1 className="font-['Poppins:Bold',sans-serif] text-[20px] md:text-[26px] leading-tight text-[#3b3b3b] dark:text-white mb-1">
               Review & Payment
             </h1>
-            <p className="font-['Inter:Regular',sans-serif] text-[13px] text-[#6b7280] dark:text-white/55 mb-4 md:mb-5">
+            <p className="font-['Inter:Regular',sans-serif] text-[13px] text-[#6b7280] dark:text-white/60 mb-4 md:mb-5">
               Please review your booking details and complete the payment
             </p>
 
             {/* Booking Review Card */}
             <div className="glass-card rounded-2xl p-4 md:p-5 mb-4">
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 rounded-lg flex items-center justify-center">
-                  <Building2 className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                  <Building2 className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                 </div>
                 <h3 className="font-['Poppins:SemiBold',sans-serif] text-[16px] md:text-[17px] text-[#3b3b3b] dark:text-white">
                   Booking Details
@@ -377,13 +294,13 @@ export function BookingStep3() {
                     {booking.hotel.name}
                   </h4>
                   <div className="flex items-center gap-1.5 mb-2">
-                    <MapPin className="w-3.5 h-3.5 text-[#1abc9c]" />
-                    <span className="font-['Inter:Regular',sans-serif] text-[12.5px] text-[#6b7280] dark:text-white/65">
+                    <MapPin className="w-3.5 h-3.5 text-[#2F80ED]" />
+                    <span className="font-['Inter:Regular',sans-serif] text-[12.5px] text-[#6b7280] dark:text-white/70">
                       {booking.hotel.location}
                     </span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 bg-[#f9fafb] dark:bg-white/[0.04] px-2.5 py-1 rounded-lg border border-[#eaeaea] dark:border-white/[0.06]">
-                    <Bed className="w-3.5 h-3.5 text-[#1abc9c]" />
+                    <Bed className="w-3.5 h-3.5 text-[#2F80ED]" />
                     <span className="font-['Inter:SemiBold',sans-serif] text-[12.5px] text-[#3b3b3b] dark:text-white/85">
                       {booking.room.name}
                     </span>
@@ -406,7 +323,7 @@ export function BookingStep3() {
               <div className="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-[#eaeaea] dark:border-white/[0.06]">
                 <div className="bg-[#fafafa] dark:bg-white/[0.04] rounded-xl p-3 border border-[#eaeaea] dark:border-white/[0.06]">
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#1abc9c]" />
+                    <Calendar className="w-3.5 h-3.5 text-[#2F80ED]" />
                     <span className="font-['Inter:Medium',sans-serif] text-[10.5px] text-[#8c8c8c] uppercase tracking-wide">
                       Check-in
                     </span>
@@ -414,14 +331,14 @@ export function BookingStep3() {
                   <div className="font-['Inter:Bold',sans-serif] text-[13.5px] text-[#3b3b3b] dark:text-white">
                     {formatDate(booking.checkIn)}
                   </div>
-                  <div className="font-['Inter:Regular',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/55">
+                  <div className="font-['Inter:Regular',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/60">
                     From 2:00 PM
                   </div>
                 </div>
 
                 <div className="bg-[#fafafa] dark:bg-white/[0.04] rounded-xl p-3 border border-[#eaeaea] dark:border-white/[0.06]">
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#1abc9c]" />
+                    <Calendar className="w-3.5 h-3.5 text-[#2F80ED]" />
                     <span className="font-['Inter:Medium',sans-serif] text-[10.5px] text-[#8c8c8c] uppercase tracking-wide">
                       Check-out
                     </span>
@@ -429,7 +346,7 @@ export function BookingStep3() {
                   <div className="font-['Inter:Bold',sans-serif] text-[13.5px] text-[#3b3b3b] dark:text-white">
                     {formatDate(booking.checkOut)}
                   </div>
-                  <div className="font-['Inter:Regular',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/55">
+                  <div className="font-['Inter:Regular',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/60">
                     Until 12:00 PM
                   </div>
                 </div>
@@ -438,28 +355,28 @@ export function BookingStep3() {
               {/* Guest Information */}
               <div className="bg-[#f9fafb] dark:bg-white/[0.04] rounded-xl p-3.5 border border-[#eaeaea] dark:border-white/[0.06]">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <User className="w-3.5 h-3.5 text-[#1abc9c]" />
+                  <User className="w-3.5 h-3.5 text-[#2F80ED]" />
                   <span className="font-['Inter:Medium',sans-serif] text-[10.5px] text-[#8c8c8c] uppercase tracking-wide">
                     Guest Information
                   </span>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-[#6b7280] dark:text-white/55" />
+                    <User className="w-3.5 h-3.5 text-[#6b7280] dark:text-white/60" />
                     <span className="font-['Inter:SemiBold',sans-serif] text-[13.5px] text-[#3b3b3b] dark:text-white">
                       {booking.guestDetails.firstName}{" "}
                       {booking.guestDetails.lastName}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-[#6b7280] dark:text-white/55" />
-                    <span className="font-['Inter:Regular',sans-serif] text-[12.5px] text-[#6b7280] dark:text-white/65">
+                    <Mail className="w-3.5 h-3.5 text-[#6b7280] dark:text-white/60" />
+                    <span className="font-['Inter:Regular',sans-serif] text-[12.5px] text-[#6b7280] dark:text-white/70">
                       {booking.guestDetails.email}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-[#6b7280] dark:text-white/55" />
-                    <span className="font-['Inter:Regular',sans-serif] text-[12.5px] text-[#6b7280] dark:text-white/65">
+                    <Phone className="w-3.5 h-3.5 text-[#6b7280] dark:text-white/60" />
+                    <span className="font-['Inter:Regular',sans-serif] text-[12.5px] text-[#6b7280] dark:text-white/70">
                       {booking.guestDetails.phone}
                     </span>
                   </div>
@@ -471,8 +388,8 @@ export function BookingStep3() {
             <form onSubmit={handlePayment}>
               <div className="glass-card rounded-2xl p-4 md:p-5 mb-4">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 rounded-lg flex items-center justify-center">
-                    <CreditCard className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                  <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                    <CreditCard className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                   </div>
                   <h3 className="font-['Poppins:SemiBold',sans-serif] text-[16px] md:text-[17px] text-[#3b3b3b] dark:text-white">
                     Payment Method
@@ -484,8 +401,8 @@ export function BookingStep3() {
                   <label
                     className={`flex items-center gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition-all ${
                       paymentMethod === "card"
-                        ? "border-[#1abc9c] bg-[#1abc9c]/5 dark:bg-[#2dd4bf]/[0.07]"
-                        : "border-[#eaeaea] dark:border-white/[0.08] hover:border-[#1abc9c]/30"
+                        ? "border-[#2F80ED] bg-[#2F80ED]/5 dark:bg-[#5DA0F8]/[0.07]"
+                        : "border-[#eaeaea] dark:border-white/[0.08] hover:border-[#2F80ED]/30"
                     }`}
                   >
                     <input
@@ -494,10 +411,10 @@ export function BookingStep3() {
                       value="card"
                       checked={paymentMethod === "card"}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-4 h-4 accent-[#1abc9c]"
+                      className="w-4 h-4 accent-[#2F80ED]"
                     />
-                    <div className="w-8 h-8 bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 rounded-lg flex items-center justify-center">
-                      <CreditCard className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                    <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                      <CreditCard className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                     </div>
                     <div className="flex-1">
                       <div className="font-['Inter:SemiBold',sans-serif] text-[13.5px] text-[#3b3b3b] dark:text-white">
@@ -508,7 +425,7 @@ export function BookingStep3() {
                       </div>
                     </div>
                     {paymentMethod === "card" && (
-                      <CheckCircle2 className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                      <CheckCircle2 className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                     )}
                   </label>
 
@@ -516,8 +433,8 @@ export function BookingStep3() {
                   <label
                     className={`flex items-center gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition-all ${
                       paymentMethod === "hotel"
-                        ? "border-[#1abc9c] bg-[#1abc9c]/5 dark:bg-[#2dd4bf]/[0.07]"
-                        : "border-[#eaeaea] dark:border-white/[0.08] hover:border-[#1abc9c]/30"
+                        ? "border-[#2F80ED] bg-[#2F80ED]/5 dark:bg-[#5DA0F8]/[0.07]"
+                        : "border-[#eaeaea] dark:border-white/[0.08] hover:border-[#2F80ED]/30"
                     }`}
                   >
                     <input
@@ -526,10 +443,10 @@ export function BookingStep3() {
                       value="hotel"
                       checked={paymentMethod === "hotel"}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-4 h-4 accent-[#1abc9c]"
+                      className="w-4 h-4 accent-[#2F80ED]"
                     />
-                    <div className="w-8 h-8 bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                    <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                      <Building2 className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                     </div>
                     <div className="flex-1">
                       <div className="font-['Inter:SemiBold',sans-serif] text-[13.5px] text-[#3b3b3b] dark:text-white">
@@ -540,7 +457,7 @@ export function BookingStep3() {
                       </div>
                     </div>
                     {paymentMethod === "hotel" && (
-                      <CheckCircle2 className="w-4 h-4 text-[#1abc9c] dark:text-[#2dd4bf]" />
+                      <CheckCircle2 className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                     )}
                   </label>
                 </div>
@@ -563,7 +480,7 @@ export function BookingStep3() {
                           onChange={(e) =>
                             handleCardNumberChange(e.target.value)
                           }
-                          className="w-full pl-9 pr-20 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/10 transition-all"
+                          className="w-full pl-9 pr-20 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/10 transition-all"
                         />
                         {/* Card Brand Icons */}
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1.5">
@@ -588,7 +505,7 @@ export function BookingStep3() {
                         onChange={(e) =>
                           setCardName(e.target.value.toUpperCase())
                         }
-                        className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/10 transition-all"
+                        className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/10 transition-all"
                       />
                     </div>
 
@@ -602,7 +519,7 @@ export function BookingStep3() {
                           placeholder="MM/YY"
                           value={expiry}
                           onChange={(e) => handleExpiryChange(e.target.value)}
-                          className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/10 transition-all"
+                          className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/10 transition-all"
                         />
                       </div>
 
@@ -626,7 +543,7 @@ export function BookingStep3() {
                             )
                           }
                           maxLength={3}
-                          className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/10 transition-all"
+                          className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/10 transition-all"
                         />
                       </div>
                     </div>
@@ -635,7 +552,7 @@ export function BookingStep3() {
               </div>
 
               {/* Security Notice */}
-              <div className="bg-linear-to-br from-[#d1fae5]/70 to-[#a7f3d0]/60 dark:from-emerald-500/[0.10] dark:to-emerald-500/[0.06] border border-[#86efac] dark:border-emerald-400/25 rounded-2xl p-4 md:p-5">
+              <div className="bg-linear-to-br from-[#d1fae5]/70 to-[#BFD9F8]/60 dark:from-emerald-500/[0.10] dark:to-emerald-500/[0.06] border border-[#86efac] dark:border-emerald-400/25 rounded-2xl p-4 md:p-5">
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 bg-[#10b981] dark:bg-emerald-500/25 dark:ring-1 dark:ring-emerald-400/40 rounded-xl flex items-center justify-center shrink-0">
                     <Lock className="w-4 h-4 text-white dark:text-emerald-200" />
@@ -671,13 +588,13 @@ export function BookingStep3() {
           <div>
             <div className="lg:sticky lg:top-24">
               {/* Price Summary Card */}
-              <div className="hero-glass rounded-2xl p-5 mb-4 ring-1 ring-[#1abc9c]/30 dark:ring-[#2dd4bf]/35">
+              <div className="hero-glass rounded-2xl p-5 mb-4 ring-1 ring-[#2F80ED]/30 dark:ring-[#5DA0F8]/35">
                 <h3 className="font-['Poppins:Bold',sans-serif] text-[18px] text-[#3b3b3b] dark:text-white mb-4">
                   Price Summary
                 </h3>
 
                 <div className="rounded-xl border border-[#eaeaea] dark:border-white/[0.06] bg-[#f9fafb] dark:bg-white/[0.04] p-3 mb-4">
-                  <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#6b7280] dark:text-white/55 mb-0.5">
+                  <div className="font-['Inter:Regular',sans-serif] text-[12px] text-[#6b7280] dark:text-white/60 mb-0.5">
                     Recommended total price
                   </div>
                   <div className="font-['Inter:SemiBold',sans-serif] text-[13px] text-[#3b3b3b] dark:text-white/90">
@@ -693,7 +610,7 @@ export function BookingStep3() {
                     Total Amount
                   </span>
                   <div className="text-right">
-                    <div className="font-['Poppins:Bold',sans-serif] text-[26px] leading-tight text-[#1abc9c] dark:text-[#2dd4bf]">
+                    <div className="font-['Poppins:Bold',sans-serif] text-[26px] leading-tight text-[#2F80ED] dark:text-[#5DA0F8]">
                       {formatCurrency(total, language)}
                     </div>
                     <div className="font-['Inter:Regular',sans-serif] text-[11.5px] text-[#8c8c8c] mt-0.5">
@@ -706,7 +623,7 @@ export function BookingStep3() {
                 <button
                   type="submit"
                   disabled={isActionDisabled}
-                  className={`w-full bg-[#1abc9c] text-white py-3 rounded-xl hover:bg-[#16a085] transition-all font-['Inter:Bold',sans-serif] text-[14px] mb-2.5 relative overflow-hidden group ${
+                  className={`w-full bg-[#2F80ED] text-white py-3 rounded-xl hover:bg-[#1E5FBC] transition-all font-['Inter:Bold',sans-serif] text-[14px] mb-2.5 relative overflow-hidden group ${
                     isActionDisabled ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
@@ -752,13 +669,13 @@ export function BookingStep3() {
 
                 <p className="font-['Inter:Regular',sans-serif] text-[11px] text-[#8c8c8c] text-center leading-[16px]">
                   By completing this booking, you agree to our{" "}
-                  <Link to="/terms" className="text-[#1abc9c] hover:underline">
+                  <Link to="/terms" className="text-[#2F80ED] hover:underline">
                     terms and conditions
                   </Link>{" "}
                   and{" "}
                   <Link
                     to="/privacy"
-                    className="text-[#1abc9c] hover:underline"
+                    className="text-[#2F80ED] hover:underline"
                   >
                     privacy policy
                   </Link>

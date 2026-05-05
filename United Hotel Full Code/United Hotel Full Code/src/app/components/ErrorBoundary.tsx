@@ -65,13 +65,13 @@ function ErrorScreen({ error, onRetry }: ErrorScreenProps) {
           <AlertTriangle className="w-6 h-6" strokeWidth={2} />
         </div>
 
-        <div className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#1abc9c] dark:text-[#2dd4bf] mb-2">
+        <div className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#2F80ED] dark:text-[#5DA0F8] mb-2">
           Something went wrong
         </div>
         <h2 className="font-['Poppins:Bold',sans-serif] text-[24px] md:text-[28px] tracking-[-0.018em] text-[#1f2937] dark:text-white mb-2">
           We couldn't load this page.
         </h2>
-        <p className="font-['Inter:Regular',sans-serif] text-[14.5px] leading-[1.6] text-[#6b7280] dark:text-white/65 mb-6">
+        <p className="font-['Inter:Regular',sans-serif] text-[14.5px] leading-[1.6] text-[#6b7280] dark:text-white/70 mb-6">
           A tiny bug crept in while rendering. Try reloading — and if the page keeps misbehaving, our team has already been notified through the console.
         </p>
 
@@ -87,7 +87,7 @@ function ErrorScreen({ error, onRetry }: ErrorScreenProps) {
             <button
               type="button"
               onClick={onRetry}
-              className="inline-flex items-center gap-2 px-5 h-11 rounded-full bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white font-['Inter:SemiBold',sans-serif] text-[13px] shadow-[0_10px_28px_-8px_rgba(26,188,156,0.55)] hover:shadow-[0_14px_34px_-8px_rgba(26,188,156,0.75)] transition-shadow"
+              className="inline-flex items-center gap-2 px-5 h-11 rounded-full bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] text-white font-['Inter:SemiBold',sans-serif] text-[13px] shadow-[0_10px_28px_-8px_rgba(47, 128, 237,0.55)] hover:shadow-[0_14px_34px_-8px_rgba(47, 128, 237,0.75)] transition-shadow"
             >
               <RefreshCw className="w-4 h-4" /> Try again
             </button>
@@ -95,7 +95,7 @@ function ErrorScreen({ error, onRetry }: ErrorScreenProps) {
           <Link
             to="/"
             reloadDocument
-            className="inline-flex items-center gap-2 px-5 h-11 rounded-full border border-[#1abc9c]/35 dark:border-[#2dd4bf]/35 text-[#1abc9c] dark:text-[#2dd4bf] font-['Inter:SemiBold',sans-serif] text-[13px] hover:bg-[#1abc9c]/[0.08] dark:hover:bg-[#2dd4bf]/[0.08] transition-colors"
+            className="inline-flex items-center gap-2 px-5 h-11 rounded-full border border-[#2F80ED]/35 dark:border-[#5DA0F8]/35 text-[#2F80ED] dark:text-[#5DA0F8] font-['Inter:SemiBold',sans-serif] text-[13px] hover:bg-[#2F80ED]/[0.08] dark:hover:bg-[#5DA0F8]/[0.08] transition-colors"
           >
             <Home className="w-4 h-4" /> Back to home
           </Link>

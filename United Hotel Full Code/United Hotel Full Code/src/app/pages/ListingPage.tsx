@@ -74,9 +74,9 @@ export function ListingPage() {
                 max="200"
                 value={priceRange[1]}
                 onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-                className="w-full h-1.5 bg-[#eaeaea] rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#1abc9c] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#1abc9c] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg"
+                className="w-full h-1.5 bg-[#eaeaea] rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#2F80ED] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#2F80ED] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg"
                 style={{
-                  background: `linear-gradient(to right, #1abc9c 0%, #1abc9c ${(priceRange[1] / 200) * 100}%, #eaeaea ${(priceRange[1] / 200) * 100}%, #eaeaea 100%)`
+                  background: `linear-gradient(to right, #2F80ED 0%, #2F80ED ${(priceRange[1] / 200) * 100}%, #eaeaea ${(priceRange[1] / 200) * 100}%, #eaeaea 100%)`
                 }}
               />
             </div>
@@ -86,8 +86,8 @@ export function ListingPage() {
                   $0
                 </span>
               </div>
-              <div className="bg-[#f0fdf4] px-3 py-1.5 rounded-lg border border-[#1abc9c]/20">
-                <span className="font-['Inter:SemiBold',sans-serif] text-[13px] md:text-[14px] text-[#1abc9c]">
+              <div className="bg-[#f0fdf4] px-3 py-1.5 rounded-lg border border-[#2F80ED]/20">
+                <span className="font-['Inter:SemiBold',sans-serif] text-[13px] md:text-[14px] text-[#2F80ED]">
                   ${priceRange[1]}+
                 </span>
               </div>
@@ -126,7 +126,7 @@ export function ListingPage() {
                     onChange={() => toggleRating(rating)}
                     className="peer sr-only"
                   />
-                  <div className="w-5 h-5 rounded-md border-2 border-[#e5e7eb] peer-checked:border-[#1abc9c] peer-checked:bg-[#1abc9c] transition-all duration-200 flex items-center justify-center group-hover:border-[#1abc9c]/50">
+                  <div className="w-5 h-5 rounded-md border-2 border-[#e5e7eb] peer-checked:border-[#2F80ED] peer-checked:bg-[#2F80ED] transition-all duration-200 flex items-center justify-center group-hover:border-[#2F80ED]/50">
                     <svg 
                       className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" 
                       fill="none" 
@@ -138,7 +138,7 @@ export function ListingPage() {
                     </svg>
                   </div>
                 </div>
-                <span className="font-['Inter:Regular',sans-serif] text-[14px] md:text-[15px] text-[#3b3b3b] group-hover:text-[#1abc9c] transition-colors">
+                <span className="font-['Inter:Regular',sans-serif] text-[14px] md:text-[15px] text-[#3b3b3b] group-hover:text-[#2F80ED] transition-colors">
                   {rating} {rating === 1 ? 'Star' : 'Stars'}
                 </span>
                 <div className="flex items-center ml-auto gap-0.5">
@@ -165,7 +165,7 @@ export function ListingPage() {
               Amenities
             </h3>
             {selectedAmenities.length > 0 && (
-              <span className="bg-[#1abc9c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+              <span className="bg-[#2F80ED] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                 {selectedAmenities.length}
               </span>
             )}
@@ -187,8 +187,8 @@ export function ListingPage() {
                   className={`
                     px-3 py-2 rounded-lg border-2 transition-all font-['Inter:Medium',sans-serif] text-[13px] md:text-[14px] min-h-[44px] md:min-h-0
                     ${selectedAmenities.includes(amenity) 
-                      ? 'bg-[#1abc9c] border-[#1abc9c] text-white shadow-sm' 
-                      : 'bg-white border-[#e5e7eb] text-[#3b3b3b] hover:border-[#1abc9c] hover:text-[#1abc9c]'
+                      ? 'bg-[#2F80ED] border-[#2F80ED] text-white shadow-sm' 
+                      : 'bg-white border-[#e5e7eb] text-[#3b3b3b] hover:border-[#2F80ED] hover:text-[#2F80ED]'
                     }
                   `}
                 >
@@ -222,7 +222,7 @@ export function ListingPage() {
               {neighborhoodsList.map((neighborhood) => (
                 <button
                   key={neighborhood}
-                  className="px-3 py-2 rounded-lg border-2 border-[#e5e7eb] bg-white text-[#3b3b3b] hover:border-[#1abc9c] hover:text-[#1abc9c] transition-all font-['Inter:Medium',sans-serif] text-[13px] md:text-[14px] min-h-[44px] md:min-h-0"
+                  className="px-3 py-2 rounded-lg border-2 border-[#e5e7eb] bg-white text-[#3b3b3b] hover:border-[#2F80ED] hover:text-[#2F80ED] transition-all font-['Inter:Medium',sans-serif] text-[13px] md:text-[14px] min-h-[44px] md:min-h-0"
                 >
                   {neighborhood}
                 </button>
@@ -235,8 +235,8 @@ export function ListingPage() {
       {/* Active Filters Count & Clear All */}
       <div className="p-4 md:p-5">
         {activeFilterCount > 0 && (
-          <div className="bg-[#f0fdf4] border border-[#1abc9c]/20 rounded-xl p-3 mb-4">
-            <p className="font-['Inter:Medium',sans-serif] text-[13px] text-[#1abc9c] text-center">
+          <div className="bg-[#f0fdf4] border border-[#2F80ED]/20 rounded-xl p-3 mb-4">
+            <p className="font-['Inter:Medium',sans-serif] text-[13px] text-[#2F80ED] text-center">
               {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active
             </p>
           </div>
@@ -250,7 +250,7 @@ export function ListingPage() {
             setSelectedRating([]);
             setSelectedAmenities([]);
           }}
-          className="border-[#e5e7eb] hover:border-[#1abc9c] hover:bg-[#f0fdf4] transition-all min-h-[44px]"
+          className="border-[#e5e7eb] hover:border-[#2F80ED] hover:bg-[#f0fdf4] transition-all min-h-[44px]"
         >
           Clear All Filters
         </Button>
@@ -264,18 +264,18 @@ export function ListingPage() {
       <header className="bg-white border-b border-[rgba(0,0,0,0.1)] sticky top-0 z-50">
         <div className="max-w-[1400px] mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between h-[56px] md:h-[64px]">
-            <a href="/" className="font-['Poppins:Bold',sans-serif] text-[18px] md:text-[20px] text-[#1abc9c]">
+            <a href="/" className="font-['Poppins:Bold',sans-serif] text-[18px] md:text-[20px] text-[#2F80ED]">
               United Hotels
             </a>
             
             <nav className="hidden md:flex items-center gap-8">
-              <a href="/#hotels" className="font-['Inter:Regular',sans-serif] text-[14px] text-[#3b3b3b] hover:text-[#1abc9c]">
+              <a href="/#hotels" className="font-['Inter:Regular',sans-serif] text-[14px] text-[#3b3b3b] hover:text-[#2F80ED]">
                 Hotels
               </a>
-              <a href="/#neighborhoods" className="font-['Inter:Regular',sans-serif] text-[14px] text-[#3b3b3b] hover:text-[#1abc9c]">
+              <a href="/#neighborhoods" className="font-['Inter:Regular',sans-serif] text-[14px] text-[#3b3b3b] hover:text-[#2F80ED]">
                 Neighborhoods
               </a>
-              <a href="/portal" className="font-['Inter:Regular',sans-serif] text-[14px] text-[#3b3b3b] hover:text-[#1abc9c]">
+              <a href="/portal" className="font-['Inter:Regular',sans-serif] text-[14px] text-[#3b3b3b] hover:text-[#2F80ED]">
                 My Bookings
               </a>
             </nav>
@@ -293,19 +293,19 @@ export function ListingPage() {
               <input
                 type="text"
                 placeholder="Turkey"
-                className="w-full pl-10 pr-3 py-2.5 md:py-3 border border-[#e5e7eb] rounded-xl font-['Inter:Regular',sans-serif] text-[14px] md:text-[15px] focus:outline-none focus:border-[#1abc9c] transition-colors"
+                className="w-full pl-10 pr-3 py-2.5 md:py-3 border border-[#e5e7eb] rounded-xl font-['Inter:Regular',sans-serif] text-[14px] md:text-[15px] focus:outline-none focus:border-[#2F80ED] transition-colors"
               />
             </div>
             
             {/* Filters Button - Prominent on Mobile */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="relative flex items-center gap-2 bg-white border-2 border-[#e5e7eb] hover:border-[#1abc9c] px-4 py-2.5 md:py-3 rounded-xl transition-colors min-w-[100px] md:min-w-[120px]"
+              className="relative flex items-center gap-2 bg-white border-2 border-[#e5e7eb] hover:border-[#2F80ED] px-4 py-2.5 md:py-3 rounded-xl transition-colors min-w-[100px] md:min-w-[120px]"
             >
               <SlidersHorizontal className="w-4 h-4 text-[#3b3b3b]" />
               <span className="font-['Inter:SemiBold',sans-serif] text-[14px] text-[#3b3b3b]">Filters</span>
               {activeFilterCount > 0 && (
-                <div className="absolute -top-1.5 -right-1.5 bg-[#1abc9c] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-lg">
+                <div className="absolute -top-1.5 -right-1.5 bg-[#2F80ED] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-lg">
                   {activeFilterCount}
                 </div>
               )}
@@ -322,7 +322,7 @@ export function ListingPage() {
               {priceRange[1] < 200 && (
                 <button
                   onClick={() => setPriceRange([0, 200])}
-                  className="flex items-center gap-1.5 bg-[#1abc9c] text-white px-2.5 py-1 rounded-full font-['Inter:Medium',sans-serif] text-[11px] hover:bg-[#16a085] transition-colors flex-shrink-0"
+                  className="flex items-center gap-1.5 bg-[#2F80ED] text-white px-2.5 py-1 rounded-full font-['Inter:Medium',sans-serif] text-[11px] hover:bg-[#1E5FBC] transition-colors flex-shrink-0"
                 >
                   <span>Up to ${priceRange[1]}</span>
                   <X className="w-3 h-3" />
@@ -333,7 +333,7 @@ export function ListingPage() {
                 <button
                   key={rating}
                   onClick={() => toggleRating(rating)}
-                  className="flex items-center gap-1.5 bg-[#1abc9c] text-white px-2.5 py-1 rounded-full font-['Inter:Medium',sans-serif] text-[11px] hover:bg-[#16a085] transition-colors flex-shrink-0"
+                  className="flex items-center gap-1.5 bg-[#2F80ED] text-white px-2.5 py-1 rounded-full font-['Inter:Medium',sans-serif] text-[11px] hover:bg-[#1E5FBC] transition-colors flex-shrink-0"
                 >
                   <span>{rating}★</span>
                   <X className="w-3 h-3" />
@@ -344,7 +344,7 @@ export function ListingPage() {
                 <button
                   key={amenity}
                   onClick={() => toggleAmenity(amenity)}
-                  className="flex items-center gap-1.5 bg-[#1abc9c] text-white px-2.5 py-1 rounded-full font-['Inter:Medium',sans-serif] text-[11px] hover:bg-[#16a085] transition-colors flex-shrink-0"
+                  className="flex items-center gap-1.5 bg-[#2F80ED] text-white px-2.5 py-1 rounded-full font-['Inter:Medium',sans-serif] text-[11px] hover:bg-[#1E5FBC] transition-colors flex-shrink-0"
                 >
                   <span>{amenity}</span>
                   <X className="w-3 h-3" />
@@ -376,7 +376,7 @@ export function ListingPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="pl-3 pr-8 py-2 border border-[#e5e7eb] rounded-lg font-['Inter:Medium',sans-serif] text-[12px] md:text-[13px] bg-white hover:border-[#1abc9c] transition-colors cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%236b7280%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-[length:16px] bg-[right_6px_center] bg-no-repeat"
+                  className="pl-3 pr-8 py-2 border border-[#e5e7eb] rounded-lg font-['Inter:Medium',sans-serif] text-[12px] md:text-[13px] bg-white hover:border-[#2F80ED] transition-colors cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%236b7280%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-[length:16px] bg-[right_6px_center] bg-no-repeat"
                 >
                   <option value="recommended">Recommended</option>
                   <option value="price-low">Price: Low to High</option>
@@ -399,7 +399,7 @@ export function ListingPage() {
             {/* Load More Indicator */}
             <div className="mt-8 text-center">
               <div className="inline-flex items-center gap-2 bg-white border border-[#e5e7eb] px-5 py-3 rounded-xl shadow-sm">
-                <div className="w-1.5 h-1.5 bg-[#1abc9c] rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-[#2F80ED] rounded-full"></div>
                 <p className="font-['Inter:Regular',sans-serif] text-[13px] text-[#6b7280]">
                   All <span className="font-semibold text-[#3b3b3b]">{hotels.length}</span> properties shown
                 </p>

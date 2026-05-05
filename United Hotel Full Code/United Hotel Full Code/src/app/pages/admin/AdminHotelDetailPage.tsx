@@ -295,7 +295,7 @@ export function AdminHotelDetailPage() {
         <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {error || 'Hotel not found'}
         </div>
-        <Link to="/admin/hotels" className="inline-flex items-center gap-1 mt-4 text-[#1ABC9C] hover:text-[#16A085] text-sm">
+        <Link to="/admin/hotels" className="inline-flex items-center gap-1 mt-4 text-[#2F80ED] hover:text-[#1E5FBC] text-sm">
           <ArrowLeft className="w-4 h-4" /> Back to hotels
         </Link>
       </AdminLayout>
@@ -308,7 +308,7 @@ export function AdminHotelDetailPage() {
     <AdminLayout title={hotelName} breadcrumb={`Admin / Hotels / ${hotelName}`}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <Link to="/admin/hotels" className="inline-flex items-center gap-1 text-sm text-[#1ABC9C] hover:text-[#16A085]">
+          <Link to="/admin/hotels" className="inline-flex items-center gap-1 text-sm text-[#2F80ED] hover:text-[#1E5FBC]">
             <ArrowLeft className="w-4 h-4" /> Back to hotels
           </Link>
           <a
@@ -362,7 +362,7 @@ export function AdminHotelDetailPage() {
           <section className="bg-white rounded-xl border border-[#eaeaea] p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-[#3b3b3b] flex items-center gap-2">
-                <Pencil className="w-4 h-4 text-[#1ABC9C]" /> Hotel details
+                <Pencil className="w-4 h-4 text-[#2F80ED]" /> Hotel details
               </h2>
               <div className="flex items-center gap-2">
                 <button
@@ -374,7 +374,7 @@ export function AdminHotelDetailPage() {
                 <button
                   onClick={saveHotel}
                   disabled={savingHotel}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white text-sm font-semibold px-3 py-1.5 disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-sm font-semibold px-3 py-1.5 disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" /> {savingHotel ? 'Saving…' : 'Save changes'}
                 </button>
@@ -458,11 +458,11 @@ export function AdminHotelDetailPage() {
         <section className="bg-white rounded-xl border border-[#eaeaea] p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-[#3b3b3b] flex items-center gap-2">
-              <BedDouble className="w-4 h-4 text-[#1ABC9C]" /> Room inventory ({rooms.length})
+              <BedDouble className="w-4 h-4 text-[#2F80ED]" /> Room inventory ({rooms.length})
             </h2>
             <button
               onClick={() => setShowAddRoom((v) => !v)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white text-sm font-semibold px-3 py-1.5"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-sm font-semibold px-3 py-1.5"
             >
               <Plus className="w-4 h-4" /> {showAddRoom ? 'Cancel' : 'Add Room'}
             </button>
@@ -498,7 +498,7 @@ export function AdminHotelDetailPage() {
                 onChange={(e) => setRoomForm({ ...roomForm, basePrice: e.target.value })}
                 className="rounded-md border border-[#eaeaea] px-3 py-2 bg-white" />
               <button onClick={handleAddRoom} disabled={savingRoom}
-                className="rounded-md bg-[#1ABC9C] hover:bg-[#16A085] text-white font-semibold py-2 disabled:opacity-60">
+                className="rounded-md bg-[#2F80ED] hover:bg-[#1E5FBC] text-white font-semibold py-2 disabled:opacity-60">
                 {savingRoom ? 'Adding…' : 'Save'}
               </button>
               <input type="number" placeholder="Min $ (optional)" value={roomForm.minPrice}
@@ -550,7 +550,7 @@ export function AdminHotelDetailPage() {
                               className="w-20 rounded-md border border-[#eaeaea] px-2 py-1 text-right" />
                           </td>
                         ) : (
-                          <td className="px-4 py-3 text-right text-[#1ABC9C] font-semibold">
+                          <td className="px-4 py-3 text-right text-[#2F80ED] font-semibold">
                             {fmtUsd(Number(r.price_per_night ?? r.base_price ?? 0))}
                           </td>
                         )}
@@ -573,7 +573,7 @@ export function AdminHotelDetailPage() {
                                   <XCircle className="w-3.5 h-3.5" /> Cancel
                                 </button>
                                 <button onClick={() => roomId != null && savePrice(roomId)} disabled={isSaving}
-                                  className="inline-flex items-center gap-1 rounded-md bg-[#1ABC9C] hover:bg-[#16A085] text-white text-xs font-semibold px-2 py-1 disabled:opacity-60">
+                                  className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-xs font-semibold px-2 py-1 disabled:opacity-60">
                                   <Save className="w-3.5 h-3.5" /> {isSaving ? 'Saving…' : 'Save'}
                                 </button>
                               </div>
@@ -588,7 +588,7 @@ export function AdminHotelDetailPage() {
                                 <button
                                   onClick={() => startEdit(r)}
                                   disabled={roomId == null}
-                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#1ABC9C] hover:text-[#16A085] disabled:opacity-50"
+                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#2F80ED] hover:text-[#1E5FBC] disabled:opacity-50"
                                 >
                                   {isVendor ? <Sliders className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
                                   {isVendor ? 'Set band' : 'Adjust'}
@@ -619,7 +619,7 @@ export function AdminHotelDetailPage() {
         <section className="bg-white rounded-xl border border-[#eaeaea] p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-[#3b3b3b] flex items-center gap-2">
-              <CalendarRange className="w-4 h-4 text-[#1ABC9C]" /> Recent bookings
+              <CalendarRange className="w-4 h-4 text-[#2F80ED]" /> Recent bookings
             </h2>
             <span className="text-xs text-[#8c8c8c]">{bookings.length} shown</span>
           </div>
@@ -642,7 +642,7 @@ export function AdminHotelDetailPage() {
                 <tbody className="divide-y divide-[#eaeaea]">
                   {bookings.map((b) => (
                     <tr key={b.id}>
-                      <td className="px-4 py-3 font-mono text-xs text-[#1ABC9C]">BK-{b.id}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-[#2F80ED]">BK-{b.id}</td>
                       <td className="px-4 py-3 text-[#3b3b3b]">
                         <div className="font-medium">{b.user_name || 'Guest'}</div>
                         <div className="text-xs text-[#8c8c8c]">{b.user_email || '—'}</div>
@@ -712,7 +712,7 @@ function Field({
 }
 
 function Stat({
-  label, value, icon: Icon, accent = '#1ABC9C',
+  label, value, icon: Icon, accent = '#2F80ED',
 }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; accent?: string }) {
   return (
     <div className="bg-white rounded-xl border border-[#eaeaea] p-4 flex items-center gap-3">

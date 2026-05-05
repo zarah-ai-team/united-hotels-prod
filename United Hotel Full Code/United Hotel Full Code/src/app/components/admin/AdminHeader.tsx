@@ -61,7 +61,7 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
           <RoleSwitcher />
 
           {/* Search Input — narrower, slimmer */}
-          <div className="hidden lg:flex items-center gap-1.5 rounded-lg border border-[#EAEAEA] bg-white/60 px-2.5 py-1 w-52 hover:border-[#1ABC9C]/40 transition-colors">
+          <div className="hidden lg:flex items-center gap-1.5 rounded-lg border border-[#EAEAEA] bg-white/60 px-2.5 py-1 w-52 hover:border-[#2F80ED]/40 transition-colors">
             <Search className="h-3.5 w-3.5 text-[#9aa0a6]" strokeWidth={1.75} />
             <input
               type="text"
@@ -97,7 +97,7 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
                     <button
                       key={notif.id}
                       className={`w-full px-3 py-2 text-left hover:bg-[#FAFAFA] transition-colors border-b border-[#EAEAEA]/60 last:border-0 ${
-                        notif.unread ? 'bg-[#1ABC9C]/[0.04]' : ''
+                        notif.unread ? 'bg-[#2F80ED]/[0.04]' : ''
                       }`}
                     >
                       <p className="text-[12.5px] text-[#3B3B3B] mb-0.5 leading-snug" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -108,7 +108,7 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
                   ))}
                 </div>
                 <div className="px-3 py-2 border-t border-[#EAEAEA]">
-                  <button className="text-[12px] text-[#1ABC9C] font-medium hover:text-[#16A085]">
+                  <button className="text-[12px] text-[#2F80ED] font-medium hover:text-[#1E5FBC]">
                     View all notifications
                   </button>
                 </div>
@@ -122,8 +122,8 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex h-7 w-7 items-center justify-center rounded-full text-white text-[11px] font-semibold transition-all hover:scale-105"
               style={{
-                background: 'linear-gradient(135deg, #1ABC9C, #16A085)',
-                boxShadow: '0 4px 10px -4px rgba(26,188,156,0.55)',
+                background: 'linear-gradient(135deg, #2F80ED, #1E5FBC)',
+                boxShadow: '0 4px 10px -4px rgba(47, 128, 237,0.55)',
               }}
               aria-label="Account menu"
             >

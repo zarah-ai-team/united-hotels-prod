@@ -238,7 +238,7 @@ export function AdminHotelsPage() {
       <div className="space-y-4">
         {/* Toolbar — single tidy row, smaller search/button */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[12.5px] text-[#6b7280] dark:text-white/55" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-[12.5px] text-[#6b7280] dark:text-white/60" style={{ fontFamily: 'Inter, sans-serif' }}>
             <span className="text-[#1f2937] dark:text-white font-semibold">{hotels.length}</span> properties · room inventory
           </p>
           <div className="flex items-center gap-2">
@@ -248,14 +248,14 @@ export function AdminHotelsPage() {
                 placeholder="Search hotels…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="rounded-lg border border-[#eaeaea] dark:border-white/10 bg-white dark:bg-[#11151a] dark:text-white dark:placeholder-white/40 pl-8 pr-3 py-1.5 text-[12.5px] w-56 focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C] transition-colors"
+                className="rounded-lg border border-[#eaeaea] dark:border-white/10 bg-white dark:bg-[#11151a] dark:text-white dark:placeholder-white/40 pl-8 pr-3 py-1.5 text-[12.5px] w-56 focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/25 focus:border-[#2F80ED] transition-colors"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               />
             </div>
             {!isVendor && (
               <button
                 onClick={() => setShowAdd(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#1ABC9C] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#16A085] transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#2F80ED] px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-[#1E5FBC] transition-colors shadow-[0_4px_12px_-4px_rgba(47, 128, 237,0.55)]"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 <Plus className="w-3.5 h-3.5" /> Add Hotel
@@ -269,7 +269,7 @@ export function AdminHotelsPage() {
         )}
 
         {loading ? (
-          <p className="text-[12.5px] text-[#8c8c8c] dark:text-white/55">Loading hotels…</p>
+          <p className="text-[12.5px] text-[#8c8c8c] dark:text-white/60">Loading hotels…</p>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
             {/* Hotel list — single-column horizontal row layout with a 96x72
@@ -294,12 +294,12 @@ export function AdminHotelsPage() {
                       onClick={() => setActiveId(h.id)}
                       className={`group grid grid-cols-[96px_minmax(0,1fr)_72px] md:grid-cols-[96px_minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_88px] gap-3 px-3 py-2.5 transition-colors cursor-pointer ${
                         isActiveRow
-                          ? 'bg-[#1ABC9C]/[0.06] hover:bg-[#1ABC9C]/[0.08]'
+                          ? 'bg-[#2F80ED]/[0.06] hover:bg-[#2F80ED]/[0.08]'
                           : 'hover:bg-[#fafafa] dark:hover:bg-white/[0.03]'
                       }`}
                     >
                       {/* Thumbnail */}
-                      <div className="relative h-[72px] w-[96px] rounded-lg overflow-hidden bg-gradient-to-br from-[#1ABC9C]/15 to-[#2dd4bf]/10 dark:from-[#1ABC9C]/20 dark:to-[#2dd4bf]/15 shrink-0">
+                      <div className="relative h-[72px] w-[96px] rounded-lg overflow-hidden bg-gradient-to-br from-[#2F80ED]/15 to-[#5DA0F8]/10 dark:from-[#2F80ED]/20 dark:to-[#5DA0F8]/15 shrink-0">
                         {h.image ? (
                           <img
                             src={h.image}
@@ -315,11 +315,11 @@ export function AdminHotelsPage() {
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <BedDouble className="w-5 h-5 text-[#1ABC9C] opacity-60" />
+                            <BedDouble className="w-5 h-5 text-[#2F80ED] opacity-60" />
                           </div>
                         )}
                         {h.vendorId ? (
-                          <span className="absolute top-1 left-1 inline-flex items-center gap-0.5 rounded-full bg-[#1ABC9C] text-white text-[9px] px-1 py-px shadow-sm">
+                          <span className="absolute top-1 left-1 inline-flex items-center gap-0.5 rounded-full bg-[#2F80ED] text-white text-[9px] px-1 py-px shadow-sm">
                             <Tag className="w-2 h-2" /> {h.vendorId}
                           </span>
                         ) : null}
@@ -330,7 +330,7 @@ export function AdminHotelsPage() {
                         <h3 className="text-[13.5px] font-semibold text-[#1f2937] dark:text-white truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
                           {h.name}
                         </h3>
-                        <div className="flex items-center gap-1 text-[11.5px] text-[#8c8c8c] dark:text-white/55 mt-0.5">
+                        <div className="flex items-center gap-1 text-[11.5px] text-[#8c8c8c] dark:text-white/60 mt-0.5">
                           <MapPin className="w-3 h-3 shrink-0" />
                           <span className="truncate">{h.location}</span>
                         </div>
@@ -356,12 +356,12 @@ export function AdminHotelsPage() {
                       </div>
 
                       {/* Price band — desktop only */}
-                      <div className="hidden md:flex items-center text-[12px] font-semibold text-[#0f9b86] dark:text-[#2dd4bf]">
+                      <div className="hidden md:flex items-center text-[12px] font-semibold text-[#1E5FBC] dark:text-[#5DA0F8]">
                         {h.minPrice > 0 ? `${fmtUsd(h.minPrice)}–${fmtUsd(h.maxPrice)}` : '—'}
                       </div>
 
                       {/* Inventory — desktop only */}
-                      <div className="hidden md:flex items-center text-[11.5px] text-[#6b7280] dark:text-white/65">
+                      <div className="hidden md:flex items-center text-[11.5px] text-[#6b7280] dark:text-white/70">
                         <BedDouble className="w-3.5 h-3.5 mr-1 text-[#9aa0a6]" />
                         {h.rooms.length} {h.rooms.length === 1 ? 'type' : 'types'}
                         {h.totalRooms ? ` · ${h.totalRooms} rms` : ''}
@@ -371,7 +371,7 @@ export function AdminHotelsPage() {
                       <div className="flex items-center justify-end">
                         <button
                           onClick={(e) => { e.stopPropagation(); navigate(`/admin/hotels/${h.id}`); }}
-                          className="inline-flex items-center gap-1 rounded-md bg-[#1ABC9C]/10 hover:bg-[#1ABC9C] hover:text-white text-[#0f9b86] dark:text-[#2dd4bf] dark:hover:text-white text-[11px] font-semibold px-2 py-1.5 transition-colors"
+                          className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED]/10 hover:bg-[#2F80ED] hover:text-white text-[#1E5FBC] dark:text-[#5DA0F8] dark:hover:text-white text-[11px] font-semibold px-2 py-1.5 transition-colors"
                         >
                           Open <ChevronRight className="w-3 h-3" />
                         </button>
@@ -406,7 +406,7 @@ export function AdminHotelsPage() {
                       href={`/hotel/${active.id}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-2 inline-flex items-center gap-1 text-xs text-[#1ABC9C] hover:text-[#16A085]"
+                      className="mt-2 inline-flex items-center gap-1 text-xs text-[#2F80ED] hover:text-[#1E5FBC]"
                     >
                       View public page <ExternalLink className="w-3 h-3" />
                     </a>
@@ -415,11 +415,11 @@ export function AdminHotelsPage() {
                   <div className="border-t border-[#eaeaea] pt-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-sm font-semibold text-[#3b3b3b] flex items-center gap-1">
-                        <DollarSign className="w-4 h-4 text-[#1ABC9C]" /> Room categories
+                        <DollarSign className="w-4 h-4 text-[#2F80ED]" /> Room categories
                       </h3>
                       <button
                         onClick={() => setShowAddRoom((v) => !v)}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#1ABC9C] hover:text-[#16A085]"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#2F80ED] hover:text-[#1E5FBC]"
                       >
                         <Plus className="w-3.5 h-3.5" /> {showAddRoom ? 'Cancel' : 'Add room'}
                       </button>
@@ -484,7 +484,7 @@ export function AdminHotelsPage() {
                         <button
                           onClick={handleAddRoom}
                           disabled={savingRoom}
-                          className="w-full rounded-md bg-[#1ABC9C] hover:bg-[#16A085] text-white text-sm font-semibold py-1.5 disabled:opacity-60"
+                          className="w-full rounded-md bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-sm font-semibold py-1.5 disabled:opacity-60"
                         >
                           {savingRoom ? 'Adding…' : 'Add Room'}
                         </button>
@@ -502,7 +502,7 @@ export function AdminHotelsPage() {
                             <div key={r.id ?? i} className="rounded-lg border border-[#eaeaea] p-3 text-sm">
                               <div className="flex items-center justify-between">
                                 <span className="font-medium text-[#3b3b3b]">{r.room_name || `Room ${i + 1}`}</span>
-                                <span className="text-[#1ABC9C] font-semibold">{fmtUsd(Number(r.price_per_night ?? r.base_price ?? 0))}</span>
+                                <span className="text-[#2F80ED] font-semibold">{fmtUsd(Number(r.price_per_night ?? r.base_price ?? 0))}</span>
                               </div>
                               <div className="flex items-center justify-between text-xs text-[#8c8c8c] mt-1">
                                 <span className="capitalize">{r.room_category || 'standard'}</span>
@@ -515,7 +515,7 @@ export function AdminHotelsPage() {
                                 <button
                                   onClick={() => startEdit(r)}
                                   disabled={roomId == null}
-                                  className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#1ABC9C] hover:text-[#16A085] disabled:opacity-50"
+                                  className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#2F80ED] hover:text-[#1E5FBC] disabled:opacity-50"
                                 >
                                   {isVendor ? <Sliders className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
                                   {isVendor ? 'Set price band' : 'Adjust price'}
@@ -563,7 +563,7 @@ export function AdminHotelsPage() {
                                     <button
                                       onClick={() => roomId != null && savePrice(roomId)}
                                       disabled={isSaving}
-                                      className="inline-flex items-center gap-1 rounded-md bg-[#1ABC9C] hover:bg-[#16A085] text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
+                                      className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
                                     >
                                       <Save className="w-3.5 h-3.5" /> {isSaving ? 'Saving…' : 'Save'}
                                     </button>

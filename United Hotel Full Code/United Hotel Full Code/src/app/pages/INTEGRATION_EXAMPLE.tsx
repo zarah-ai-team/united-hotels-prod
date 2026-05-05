@@ -1,4 +1,4 @@
-/**
+﻿/**
  * IMPLEMENTATION EXAMPLE: How to Integrate API into ListingPageNew
  * 
  * This file demonstrates the pattern to follow when integrating pages with the API services.
@@ -87,7 +87,7 @@ export function ListingPageNewExample() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-[#1abc9c]" />
+          <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-[#2F80ED]" />
           <p className="text-gray-600">Loading hotels...</p>
         </div>
       </div>
@@ -134,7 +134,7 @@ export function ListingPageNewExample() {
                 type="date"
                 value={filters.checkInDate}
                 onChange={(e) => setFilters({ ...filters, checkInDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1abc9c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F80ED]"
               />
             </div>
 
@@ -147,7 +147,7 @@ export function ListingPageNewExample() {
                 type="date"
                 value={filters.checkOutDate}
                 onChange={(e) => setFilters({ ...filters, checkOutDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1abc9c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F80ED]"
               />
             </div>
 
@@ -159,7 +159,7 @@ export function ListingPageNewExample() {
               <select
                 value={filters.guests}
                 onChange={(e) => setFilters({ ...filters, guests: parseInt(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1abc9c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F80ED]"
               >
                 {[1, 2, 3, 4, 5, 6].map(num => (
                   <option key={num} value={num}>{num} Guest{num > 1 ? 's' : ''}</option>
@@ -177,7 +177,7 @@ export function ListingPageNewExample() {
                 placeholder="City or hotel name"
                 value={filters.location}
                 onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1abc9c]"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F80ED]"
               />
             </div>
           </div>
@@ -222,7 +222,7 @@ export function ListingPageNewExample() {
                             i < Math.floor(hotel.rating || 4) ? "text-yellow-400" : "text-gray-300"
                           }`}
                         >
-                          ★
+                          â˜…
                         </span>
                       ))}
                     </div>
@@ -244,7 +244,7 @@ export function ListingPageNewExample() {
                   </div>
 
                   {/* CTA Button */}
-                  <button className="w-full bg-[#1abc9c] text-white py-2 rounded-lg hover:bg-[#16a085] transition-colors">
+                  <button className="w-full bg-[#2F80ED] text-white py-2 rounded-lg hover:bg-[#1E5FBC] transition-colors">
                     View Details
                   </button>
                 </div>

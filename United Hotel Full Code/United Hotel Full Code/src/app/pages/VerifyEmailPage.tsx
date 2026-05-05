@@ -56,7 +56,7 @@ export function VerifyEmailPage() {
           <div
             className={
               status === 'success'
-                ? 'px-6 py-5 bg-linear-to-r from-[#1ABC9C] to-[#16A085]'
+                ? 'px-6 py-5 bg-linear-to-r from-[#2F80ED] to-[#1E5FBC]'
                 : 'px-6 py-5 bg-[#3B3B3B] dark:bg-black/60'
             }
           >
@@ -78,7 +78,7 @@ export function VerifyEmailPage() {
             {status === 'loading' && (
               <>
                 <div className="mx-auto mb-5 h-16 w-16 rounded-full bg-[#FAFAFA] dark:bg-white/[0.06] flex items-center justify-center">
-                  <Loader2 className="h-7 w-7 text-[#1ABC9C] animate-spin" strokeWidth={1.6} />
+                  <Loader2 className="h-7 w-7 text-[#2F80ED] animate-spin" strokeWidth={1.6} />
                 </div>
                 <h2
                   className="text-xl font-semibold text-[#3B3B3B] dark:text-white mb-2"
@@ -99,15 +99,15 @@ export function VerifyEmailPage() {
               <>
                 {/* Animated success checkmark — pulsing teal halo behind it */}
                 <div className="relative mx-auto mb-6 h-24 w-24">
-                  <span className="absolute inset-0 rounded-full bg-[#1ABC9C]/20 dark:bg-[#2dd4bf]/15 animate-ping" />
-                  <span className="absolute inset-2 rounded-full bg-[#1ABC9C]/30 dark:bg-[#2dd4bf]/25" />
+                  <span className="absolute inset-0 rounded-full bg-[#2F80ED]/20 dark:bg-[#5DA0F8]/15 animate-ping" />
+                  <span className="absolute inset-2 rounded-full bg-[#2F80ED]/30 dark:bg-[#5DA0F8]/25" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-16 w-16 rounded-full bg-linear-to-br from-[#1ABC9C] to-[#16A085] flex items-center justify-center shadow-[0_12px_30px_-12px_rgba(26,188,156,0.65)]">
+                    <div className="h-16 w-16 rounded-full bg-linear-to-br from-[#2F80ED] to-[#1E5FBC] flex items-center justify-center shadow-[0_12px_30px_-12px_rgba(47, 128, 237,0.65)]">
                       <CheckCircle2 className="h-9 w-9 text-white" strokeWidth={2.2} />
                     </div>
                   </div>
                   <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-[#FFA500]" strokeWidth={1.8} />
-                  <Sparkles className="absolute -bottom-1 -left-1 h-4 w-4 text-[#1ABC9C]" strokeWidth={1.8} />
+                  <Sparkles className="absolute -bottom-1 -left-1 h-4 w-4 text-[#2F80ED]" strokeWidth={1.8} />
                 </div>
 
                 <h2
@@ -117,7 +117,7 @@ export function VerifyEmailPage() {
                   You&apos;re all set!
                 </h2>
                 <p
-                  className="text-[15px] text-[#1ABC9C] dark:text-[#2dd4bf] font-semibold mb-3"
+                  className="text-[15px] text-[#2F80ED] dark:text-[#5DA0F8] font-semibold mb-3"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   Your email has been verified.
@@ -132,9 +132,9 @@ export function VerifyEmailPage() {
 
                 {/* Account confirmation card */}
                 {(user?.email || user?.name) && (
-                  <div className="rounded-xl border border-[#1ABC9C]/25 bg-[#1ABC9C]/[0.06] dark:border-[#2dd4bf]/30 dark:bg-[#2dd4bf]/[0.05] px-4 py-3 mb-5 text-left">
+                  <div className="rounded-xl border border-[#2F80ED]/25 bg-[#2F80ED]/[0.06] dark:border-[#5DA0F8]/30 dark:bg-[#5DA0F8]/[0.05] px-4 py-3 mb-5 text-left">
                     <div className="flex items-center gap-2.5">
-                      <ShieldCheck className="h-4 w-4 text-[#1ABC9C] dark:text-[#2dd4bf] shrink-0" strokeWidth={2} />
+                      <ShieldCheck className="h-4 w-4 text-[#2F80ED] dark:text-[#5DA0F8] shrink-0" strokeWidth={2} />
                       <div className="min-w-0">
                         <p
                           className="text-[12px] font-medium text-[#1f2937] dark:text-white truncate"
@@ -142,7 +142,7 @@ export function VerifyEmailPage() {
                         >
                           {user.email || user.name}
                         </p>
-                        <p className="text-[11px] text-[#16A085] dark:text-[#5eead4]">
+                        <p className="text-[11px] text-[#1E5FBC] dark:text-[#5DA0F8]">
                           Verified · just now
                         </p>
                       </div>
@@ -152,14 +152,14 @@ export function VerifyEmailPage() {
 
                 <Link
                   to="/auth"
-                  className="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg bg-linear-to-br from-[#1ABC9C] to-[#16A085] text-white font-semibold text-sm shadow-[0_10px_24px_-12px_rgba(26,188,156,0.55)] hover:brightness-105 transition-all"
+                  className="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg bg-linear-to-br from-[#2F80ED] to-[#1E5FBC] text-white font-semibold text-sm shadow-[0_10px_24px_-12px_rgba(47, 128, 237,0.55)] hover:brightness-105 transition-all"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   Sign in to your account
                 </Link>
                 <Link
                   to="/"
-                  className="block mt-3 text-xs text-[#8C8C8C] dark:text-white/55 hover:text-[#3B3B3B] dark:hover:text-white"
+                  className="block mt-3 text-xs text-[#8C8C8C] dark:text-white/60 hover:text-[#3B3B3B] dark:hover:text-white"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   Or browse hotels first →
@@ -190,14 +190,14 @@ export function VerifyEmailPage() {
                 </p>
                 <Link
                   to="/auth"
-                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#1ABC9C] text-white font-semibold text-sm hover:bg-[#16A085] transition-colors"
+                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#2F80ED] text-white font-semibold text-sm hover:bg-[#1E5FBC] transition-colors"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   Back to sign in
                 </Link>
                 <Link
                   to="/"
-                  className="block mt-3 text-xs text-[#8C8C8C] dark:text-white/55 hover:text-[#3B3B3B] dark:hover:text-white"
+                  className="block mt-3 text-xs text-[#8C8C8C] dark:text-white/60 hover:text-[#3B3B3B] dark:hover:text-white"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   Go to homepage

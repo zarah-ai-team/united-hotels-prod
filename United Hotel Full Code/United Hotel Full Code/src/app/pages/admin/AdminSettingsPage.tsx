@@ -32,7 +32,7 @@ function Field({ label, children }: FieldProps) {
 }
 
 const inputCls =
-  'w-full rounded-md border bg-transparent px-2.5 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]/25 focus:border-[#1ABC9C] transition-colors';
+  'w-full rounded-md border bg-transparent px-2.5 py-1.5 text-[12.5px] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/25 focus:border-[#2F80ED] transition-colors';
 
 interface SectionCardProps {
   title: string;
@@ -41,7 +41,7 @@ interface SectionCardProps {
   children: React.ReactNode;
 }
 
-function SectionCard({ title, icon: Icon, accent = '#1ABC9C', children }: SectionCardProps) {
+function SectionCard({ title, icon: Icon, accent = '#2F80ED', children }: SectionCardProps) {
   return (
     <div className="admin-card p-4">
       <div className="flex items-center gap-2 mb-3.5">
@@ -95,7 +95,7 @@ export function AdminSettingsPage() {
                 onClick={() => setTheme('light')}
                 className={`flex items-center justify-center gap-2 rounded-md py-2.5 text-[12.5px] font-medium border transition-colors ${
                   theme === 'light'
-                    ? 'bg-[#1ABC9C]/10 border-[#1ABC9C]/40 text-[#0f9b86]'
+                    ? 'bg-[#2F80ED]/10 border-[#2F80ED]/40 text-[#1E5FBC]'
                     : 'border hover:border-[#9aa0a6]'
                 }`}
                 style={{
@@ -111,7 +111,7 @@ export function AdminSettingsPage() {
                 onClick={() => setTheme('dark')}
                 className={`flex items-center justify-center gap-2 rounded-md py-2.5 text-[12.5px] font-medium border transition-colors ${
                   theme === 'dark'
-                    ? 'bg-[#1ABC9C]/10 border-[#1ABC9C]/40 text-[#0f9b86]'
+                    ? 'bg-[#2F80ED]/10 border-[#2F80ED]/40 text-[#1E5FBC]'
                     : 'border hover:border-[#9aa0a6]'
                 }`}
                 style={{
@@ -131,13 +131,13 @@ export function AdminSettingsPage() {
         </SectionCard>
 
         {/* Profile — display name + email + sign out */}
-        <SectionCard title="Profile" icon={User} accent="#1ABC9C">
+        <SectionCard title="Profile" icon={User} accent="#2F80ED">
           <div className="flex items-center gap-3 pb-3 border-b" style={{ borderColor: 'var(--admin-border)' }}>
             <div
               className="flex h-10 w-10 items-center justify-center rounded-full text-white text-[12px] font-semibold shrink-0"
               style={{
-                background: 'linear-gradient(135deg, #1ABC9C, #16A085)',
-                boxShadow: '0 4px 10px -4px rgba(26,188,156,0.45)',
+                background: 'linear-gradient(135deg, #2F80ED, #1E5FBC)',
+                boxShadow: '0 4px 10px -4px rgba(47, 128, 237,0.45)',
               }}
             >
               {(name || 'A').slice(0, 2).toUpperCase()}
@@ -172,7 +172,7 @@ export function AdminSettingsPage() {
               <LogOut className="w-3.5 h-3.5" /> Sign out
             </button>
             <button
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#1ABC9C] px-3 py-1.5 text-[11.5px] font-semibold text-white hover:bg-[#16A085] transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#2F80ED] px-3 py-1.5 text-[11.5px] font-semibold text-white hover:bg-[#1E5FBC] transition-colors shadow-[0_4px_12px_-4px_rgba(47, 128, 237,0.55)]"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               <Save className="w-3.5 h-3.5" /> Save changes

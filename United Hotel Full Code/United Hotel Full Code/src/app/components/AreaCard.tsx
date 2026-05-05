@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react';
+﻿import { ChevronRight } from 'lucide-react';
 
 interface AreaCardProps {
   name: string;
@@ -24,7 +24,7 @@ export function AreaCard({ name, description, image }: AreaCardProps) {
           {description}
         </p>
         
-        <button className="flex items-center gap-[6px] text-[#1ABC9C] font-['Inter'] font-medium text-[14px] hover:gap-[10px] transition-all min-h-[44px]">
+        <button className="flex items-center gap-[6px] text-[#2F80ED] font-['Inter'] font-medium text-[14px] hover:gap-[10px] transition-all min-h-[44px]">
           Explore Hotels
           <ChevronRight className="w-[16px] h-[16px]" />
         </button>

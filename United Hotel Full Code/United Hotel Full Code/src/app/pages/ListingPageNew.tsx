@@ -130,7 +130,7 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
 
         {/* Discount (top-right) */}
         {hasDiscount && (
-          <div className="absolute top-3 right-3 inline-flex items-center rounded-full bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] px-2.5 py-1 text-[11px] font-['Inter:SemiBold',sans-serif] text-white shadow-[0_6px_18px_-6px_rgba(26,188,156,0.7)] ring-1 ring-white/30">
+          <div className="absolute top-3 right-3 inline-flex items-center rounded-full bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] px-2.5 py-1 text-[11px] font-['Inter:SemiBold',sans-serif] text-white shadow-[0_6px_18px_-6px_rgba(47, 128, 237,0.7)] ring-1 ring-white/30">
             −{hotel.discountPercent.toFixed(0)}%
           </div>
         )}
@@ -148,8 +148,8 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="h-px w-5 bg-gradient-to-r from-[#1abc9c] to-transparent shrink-0" />
-            <span className="font-['Inter:Medium',sans-serif] text-[9.5px] tracking-[0.26em] uppercase text-[#1abc9c] line-clamp-1">
+            <span className="h-px w-5 bg-gradient-to-r from-[#2F80ED] to-transparent shrink-0" />
+            <span className="font-['Inter:Medium',sans-serif] text-[9.5px] tracking-[0.26em] uppercase text-[#2F80ED] line-clamp-1">
               {hasDiscount ? t("Limited offer") : t("Direct rate")}
             </span>
           </div>
@@ -166,11 +166,11 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
           </div>
         </div>
 
-        <h3 className="font-['Poppins:Bold',sans-serif] text-[19px] md:text-[20px] leading-[1.22] tracking-[-0.018em] text-[#1f2937] dark:text-white line-clamp-1 group-hover:text-[#1abc9c] transition-colors">
+        <h3 className="font-['Poppins:Bold',sans-serif] text-[19px] md:text-[20px] leading-[1.22] tracking-[-0.018em] text-[#1f2937] dark:text-white line-clamp-1 group-hover:text-[#2F80ED] transition-colors">
           {t(hotel.name)}
         </h3>
 
-        <div className="font-['Inter:Regular',sans-serif] italic text-[12px] text-[#6b7280] dark:text-white/55 mt-1.5 mb-3.5 flex items-center gap-2">
+        <div className="font-['Inter:Regular',sans-serif] italic text-[12px] text-[#6b7280] dark:text-white/60 mt-1.5 mb-3.5 flex items-center gap-2">
           <span>
             {hotel.reviewCount > 0
               ? `${hotel.reviewCount} ${t("verified reviews")}`
@@ -179,7 +179,7 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
           {hotel.district ? (
             <>
               <span className="text-[#d1d5db] dark:text-white/20">·</span>
-              <span className="not-italic font-['Inter:Medium',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/65 line-clamp-1">
+              <span className="not-italic font-['Inter:Medium',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/70 line-clamp-1">
                 {t(hotel.district)}
               </span>
             </>
@@ -191,7 +191,7 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
             {hotel.amenities.slice(0, 3).map((amenity, idx) => (
               <span
                 key={`${hotel.id}-${amenity}-${idx}`}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/65 dark:bg-white/[0.05] backdrop-blur-sm ring-1 ring-[#1abc9c]/15 dark:ring-white/10 font-['Inter:Medium',sans-serif] text-[10.5px] text-[#3b3b3b] dark:text-white/80"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/65 dark:bg-white/[0.05] backdrop-blur-sm ring-1 ring-[#2F80ED]/15 dark:ring-white/10 font-['Inter:Medium',sans-serif] text-[10.5px] text-[#3b3b3b] dark:text-white/80"
               >
                 {t(capitalizeAmenity(amenity))}
               </span>
@@ -201,10 +201,10 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
       </div>
 
       {/* Price band */}
-      <div className="relative px-5 py-4 bg-gradient-to-br from-[#1abc9c]/[0.07] via-[#2dd4bf]/[0.04] to-transparent dark:from-[#2dd4bf]/[0.08] dark:via-[#2dd4bf]/[0.04] border-t border-[#1abc9c]/15 dark:border-white/10">
+      <div className="relative px-5 py-4 bg-gradient-to-br from-[#2F80ED]/[0.07] via-[#5DA0F8]/[0.04] to-transparent dark:from-[#5DA0F8]/[0.08] dark:via-[#5DA0F8]/[0.04] border-t border-[#2F80ED]/15 dark:border-white/10">
         <span
           aria-hidden
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 rounded-r-full bg-gradient-to-b from-[#1abc9c] to-[#2dd4bf]"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 rounded-r-full bg-gradient-to-b from-[#2F80ED] to-[#5DA0F8]"
         />
 
         {/* Stack price + CTA vertically on mobile so the View pill never
@@ -213,7 +213,7 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-['Inter:SemiBold',sans-serif] text-[10px] tracking-[0.22em] uppercase text-[#1abc9c]">
+              <span className="font-['Inter:SemiBold',sans-serif] text-[10px] tracking-[0.22em] uppercase text-[#2F80ED]">
                 {t("From")}
               </span>
               {hasPrice && showOldPrice && (
@@ -224,20 +224,20 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
             </div>
             {hasPrice ? (
               <div className="flex items-baseline gap-1.5 flex-wrap">
-                <span className="font-['Poppins:Bold',sans-serif] text-[22px] sm:text-[26px] leading-none tracking-[-0.025em] text-[#0f9b86] dark:text-[#2dd4bf]">
+                <span className="font-['Poppins:Bold',sans-serif] text-[22px] sm:text-[26px] leading-none tracking-[-0.025em] text-[#1E5FBC] dark:text-[#5DA0F8]">
                   {formatCurrency(hotel.directPrice, language)}
                 </span>
-                <span className="font-['Inter:Medium',sans-serif] text-[12px] text-[#6b7280] dark:text-white/55">
+                <span className="font-['Inter:Medium',sans-serif] text-[12px] text-[#6b7280] dark:text-white/60">
                   / {t("night")}
                 </span>
               </div>
             ) : (
-              <div className="font-['Poppins:SemiBold',sans-serif] text-[15px] text-[#6b7280] dark:text-white/65 italic">
+              <div className="font-['Poppins:SemiBold',sans-serif] text-[15px] text-[#6b7280] dark:text-white/70 italic">
                 {t("Price on request")}
               </div>
             )}
             {hasPrice && hasDiscount && hotel.savings > 0 ? (
-              <div className="mt-1 inline-flex items-center gap-1 font-['Inter:SemiBold',sans-serif] text-[11px] text-[#0f9b86] dark:text-[#2dd4bf]">
+              <div className="mt-1 inline-flex items-center gap-1 font-['Inter:SemiBold',sans-serif] text-[11px] text-[#1E5FBC] dark:text-[#5DA0F8]">
                 <Sparkles className="w-3 h-3" strokeWidth={2.2} />
                 {t("You save")} {formatCurrency(hotel.savings, language)}
               </div>
@@ -246,7 +246,7 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
 
           <span
             aria-hidden
-            className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 h-10 rounded-full bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white font-['Inter:SemiBold',sans-serif] text-[12px] shadow-[0_8px_22px_-8px_rgba(26,188,156,0.6)] transition-all duration-300 group-hover:shadow-[0_12px_28px_-8px_rgba(26,188,156,0.8)] group-hover:translate-x-0.5"
+            className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 h-10 rounded-full bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] text-white font-['Inter:SemiBold',sans-serif] text-[12px] shadow-[0_8px_22px_-8px_rgba(47, 128, 237,0.6)] transition-all duration-300 group-hover:shadow-[0_12px_28px_-8px_rgba(47, 128, 237,0.8)] group-hover:translate-x-0.5"
           >
             {t("View")}
             <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.4} />
@@ -386,17 +386,13 @@ export function ListingPageNew() {
   const visiblePages = Array.from({ length: pageWindowEnd - pageWindowStart + 1 }, (_, idx) => pageWindowStart + idx);
 
   return (
-    <div className="bg-[#fafafa] min-h-screen">
+    <div className="listing-page-bg min-h-screen">
       <div className="scroll-progress" aria-hidden />
       <Navigation />
 
-      <section className="glass-section-bg pt-12 md:pt-20 pb-20 md:pb-28 relative overflow-hidden">
-        {/* Soft floating blob — frosted-glass haze on the left */}
-        <span
-          className="blob blob-teal w-[380px] h-[380px] -left-32 top-32 opacity-[0.18] dark:opacity-[0.12] mix-blend-multiply dark:mix-blend-screen"
-          style={{ filter: 'blur(110px)' }}
-          aria-hidden
-        />
+      <section className="pt-12 md:pt-20 pb-20 md:pb-28 relative overflow-hidden">
+        {/* Decorative blob removed — the page-level radial gradient already
+            provides soft brand colour without competing with hotel cards. */}
 
         <main className="max-w-[1840px] mx-auto px-4 md:px-10 relative">
           {/* Editorial header */}
@@ -474,7 +470,7 @@ export function ListingPageNew() {
                     aria-current={page === currentPage ? "page" : undefined}
                     className={`min-w-[44px] h-[44px] px-3 rounded-full font-['Inter:SemiBold',sans-serif] text-[13px] transition-all ${
                       page === currentPage
-                        ? "bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white shadow-[0_8px_22px_-8px_rgba(26,188,156,0.6)]"
+                        ? "bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] text-white shadow-[0_8px_22px_-8px_rgba(47, 128, 237,0.6)]"
                         : "h-scroll-btn"
                     }`}
                   >

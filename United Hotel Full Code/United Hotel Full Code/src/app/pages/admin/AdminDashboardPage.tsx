@@ -95,7 +95,7 @@ export function AdminDashboardPage() {
     Icon: typeof CalendarCheck;
     accent: string;
   }> = [
-    { label: 'Total Bookings', value: liveBookings, Icon: CalendarCheck, accent: '#1ABC9C' },
+    { label: 'Total Bookings', value: liveBookings, Icon: CalendarCheck, accent: '#2F80ED' },
     { label: 'Revenue',        value: liveRevenue,  Icon: DollarSign,    accent: '#10b981' },
     { label: 'Hotels (Active)',value: liveHotels,   Icon: Percent,       accent: '#0ea5e9' },
     { label: 'Total Users',    value: liveUsers,    Icon: TrendingUp,    accent: '#8b5cf6' },
@@ -129,7 +129,7 @@ export function AdminDashboardPage() {
                 onClick={() => setDateFilter(filter.value)}
                 className={`rounded-md px-2.5 py-1 text-[11.5px] font-medium transition-colors ${
                   dateFilter === filter.value
-                    ? 'bg-[#1ABC9C] text-white shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]'
+                    ? 'bg-[#2F80ED] text-white shadow-[0_4px_12px_-4px_rgba(47, 128, 237,0.55)]'
                     : 'hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
                 style={{
@@ -150,7 +150,7 @@ export function AdminDashboardPage() {
           {statCards.map(({ label, value, Icon, accent }) => (
             <div
               key={label}
-              className="group admin-card p-3.5 hover:border-[#1ABC9C]/30 hover:shadow-[0_8px_22px_-10px_rgba(26,188,156,0.25)] transition-all"
+              className="group admin-card p-3.5 hover:border-[#2F80ED]/30 hover:shadow-[0_8px_22px_-10px_rgba(47, 128, 237,0.25)] transition-all"
             >
               <div className="flex items-center gap-3">
                 <div
@@ -192,7 +192,7 @@ export function AdminDashboardPage() {
             </h3>
             <a
               href="/admin/bookings"
-              className="text-[12px] font-medium text-[#1ABC9C] hover:text-[#16A085] transition-colors"
+              className="text-[12px] font-medium text-[#2F80ED] hover:text-[#1E5FBC] transition-colors"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               View All →
@@ -247,7 +247,7 @@ export function AdminDashboardPage() {
                     <td className="px-3 py-2 whitespace-nowrap">
                       <a
                         href={`/admin/bookings/${booking.id}`}
-                        className="text-sm font-mono text-[#1ABC9C] hover:text-[#16A085]"
+                        className="text-sm font-mono text-[#2F80ED] hover:text-[#1E5FBC]"
                       >
                         {booking.id}
                       </a>
@@ -287,7 +287,7 @@ export function AdminDashboardPage() {
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { icon: Building2, title: 'Add New Hotel', description: 'Create a new property', accent: '#1ABC9C' },
+              { icon: Building2, title: 'Add New Hotel', description: 'Create a new property', accent: '#2F80ED' },
               { icon: Tag, title: 'Manage Pricing', description: 'Update room rates', accent: '#10b981' },
               { icon: FileDown, title: 'Generate Report', description: 'Export analytics', accent: '#0ea5e9' },
               { icon: Calendar, title: 'View Calendar', description: 'Check availability', accent: '#8b5cf6' },
@@ -297,7 +297,7 @@ export function AdminDashboardPage() {
                 <button
                   key={index}
                   onClick={() => handleQuickAction(action.title)}
-                  className="group admin-card p-3 hover:border-[#1ABC9C]/40 hover:shadow-[0_8px_20px_-10px_rgba(26,188,156,0.25)] transition-all text-left"
+                  className="group admin-card p-3 hover:border-[#2F80ED]/40 hover:shadow-[0_8px_20px_-10px_rgba(47, 128, 237,0.25)] transition-all text-left"
                 >
                   <div className="flex items-center gap-2.5">
                     <div
@@ -335,7 +335,7 @@ export function AdminDashboardPage() {
           <p>Per-room base / min / max price bands are edited live on each hotel's room cards.</p>
           <button
             onClick={() => { setShowPricingModal(false); navigate('/admin/hotels'); }}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(47, 128, 237,0.55)]"
           >
             <Tag className="w-3.5 h-3.5" /> Open Hotels & Rooms
           </button>
@@ -347,7 +347,7 @@ export function AdminDashboardPage() {
           <p>Live KPIs, daily booking trend, top-performing hotels and revenue by district are all on the Analytics page — pick a 7/30/90-day window there. Export will be wired to /api/admin/analytics in a follow-up.</p>
           <button
             onClick={() => { setShowReportModal(false); navigate('/admin/analytics'); }}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(47, 128, 237,0.55)]"
           >
             <FileDown className="w-3.5 h-3.5" /> Open Analytics
           </button>
@@ -359,7 +359,7 @@ export function AdminDashboardPage() {
           <p>Room-level availability per hotel is reflected on the public listing page once dates are picked, and on each hotel's admin detail page. A standalone calendar view is on the roadmap.</p>
           <button
             onClick={() => { setShowCalendarModal(false); navigate('/admin/bookings'); }}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#1ABC9C] hover:bg-[#16A085] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(26,188,156,0.55)]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-[12.5px] font-semibold px-3.5 py-2 transition-colors shadow-[0_4px_12px_-4px_rgba(47, 128, 237,0.55)]"
           >
             <Calendar className="w-3.5 h-3.5" /> Open Bookings
           </button>
@@ -375,7 +375,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
   BR: '🇧🇷', NL: '🇳🇱', CH: '🇨🇭', SE: '🇸🇪', NO: '🇳🇴', AU: '🇦🇺', CA: '🇨🇦',
 };
 
-const COUNTRY_COLORS = ['#1ABC9C', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981', '#EC4899', '#14B8A6'];
+const COUNTRY_COLORS = ['#2F80ED', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981', '#EC4899', '#5DA0F8'];
 
 function BookingsByCountryCard({ rows }: { rows: Array<{ country: string; bookings: number; revenue: number; share: number }> }) {
   const total = rows.reduce((s, r) => s + r.bookings, 0);
@@ -384,7 +384,7 @@ function BookingsByCountryCard({ rows }: { rows: Array<{ country: string; bookin
     <div className="bg-white dark:bg-[#11151a] rounded-xl shadow-sm border border-[#EAEAEA] p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-[#3B3B3B] flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          <Globe2 className="w-5 h-5 text-[#1ABC9C]" /> Bookings by country
+          <Globe2 className="w-5 h-5 text-[#2F80ED]" /> Bookings by country
         </h3>
         <span className="text-xs text-[#8C8C8C]">{total} bookings · top {top.length} countries</span>
       </div>
@@ -422,7 +422,7 @@ function BookingsByCountryCard({ rows }: { rows: Array<{ country: string; bookin
                   tickFormatter={(c: string) => `${COUNTRY_FLAGS[c] || '🌐'} ${c}`}
                 />
                 <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #EAEAEA' }} />
-                <Bar dataKey="bookings" name="Bookings" fill="#1ABC9C" radius={[0, 4, 4, 0]} isAnimationActive={false} />
+                <Bar dataKey="bookings" name="Bookings" fill="#2F80ED" radius={[0, 4, 4, 0]} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -449,7 +449,7 @@ function UsersByCountryCard({ rows }: { rows: Array<{ country: string; users: nu
     <div className="admin-card p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-[14px] font-semibold flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif', color: 'var(--admin-text)' }}>
-          <Globe2 className="w-4 h-4 text-[#1ABC9C]" /> Users by country
+          <Globe2 className="w-4 h-4 text-[#2F80ED]" /> Users by country
         </h3>
         <span className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
           {total} users · {top.length} countries

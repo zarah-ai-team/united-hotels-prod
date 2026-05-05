@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+﻿import { useNavigate } from 'react-router';
 import { CheckCircle, Download, Calendar, MapPin, Mail, Phone } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useBooking } from '../context/BookingContext';
@@ -25,7 +25,7 @@ export function ConfirmationPage() {
       <header className="bg-white border-b border-[rgba(0,0,0,0.1)]">
         <div className="max-w-[1200px] mx-auto px-[16px] md:px-[32px]">
           <div className="flex items-center justify-between h-[64px]">
-            <a href="/" className="font-['Poppins'] font-bold text-[20px] text-[#1ABC9C]">
+            <a href="/" className="font-['Poppins'] font-bold text-[20px] text-[#2F80ED]">
               United Hotels
             </a>
           </div>
@@ -47,11 +47,11 @@ export function ConfirmationPage() {
             Your reservation has been successfully confirmed
           </p>
 
-          <div className="bg-[#f0fdf4] border border-[#1ABC9C]/20 rounded-[12px] p-[20px] inline-block">
+          <div className="bg-[#f0fdf4] border border-[#2F80ED]/20 rounded-[12px] p-[20px] inline-block">
             <div className="font-['Inter'] text-[14px] text-[#8c8c8c] mb-[4px]">
               Booking ID
             </div>
-            <div className="font-['Poppins'] font-bold text-[24px] text-[#1ABC9C]">
+            <div className="font-['Poppins'] font-bold text-[24px] text-[#2F80ED]">
               {bookingId}
             </div>
           </div>
@@ -139,7 +139,7 @@ export function ConfirmationPage() {
             <div className="space-y-[8px] mb-[16px]">
               <div className="flex justify-between">
                 <span className="font-['Inter'] text-[14px] text-[#3b3b3b]">
-                  ${booking.room.price} × {nights} nights
+                  ${booking.room.price} Ã— {nights} nights
                 </span>
                 <span className="font-['Inter'] text-[14px] text-[#3b3b3b]">
                   ${basePrice}
@@ -185,19 +185,19 @@ export function ConfirmationPage() {
           </h3>
           <ul className="space-y-[12px] font-['Inter'] text-[14px] text-[#3b3b3b]">
             <li className="flex items-start gap-[12px]">
-              <span className="text-[#FFA500] flex-shrink-0 mt-[2px]">✓</span>
+              <span className="text-[#FFA500] flex-shrink-0 mt-[2px]">âœ“</span>
               <span>Confirmation email sent to {booking.guestDetails.email}</span>
             </li>
             <li className="flex items-start gap-[12px]">
-              <span className="text-[#FFA500] flex-shrink-0 mt-[2px]">✓</span>
+              <span className="text-[#FFA500] flex-shrink-0 mt-[2px]">âœ“</span>
               <span>Hotel has been notified of your reservation</span>
             </li>
             <li className="flex items-start gap-[12px]">
-              <span className="text-[#FFA500] flex-shrink-0 mt-[2px]">✓</span>
+              <span className="text-[#FFA500] flex-shrink-0 mt-[2px]">âœ“</span>
               <span>Bring a valid ID and credit card for check-in</span>
             </li>
             <li className="flex items-start gap-[12px]">
-              <span className="text-[#FFA500] flex-shrink-0 mt-[2px]">✓</span>
+              <span className="text-[#FFA500] flex-shrink-0 mt-[2px]">âœ“</span>
               <span>Need help? Contact us on WhatsApp: +90 555 123 4567</span>
             </li>
           </ul>

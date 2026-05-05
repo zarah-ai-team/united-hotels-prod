@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+﻿import { Link } from "react-router";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { useBooking } from "../context/BookingContext";
@@ -167,19 +167,19 @@ export function ConfirmationPageNew() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-[#1abc9c]" />
+                <User className="w-5 h-5 text-[#2F80ED]" />
                 <span className="font-['Inter:SemiBold',sans-serif] text-[16px] text-[#3b3b3b]">
                   {bookingData.guest.name}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-[#1abc9c]" />
+                <Mail className="w-5 h-5 text-[#2F80ED]" />
                 <span className="font-['Inter:Regular',sans-serif] text-[15px] text-[#6b7280]">
                   {bookingData.guest.email}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-[#1abc9c]" />
+                <Phone className="w-5 h-5 text-[#2F80ED]" />
                 <span className="font-['Inter:Regular',sans-serif] text-[15px] text-[#6b7280]">
                   {bookingData.guest.phone}
                 </span>
@@ -197,7 +197,7 @@ export function ConfirmationPageNew() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-['Inter:Regular',sans-serif] text-[15px] text-[#6b7280]">
-                  {formatCurrency(bookingData.payment.nightlyRate, language)} × {bookingData.payment.nights} nights
+                  {formatCurrency(bookingData.payment.nightlyRate, language)} Ã— {bookingData.payment.nights} nights
                 </span>
                 <span className="font-['Inter:SemiBold',sans-serif] text-[16px] text-[#3b3b3b]">
                   {formatCurrency(bookingData.payment.subtotal, language)}
@@ -227,14 +227,14 @@ export function ConfirmationPageNew() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
           <button
             onClick={handleDownloadInvoice}
-            className="flex items-center justify-center gap-3 bg-white border-2 border-[#eaeaea] text-[#3b3b3b] px-6 py-4 rounded-xl hover:border-[#1abc9c] hover:text-[#1abc9c] transition-all font-['Inter:SemiBold',sans-serif] text-[15px] group"
+            className="flex items-center justify-center gap-3 bg-white border-2 border-[#eaeaea] text-[#3b3b3b] px-6 py-4 rounded-xl hover:border-[#2F80ED] hover:text-[#2F80ED] transition-all font-['Inter:SemiBold',sans-serif] text-[15px] group"
           >
             <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
             Download Invoice
           </button>
           <button
             onClick={handleAddToCalendar}
-            className="flex items-center justify-center gap-3 bg-white border-2 border-[#eaeaea] text-[#3b3b3b] px-6 py-4 rounded-xl hover:border-[#1abc9c] hover:text-[#1abc9c] transition-all font-['Inter:SemiBold',sans-serif] text-[15px] group"
+            className="flex items-center justify-center gap-3 bg-white border-2 border-[#eaeaea] text-[#3b3b3b] px-6 py-4 rounded-xl hover:border-[#2F80ED] hover:text-[#2F80ED] transition-all font-['Inter:SemiBold',sans-serif] text-[15px] group"
           >
             <CalendarPlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
             Add to Calendar
@@ -267,14 +267,14 @@ export function ConfirmationPageNew() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
           <Link
             to="/portal"
-            className="flex items-center justify-center gap-2 bg-[#1abc9c] text-white px-8 py-4 rounded-xl hover:bg-[#16a085] transition-all hover:shadow-lg font-['Inter:Bold',sans-serif] text-[16px]"
+            className="flex items-center justify-center gap-2 bg-[#2F80ED] text-white px-8 py-4 rounded-xl hover:bg-[#1E5FBC] transition-all hover:shadow-lg font-['Inter:Bold',sans-serif] text-[16px]"
           >
             View in My Bookings
             <ChevronRight className="w-5 h-5" />
           </Link>
           <Link
             to="/"
-            className="flex items-center justify-center gap-2 bg-white border-2 border-[#1abc9c] text-[#1abc9c] px-8 py-4 rounded-xl hover:bg-[#1abc9c] hover:text-white transition-all font-['Inter:Bold',sans-serif] text-[16px]"
+            className="flex items-center justify-center gap-2 bg-white border-2 border-[#2F80ED] text-[#2F80ED] px-8 py-4 rounded-xl hover:bg-[#2F80ED] hover:text-white transition-all font-['Inter:Bold',sans-serif] text-[16px]"
           >
             Back to Homepage
           </Link>
@@ -285,8 +285,8 @@ export function ConfirmationPageNew() {
           <p className="font-['Inter:Regular',sans-serif] text-[14px] text-[#6b7280] mb-2">
             Questions about your booking?
           </p>
-          <Link to="/support" className="font-['Inter:SemiBold',sans-serif] text-[15px] text-[#1abc9c] hover:text-[#16a085]">
-            Contact Support →
+          <Link to="/support" className="font-['Inter:SemiBold',sans-serif] text-[15px] text-[#2F80ED] hover:text-[#1E5FBC]">
+            Contact Support â†’
           </Link>
         </div>
       </main>

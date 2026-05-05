@@ -44,7 +44,7 @@ const UnitedHotelsLogo = ({ withWordmark = true }: { withWordmark?: boolean }) =
         <mask fill="white" id="uh-admin-logo-mask">
           <path d={svgPaths.p32095b00} />
         </mask>
-        <path d={svgPaths.p32095b00} fill="#1ABC9C" mask="url(#uh-admin-logo-mask)" stroke="#1ABC9C" strokeWidth="0.4" />
+        <path d={svgPaths.p32095b00} fill="#2F80ED" mask="url(#uh-admin-logo-mask)" stroke="#2F80ED" strokeWidth="0.4" />
       </svg>
     </div>
     {withWordmark && (
@@ -89,7 +89,7 @@ export function AdminSidebar() {
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
-          background: 'linear-gradient(90deg, transparent, rgba(26,188,156,0.6), transparent)',
+          background: 'linear-gradient(90deg, transparent, rgba(47, 128, 237,0.6), transparent)',
         }}
       />
 
@@ -148,13 +148,13 @@ export function AdminSidebar() {
                   collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-2.5 py-2'
                 } ${
                   isActive
-                    ? 'bg-[#1ABC9C]/15 text-[#5eead4] shadow-[inset_0_0_0_1px_rgba(26,188,156,0.25)]'
+                    ? 'bg-[#2F80ED]/15 text-[#5DA0F8] shadow-[inset_0_0_0_1px_rgba(47, 128, 237,0.25)]'
                     : 'text-white/65 hover:bg-white/[0.06] hover:text-white'
                 }`}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {isActive && !collapsed && (
-                  <span aria-hidden className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r-full bg-[#1ABC9C]" />
+                  <span aria-hidden className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r-full bg-[#2F80ED]" />
                 )}
                 <Icon className={collapsed ? 'h-[18px] w-[18px] shrink-0' : 'h-[15px] w-[15px] shrink-0'} strokeWidth={1.85} />
                 {!collapsed && <span className="truncate">{item.label}</span>}
@@ -227,8 +227,8 @@ export function AdminSidebar() {
           <div
             className="flex h-8 w-8 items-center justify-center rounded-full text-white text-[11px] font-semibold shrink-0"
             style={{
-              background: 'linear-gradient(135deg, #1ABC9C, #16A085)',
-              boxShadow: '0 4px 12px -4px rgba(26,188,156,0.55)',
+              background: 'linear-gradient(135deg, #2F80ED, #1E5FBC)',
+              boxShadow: '0 4px 12px -4px rgba(47, 128, 237,0.55)',
             }}
             title={collapsed ? 'Admin User' : undefined}
           >

@@ -1,61 +1,6 @@
 import { Link } from "react-router";
 import { Calendar, Clock, ArrowLeft, Share2, Bookmark, MapPin, Sparkles, TrendingUp, Heart, Users, Home, Building2, Coffee } from "lucide-react";
-import svgPaths from "../../imports/svg-nnzqmx1xjq";
-
-// Navigation Component
-function Navigation() {
-  return (
-    <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100">
-      <div className="max-w-[1840px] mx-auto px-10">
-        <div className="flex items-center justify-between h-18">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-[26px] w-[28px]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28 26">
-                <mask fill="white" id="path-1-inside-1_20_512">
-                  <path d={svgPaths.p32095b00} />
-                </mask>
-                <path d={svgPaths.p32095b00} fill="#1ABC9C" mask="url(#path-1-inside-1_20_512)" stroke="#1ABC9C" strokeWidth="0.4" />
-              </svg>
-            </div>
-            <span className="font-['Poppins:SemiBold',sans-serif] text-[20px] text-[#1abc9c]">
-              United Hotels
-            </span>
-          </Link>
-
-          {/* Main Navigation */}
-          <div className="flex items-center gap-8">
-            <a href="/#home" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Home
-            </a>
-            <a href="/#why-choose-united-hotels" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Why Choose United Hotels
-            </a>
-            <a href="/#featured-hotels" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Featured Hotels
-            </a>
-            <a href="/#quality" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              Quality
-            </a>
-            <a href="/#faqs" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors font-['Inter:Medium',sans-serif] text-[15px]">
-              FAQ
-            </a>
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-6">
-            <Link to="/portal" className="text-[#3b3b3b] hover:text-[#1abc9c] transition-colors text-[14px] font-['Inter:Medium',sans-serif]">
-              Login / Register
-            </Link>
-            <Link to="/listing" className="bg-[#1abc9c] text-white px-6 py-2.5 rounded-lg hover:bg-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]">
-              Find Hotels
-            </Link>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-}
+import { Navigation } from "../components/Navigation";
 
 export function BlogArticlePage() {
   return (
@@ -67,7 +12,7 @@ export function BlogArticlePage() {
         <div className="max-w-[1840px] mx-auto px-10 py-4">
           <Link 
             to="/blog"
-            className="inline-flex items-center gap-2 text-[#1abc9c] hover:text-[#16a085] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]"
+            className="inline-flex items-center gap-2 text-[#2F80ED] hover:text-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Travel Guides
@@ -80,7 +25,7 @@ export function BlogArticlePage() {
         <div className="max-w-[1200px] mx-auto px-10 py-16">
           {/* Category Badge */}
           <div className="mb-6">
-            <span className="bg-[#1abc9c] text-white px-4 py-2 rounded-lg font-['Inter:SemiBold',sans-serif] text-[14px]">
+            <span className="bg-[#2F80ED] text-white px-4 py-2 rounded-lg font-['Inter:SemiBold',sans-serif] text-[14px]">
               Travel Tips
             </span>
           </div>
@@ -105,10 +50,10 @@ export function BlogArticlePage() {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3">
-              <button className="p-2.5 border border-[#eaeaea] rounded-lg hover:border-[#1abc9c] hover:text-[#1abc9c] transition-colors">
+              <button className="p-2.5 border border-[#eaeaea] rounded-lg hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors">
                 <Share2 className="w-4.5 h-4.5" />
               </button>
-              <button className="p-2.5 border border-[#eaeaea] rounded-lg hover:border-[#1abc9c] hover:text-[#1abc9c] transition-colors">
+              <button className="p-2.5 border border-[#eaeaea] rounded-lg hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors">
                 <Bookmark className="w-4.5 h-4.5" />
               </button>
             </div>
@@ -141,8 +86,8 @@ export function BlogArticlePage() {
               Sultanahmet is Turkey's Old City, home to iconic sites like the Blue Mosque, Hagia Sophia, and Topkapi Palace. This area puts you at the center of Byzantine and Ottoman history, with countless restaurants, cafes, and shops catering to tourists.
             </p>
 
-            <div className="bg-[#f0fdf4] border-l-4 border-[#1abc9c] p-6 rounded-r-xl mb-8">
-              <p className="font-['Inter:SemiBold',sans-serif] text-[16px] text-[#1abc9c] mb-2">
+            <div className="bg-[#f0fdf4] border-l-4 border-[#2F80ED] p-6 rounded-r-xl mb-8">
+              <p className="font-['Inter:SemiBold',sans-serif] text-[16px] text-[#2F80ED] mb-2">
                 💡 Local Tip
               </p>
               <p className="font-['Inter:Regular',sans-serif] text-[15px] text-[#3b3b3b] leading-[24px]">
@@ -155,19 +100,19 @@ export function BlogArticlePage() {
             </h3>
             <ul className="space-y-3 mb-8">
               <li className="font-['Inter:Regular',sans-serif] text-[17px] text-[#4b5563] leading-[30px] flex items-start gap-3">
-                <span className="text-[#1abc9c] text-[20px] font-bold">•</span>
+                <span className="text-[#2F80ED] text-[20px] font-bold">•</span>
                 <span>Walking distance to major attractions</span>
               </li>
               <li className="font-['Inter:Regular',sans-serif] text-[17px] text-[#4b5563] leading-[30px] flex items-start gap-3">
-                <span className="text-[#1abc9c] text-[20px] font-bold">•</span>
+                <span className="text-[#2F80ED] text-[20px] font-bold">•</span>
                 <span>Good public transport connections</span>
               </li>
               <li className="font-['Inter:Regular',sans-serif] text-[17px] text-[#4b5563] leading-[30px] flex items-start gap-3">
-                <span className="text-[#1abc9c] text-[20px] font-bold">•</span>
+                <span className="text-[#2F80ED] text-[20px] font-bold">•</span>
                 <span>Wide range of hotel options and budgets</span>
               </li>
               <li className="font-['Inter:Regular',sans-serif] text-[17px] text-[#4b5563] leading-[30px] flex items-start gap-3">
-                <span className="text-[#1abc9c] text-[20px] font-bold">•</span>
+                <span className="text-[#2F80ED] text-[20px] font-bold">•</span>
                 <span>Easy airport access via tramway</span>
               </li>
             </ul>
@@ -188,19 +133,19 @@ export function BlogArticlePage() {
             </h3>
             <ul className="space-y-3 mb-8">
               <li className="font-['Inter:Regular',sans-serif] text-[17px] text-[#4b5563] leading-[30px] flex items-start gap-3">
-                <span className="text-[#1abc9c] text-[20px] font-bold">•</span>
+                <span className="text-[#2F80ED] text-[20px] font-bold">•</span>
                 <span>Vibrant nightlife with rooftop bars and clubs</span>
               </li>
               <li className="font-['Inter:Regular',sans-serif] text-[17px] text-[#4b5563] leading-[30px] flex items-start gap-3">
-                <span className="text-[#1abc9c] text-[20px] font-bold">•</span>
+                <span className="text-[#2F80ED] text-[20px] font-bold">•</span>
                 <span>Excellent restaurants from street food to fine dining</span>
               </li>
               <li className="font-['Inter:Regular',sans-serif] text-[17px] text-[#4b5563] leading-[30px] flex items-start gap-3">
-                <span className="text-[#1abc9c] text-[20px] font-bold">•</span>
+                <span className="text-[#2F80ED] text-[20px] font-bold">•</span>
                 <span>Art galleries and cultural centers</span>
               </li>
               <li className="font-['Inter:Regular',sans-serif] text-[17px] text-[#4b5563] leading-[30px] flex items-start gap-3">
-                <span className="text-[#1abc9c] text-[20px] font-bold">•</span>
+                <span className="text-[#2F80ED] text-[20px] font-bold">•</span>
                 <span>Great shopping from high-street brands to boutiques</span>
               </li>
             </ul>
@@ -304,7 +249,7 @@ export function BlogArticlePage() {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="font-['Poppins:SemiBold',sans-serif] text-[18px] text-[#3b3b3b] mb-2 group-hover:text-[#1abc9c] transition-colors">
+                  <h3 className="font-['Poppins:SemiBold',sans-serif] text-[18px] text-[#3b3b3b] mb-2 group-hover:text-[#2F80ED] transition-colors">
                     {article.title}
                   </h3>
                   <p className="font-['Inter:Regular',sans-serif] text-[14px] text-[#6b7280]">
@@ -318,7 +263,7 @@ export function BlogArticlePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-[#1abc9c]">
+      <section className="py-20 bg-[#2F80ED]">
         <div className="max-w-[800px] mx-auto px-10 text-center">
           <h2 className="font-['Poppins:Bold',sans-serif] text-[40px] leading-[52px] text-white mb-6">
             Ready to Book Your Turkey Hotel?
@@ -329,7 +274,7 @@ export function BlogArticlePage() {
           
           <Link 
             to="/listing"
-            className="inline-block bg-white text-[#1abc9c] px-10 py-4 rounded-xl hover:shadow-2xl transition-all font-['Inter:Bold',sans-serif] text-[16px]"
+            className="inline-block bg-white text-[#2F80ED] px-10 py-4 rounded-xl hover:shadow-2xl transition-all font-['Inter:Bold',sans-serif] text-[16px]"
           >
             Browse Hotels in Turkey
           </Link>

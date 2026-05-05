@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
@@ -239,17 +239,17 @@ function HotelQuickFacts({ hotel }: HotelQuickFactsProps) {
   type Fact = { icon: React.ReactNode; label: string; value: string };
   const facts: Fact[] = [
     checkIn && ({
-      icon: <AlarmClock className="w-5 h-5 text-[#1abc9c]" />,
+      icon: <AlarmClock className="w-5 h-5 text-[#2F80ED]" />,
       label: "Check-in from",
       value: checkIn,
     } as Fact),
     checkOut && ({
-      icon: <Clock className="w-5 h-5 text-[#1abc9c]" />,
+      icon: <Clock className="w-5 h-5 text-[#2F80ED]" />,
       label: "Check-out by",
       value: checkOut,
     } as Fact),
     phone && ({
-      icon: <Phone className="w-5 h-5 text-[#1abc9c]" />,
+      icon: <Phone className="w-5 h-5 text-[#2F80ED]" />,
       label: "Phone",
       value: phone,
     } as Fact),
@@ -266,7 +266,7 @@ function HotelQuickFacts({ hotel }: HotelQuickFactsProps) {
         >
           <div className="mt-0.5 shrink-0">{fact.icon}</div>
           <div>
-            <div className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#1abc9c] dark:text-[#2dd4bf] mb-1">
+            <div className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#2F80ED] dark:text-[#5DA0F8] mb-1">
               {fact.label}
             </div>
             <div className="text-[15px] font-semibold text-[#1f2937] dark:text-white">{fact.value}</div>
@@ -298,10 +298,10 @@ function AmenitiesList({ amenities }: AmenitiesListProps) {
         return (
           <div
             key={`${name}-${i}`}
-            className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/70 dark:bg-white/[0.04] backdrop-blur-sm ring-1 ring-[#1abc9c]/15 dark:ring-[#2dd4bf]/20 hover:ring-[#1abc9c]/35 dark:hover:ring-[#2dd4bf]/40 transition-colors"
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/70 dark:bg-white/[0.04] backdrop-blur-sm ring-1 ring-[#2F80ED]/15 dark:ring-[#5DA0F8]/20 hover:ring-[#2F80ED]/35 dark:hover:ring-[#5DA0F8]/40 transition-colors"
           >
             <span
-              className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 text-[#0f9b86] dark:text-[#2dd4bf] shrink-0"
+              className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 text-[#1E5FBC] dark:text-[#5DA0F8] shrink-0"
               aria-hidden
             >
               <Icon className="w-[15px] h-[15px]" strokeWidth={1.9} />
@@ -350,7 +350,7 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
     <div
       className={`glass-card rounded-2xl overflow-hidden transition-all duration-300 ${
         isSelected
-          ? "ring-2 ring-[#1abc9c]/45 dark:ring-[#2dd4bf]/55 shadow-[0_22px_60px_-22px_rgba(26,188,156,0.45)]"
+          ? "ring-2 ring-[#2F80ED]/45 dark:ring-[#5DA0F8]/55 shadow-[0_22px_60px_-22px_rgba(47, 128, 237,0.45)]"
           : "is-interactive"
       }`}
     >
@@ -367,7 +367,7 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
 
           {hasDiscount && (
-            <div className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] px-2.5 py-1 text-[11px] font-['Inter:SemiBold',sans-serif] text-white shadow-[0_6px_18px_-6px_rgba(26,188,156,0.7)] ring-1 ring-white/30">
+            <div className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] px-2.5 py-1 text-[11px] font-['Inter:SemiBold',sans-serif] text-white shadow-[0_6px_18px_-6px_rgba(47, 128, 237,0.7)] ring-1 ring-white/30">
               <TrendingDown className="w-3 h-3" />
               −{Number(recommendation?.discountPercent || 0).toFixed(0)}%
             </div>
@@ -386,12 +386,12 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
         {/* Info column */}
         <div className="p-5 md:p-6">
           <div className="flex flex-wrap items-center gap-2 mb-2.5">
-            <span className="h-px w-5 bg-gradient-to-r from-[#1abc9c] to-transparent shrink-0" />
-            <span className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#1abc9c] dark:text-[#2dd4bf]">
+            <span className="h-px w-5 bg-gradient-to-r from-[#2F80ED] to-transparent shrink-0" />
+            <span className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#2F80ED] dark:text-[#5DA0F8]">
               {t("Direct rate")}
             </span>
             {room.room_category && room.room_category !== "unknown" && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 ring-1 ring-[#1abc9c]/25 dark:ring-[#2dd4bf]/30 text-[10.5px] font-['Inter:SemiBold',sans-serif] text-[#0f9b86] dark:text-[#2dd4bf] capitalize">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 ring-1 ring-[#2F80ED]/25 dark:ring-[#5DA0F8]/30 text-[10.5px] font-['Inter:SemiBold',sans-serif] text-[#1E5FBC] dark:text-[#5DA0F8] capitalize">
                 {t(room.room_category)}
               </span>
             )}
@@ -401,37 +401,37 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
             {t(room.room_name || `Room ${index + 1}`)}
           </h3>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12.5px] text-[#6b7280] dark:text-white/65 mt-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12.5px] text-[#6b7280] dark:text-white/70 mt-3">
             {occupancyLabel && (
               <span className="inline-flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-[#1abc9c] dark:text-[#2dd4bf]" strokeWidth={2.2} />
+                <Users className="w-3.5 h-3.5 text-[#2F80ED] dark:text-[#5DA0F8]" strokeWidth={2.2} />
                 {t(occupancyLabel)}
               </span>
             )}
             {room.occupancy_code && (
               <span className="inline-flex items-center gap-1.5">
-                <Hash className="w-3.5 h-3.5 text-[#1abc9c] dark:text-[#2dd4bf]" strokeWidth={2.2} />
+                <Hash className="w-3.5 h-3.5 text-[#2F80ED] dark:text-[#5DA0F8]" strokeWidth={2.2} />
                 {room.occupancy_code}
               </span>
             )}
           </div>
 
           {room.price_raw && (
-            <div className="font-['Inter:Regular',sans-serif] italic text-[12px] text-[#6b7280] dark:text-white/55 mt-2">
+            <div className="font-['Inter:Regular',sans-serif] italic text-[12px] text-[#6b7280] dark:text-white/60 mt-2">
               {room.price_raw}
             </div>
           )}
         </div>
 
         {/* Price + CTA column */}
-        <div className="relative flex flex-col items-end justify-between gap-3 p-5 md:p-6 border-t md:border-t-0 md:border-l border-[#1abc9c]/12 dark:border-white/10 bg-gradient-to-br from-[#1abc9c]/[0.07] via-[#2dd4bf]/[0.04] to-transparent dark:from-[#2dd4bf]/[0.08] dark:via-[#2dd4bf]/[0.04]">
+        <div className="relative flex flex-col items-end justify-between gap-3 p-5 md:p-6 border-t md:border-t-0 md:border-l border-[#2F80ED]/12 dark:border-white/10 bg-gradient-to-br from-[#2F80ED]/[0.07] via-[#5DA0F8]/[0.04] to-transparent dark:from-[#5DA0F8]/[0.08] dark:via-[#5DA0F8]/[0.04]">
           <span
             aria-hidden
-            className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-12 rounded-r-full bg-gradient-to-b from-[#1abc9c] to-[#2dd4bf]"
+            className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-12 rounded-r-full bg-gradient-to-b from-[#2F80ED] to-[#5DA0F8]"
           />
 
           <div className="text-right">
-            <div className="font-['Inter:SemiBold',sans-serif] text-[10px] tracking-[0.22em] uppercase text-[#1abc9c] dark:text-[#2dd4bf] mb-1">
+            <div className="font-['Inter:SemiBold',sans-serif] text-[10px] tracking-[0.22em] uppercase text-[#2F80ED] dark:text-[#5DA0F8] mb-1">
               {t("From")}
             </div>
             {hasDiscount && basePrice > displayPrice && (
@@ -441,10 +441,10 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
             )}
             {displayPrice > 0 ? (
               <>
-                <div className="font-['Poppins:Bold',sans-serif] text-[28px] leading-none tracking-[-0.025em] text-[#0f9b86] dark:text-[#2dd4bf]">
+                <div className="font-['Poppins:Bold',sans-serif] text-[28px] leading-none tracking-[-0.025em] text-[#1E5FBC] dark:text-[#5DA0F8]">
                   {format(displayPrice)}
                 </div>
-                <div className="text-[12px] text-[#6b7280] dark:text-white/55 mt-1">
+                <div className="text-[12px] text-[#6b7280] dark:text-white/60 mt-1">
                   / {t("night")}
                 </div>
               </>
@@ -452,7 +452,7 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
               <div className="text-[14px] text-[#9ca3af] italic">{t("Price on request")}</div>
             )}
             {savings > 0 && (
-              <div className="mt-1.5 inline-flex items-center gap-1 font-['Inter:SemiBold',sans-serif] text-[11px] text-[#0f9b86] dark:text-[#2dd4bf]">
+              <div className="mt-1.5 inline-flex items-center gap-1 font-['Inter:SemiBold',sans-serif] text-[11px] text-[#1E5FBC] dark:text-[#5DA0F8]">
                 <Sparkles className="w-3 h-3" strokeWidth={2.2} />
                 {t("Save")} {format(savings)}
               </div>
@@ -464,8 +464,8 @@ function RoomCategoryCard({ room, index, image, onImageError, recommendation, is
               onClick={onSelect}
               className={`shrink-0 inline-flex items-center gap-1.5 px-4 h-10 rounded-full font-['Inter:SemiBold',sans-serif] text-[12px] transition-all duration-300 ${
                 isSelected
-                  ? "bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white shadow-[0_10px_28px_-8px_rgba(26,188,156,0.7)]"
-                  : "bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white shadow-[0_8px_22px_-8px_rgba(26,188,156,0.5)] hover:shadow-[0_12px_28px_-8px_rgba(26,188,156,0.8)] hover:translate-x-0.5"
+                  ? "bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] text-white shadow-[0_10px_28px_-8px_rgba(47, 128, 237,0.7)]"
+                  : "bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] text-white shadow-[0_8px_22px_-8px_rgba(47, 128, 237,0.5)] hover:shadow-[0_12px_28px_-8px_rgba(47, 128, 237,0.8)] hover:translate-x-0.5"
               }`}
             >
               {isSelected ? (
@@ -532,14 +532,14 @@ function HotelPolicies({ childPolicy, petPolicy, smokingPolicy }: HotelPoliciesP
           className="rounded-xl p-3.5 bg-white/65 dark:bg-white/[0.04] ring-1 ring-black/[0.05] dark:ring-white/[0.06]"
         >
           <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#1abc9c]/10 dark:bg-[#2dd4bf]/15 text-[#0f9b86] dark:text-[#2dd4bf] shrink-0">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 text-[#1E5FBC] dark:text-[#5DA0F8] shrink-0">
               {p.icon}
             </span>
             <div className="font-['Inter:SemiBold',sans-serif] text-[12.5px] tracking-[0.02em] text-[#374151] dark:text-white/85">
               {t(p.label)}
             </div>
           </div>
-          <p className="text-[12.5px] text-[#6b7280] dark:text-white/65 leading-[18px]">{t(p.text)}</p>
+          <p className="text-[12.5px] text-[#6b7280] dark:text-white/70 leading-[18px]">{t(p.text)}</p>
         </div>
       ))}
     </div>
@@ -587,7 +587,7 @@ function HotelContactCard({ contactName, contactPhone, email }: HotelContactCard
   const renderRow = (r: Row, key: string) => {
     const iconWrap =
       r.accent === "teal"
-        ? "bg-[#1abc9c]/12 dark:bg-[#2dd4bf]/15 text-[#0f9b86] dark:text-[#2dd4bf]"
+        ? "bg-[#2F80ED]/12 dark:bg-[#5DA0F8]/15 text-[#1E5FBC] dark:text-[#5DA0F8]"
         : "bg-black/[0.04] dark:bg-white/[0.06] text-[#475569] dark:text-white/70";
 
     const content = (
@@ -626,7 +626,7 @@ function HotelContactCard({ contactName, contactPhone, email }: HotelContactCard
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       <div className="rounded-xl p-4 bg-white/65 dark:bg-white/[0.04] ring-1 ring-black/[0.05] dark:ring-white/[0.06]">
-        <div className="font-['Inter:SemiBold',sans-serif] text-[11px] tracking-[0.18em] uppercase text-[#1abc9c] dark:text-[#2dd4bf] mb-2">
+        <div className="font-['Inter:SemiBold',sans-serif] text-[11px] tracking-[0.18em] uppercase text-[#2F80ED] dark:text-[#5DA0F8] mb-2">
           {t("Property Contact")}
         </div>
         <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
@@ -638,11 +638,11 @@ function HotelContactCard({ contactName, contactPhone, email }: HotelContactCard
         </div>
       </div>
 
-      <div className="rounded-xl p-4 bg-gradient-to-br from-[#1abc9c]/[0.08] to-[#2dd4bf]/[0.04] dark:from-[#2dd4bf]/[0.10] dark:to-[#2dd4bf]/[0.04] ring-1 ring-[#1abc9c]/20 dark:ring-[#2dd4bf]/25">
-        <div className="font-['Inter:SemiBold',sans-serif] text-[11px] tracking-[0.18em] uppercase text-[#1abc9c] dark:text-[#2dd4bf] mb-2">
+      <div className="rounded-xl p-4 bg-gradient-to-br from-[#2F80ED]/[0.08] to-[#5DA0F8]/[0.04] dark:from-[#5DA0F8]/[0.10] dark:to-[#5DA0F8]/[0.04] ring-1 ring-[#2F80ED]/20 dark:ring-[#5DA0F8]/25">
+        <div className="font-['Inter:SemiBold',sans-serif] text-[11px] tracking-[0.18em] uppercase text-[#2F80ED] dark:text-[#5DA0F8] mb-2">
           {t("United Hotels Support")}
         </div>
-        <div className="divide-y divide-[#1abc9c]/15 dark:divide-[#2dd4bf]/15">
+        <div className="divide-y divide-[#2F80ED]/15 dark:divide-[#5DA0F8]/15">
           {supportRows.map((r, i) => renderRow(r, `support-${i}`))}
         </div>
       </div>
@@ -657,12 +657,12 @@ function Section({ title, icon, children }: { title: string; icon?: React.ReactN
     <div className="glass-card rounded-2xl p-5 md:p-8 mb-5">
       <div className="flex items-center gap-3 mb-5">
         {icon && (
-          <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/70 dark:bg-white/[0.06] border border-[#1abc9c]/15 dark:border-[#2dd4bf]/25 text-[#1abc9c] dark:text-[#2dd4bf]">
+          <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/70 dark:bg-white/[0.06] border border-[#2F80ED]/15 dark:border-[#5DA0F8]/25 text-[#2F80ED] dark:text-[#5DA0F8]">
             {icon}
           </span>
         )}
         <div className="flex-1 min-w-0">
-          <div className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#1abc9c] dark:text-[#2dd4bf] mb-1">
+          <div className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#2F80ED] dark:text-[#5DA0F8] mb-1">
             United Hotels
           </div>
           <h2 className="font-['Poppins:Bold',sans-serif] text-[22px] md:text-[24px] tracking-[-0.018em] text-[#1f2937] dark:text-white">
@@ -896,7 +896,7 @@ export function HotelDetailPageNew() {
         <Navigation />
         <main className="max-w-[1840px] mx-auto px-4 md:px-10 py-10">
           <div className="bg-white border border-red-200 rounded-2xl p-8 text-red-600 mb-4">{error || "Hotel not found"}</div>
-          <Link to="/listing" className="text-[#1abc9c] hover:text-[#16a085]">← Back to listing</Link>
+          <Link to="/listing" className="text-[#2F80ED] hover:text-[#1E5FBC]">← Back to listing</Link>
         </main>
       </div>
     );
@@ -956,7 +956,7 @@ export function HotelDetailPageNew() {
         <main className="max-w-[1840px] mx-auto px-4 md:px-10 fade-up-enter relative">
         <Link
           to="/listing"
-          className="inline-flex items-center gap-1.5 text-[#1abc9c] hover:text-[#16a085] dark:text-[#2dd4bf] dark:hover:text-[#5eead4] mb-4 text-[14px] font-semibold"
+          className="inline-flex items-center gap-1.5 text-[#2F80ED] hover:text-[#1E5FBC] dark:text-[#5DA0F8] dark:hover:text-[#5DA0F8] mb-4 text-[14px] font-semibold"
         >
           <ChevronLeft className="w-4 h-4" /> {t("Back to all hotels")}
         </Link>
@@ -999,24 +999,24 @@ export function HotelDetailPageNew() {
                           (Standard / Deluxe / Suite …) at a glance. */}
                       <div className="flex items-center gap-3 mb-4">
                         <span
-                          className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white/70 dark:bg-white/[0.06] border border-[#1abc9c]/20 dark:border-[#2dd4bf]/30 text-[#1abc9c] dark:text-[#2dd4bf]"
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white/70 dark:bg-white/[0.06] border border-[#2F80ED]/20 dark:border-[#5DA0F8]/30 text-[#2F80ED] dark:text-[#5DA0F8]"
                           aria-hidden
                         >
                           <BedDouble className="w-[18px] h-[18px]" strokeWidth={1.85} />
                         </span>
                         <div className="flex-1 min-w-0">
-                          <div className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#1abc9c] dark:text-[#2dd4bf]">
+                          <div className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#2F80ED] dark:text-[#5DA0F8]">
                             {t("Category")}
                           </div>
                           <div className="font-['Poppins:Bold',sans-serif] text-[18px] md:text-[20px] tracking-[-0.018em] text-[#1f2937] dark:text-white leading-tight">
                             {t(group.tierLabel)}
                           </div>
                         </div>
-                        <span className="shrink-0 inline-flex items-center gap-1.5 px-3 h-7 rounded-full bg-gradient-to-r from-[#1abc9c]/12 to-[#2dd4bf]/12 dark:from-[#2dd4bf]/15 dark:to-[#2dd4bf]/10 ring-1 ring-[#1abc9c]/25 dark:ring-[#2dd4bf]/30 text-[11px] font-['Inter:SemiBold',sans-serif] text-[#0f9b86] dark:text-[#2dd4bf]">
+                        <span className="shrink-0 inline-flex items-center gap-1.5 px-3 h-7 rounded-full bg-gradient-to-r from-[#2F80ED]/12 to-[#5DA0F8]/12 dark:from-[#5DA0F8]/15 dark:to-[#5DA0F8]/10 ring-1 ring-[#2F80ED]/25 dark:ring-[#5DA0F8]/30 text-[11px] font-['Inter:SemiBold',sans-serif] text-[#1E5FBC] dark:text-[#5DA0F8]">
                           {group.rooms.length} {group.rooms.length === 1 ? t("option") : t("options")}
                         </span>
                       </div>
-                      <div className="h-px w-full mb-4 bg-gradient-to-r from-[#1abc9c]/30 via-[#2dd4bf]/15 to-transparent" />
+                      <div className="h-px w-full mb-4 bg-gradient-to-r from-[#2F80ED]/30 via-[#5DA0F8]/15 to-transparent" />
                       <div className="space-y-4">
                         {group.rooms.map(({ room, index }) => {
                           const displayName = room.room_name || `Room ${index + 1}`;
@@ -1065,7 +1065,7 @@ export function HotelDetailPageNew() {
 
           {/* ── Sticky Booking Sidebar — frosted glass ── */}
           <aside className="hero-glass rounded-2xl p-5 md:p-6 h-fit md:sticky md:top-24">
-            <div className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#1abc9c] dark:text-[#2dd4bf] mb-1.5">
+            <div className="font-['Inter:Medium',sans-serif] text-[10px] tracking-[0.26em] uppercase text-[#2F80ED] dark:text-[#5DA0F8] mb-1.5">
               {t("Reserve")}
             </div>
             <h3 className="font-['Poppins:Bold',sans-serif] text-[22px] tracking-[-0.018em] text-[#1f2937] dark:text-white mb-5">
@@ -1082,7 +1082,7 @@ export function HotelDetailPageNew() {
                     value={checkIn}
                     min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => setCheckIn(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 border border-[#eaeaea] rounded-lg text-[14px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/15"
+                    className="w-full pl-9 pr-3 py-2.5 border border-[#eaeaea] rounded-lg text-[14px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15"
                   />
                 </div>
               </div>
@@ -1096,7 +1096,7 @@ export function HotelDetailPageNew() {
                     value={checkOut}
                     min={checkIn || new Date().toISOString().split("T")[0]}
                     onChange={(e) => setCheckOut(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 border border-[#eaeaea] rounded-lg text-[14px] focus:outline-none focus:border-[#1abc9c] focus:ring-2 focus:ring-[#1abc9c]/15"
+                    className="w-full pl-9 pr-3 py-2.5 border border-[#eaeaea] rounded-lg text-[14px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15"
                   />
                 </div>
               </div>
@@ -1108,7 +1108,7 @@ export function HotelDetailPageNew() {
                   <select
                     value={guestCount}
                     onChange={(e) => setGuestCount(Number(e.target.value))}
-                    className="w-full pl-9 pr-3 py-2.5 border border-[#eaeaea] rounded-lg text-[14px] focus:outline-none focus:border-[#1abc9c] appearance-none"
+                    className="w-full pl-9 pr-3 py-2.5 border border-[#eaeaea] rounded-lg text-[14px] focus:outline-none focus:border-[#2F80ED] appearance-none"
                   >
                     {[1, 2, 3, 4, 5, 6].map((n) => (
                       <option key={n} value={n}>{n} {n === 1 ? "guest" : "guests"}</option>
@@ -1123,7 +1123,7 @@ export function HotelDetailPageNew() {
                   value={roomCount}
                   onChange={(e) => setSelectedRoomCount(Number(e.target.value))}
                   disabled={!selectedRoom}
-                  className="w-full px-3 py-2.5 border border-[#eaeaea] rounded-lg text-[14px] focus:outline-none focus:border-[#1abc9c] disabled:opacity-50"
+                  className="w-full px-3 py-2.5 border border-[#eaeaea] rounded-lg text-[14px] focus:outline-none focus:border-[#2F80ED] disabled:opacity-50"
                 >
                   {roomCountOptions.map((n) => (
                     <option key={n} value={n}>{n} {n === 1 ? "room" : "rooms"}</option>
@@ -1135,7 +1135,7 @@ export function HotelDetailPageNew() {
               </div>
             </div>
 
-            <div className="mb-4 rounded-xl bg-[#f0fdf9] border border-[#bbf7e4] px-3 py-2 text-[13px] text-[#0f766e] font-medium">
+            <div className="mb-4 rounded-xl bg-[#f0fdf9] border border-[#bbf7e4] px-3 py-2 text-[13px] text-[#1E5FBC] font-medium">
               {nights} {nights === 1 ? "night" : "nights"} selected
             </div>
 
@@ -1164,7 +1164,7 @@ export function HotelDetailPageNew() {
             <button
               onClick={handleContinue}
               disabled={!selectedRoom}
-              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white py-3.5 rounded-xl font-['Inter:SemiBold',sans-serif] text-[15px] disabled:opacity-40 disabled:cursor-not-allowed hover:translate-y-[-1px] transition-all duration-300 shadow-[0_10px_28px_-8px_rgba(26,188,156,0.55)] hover:shadow-[0_14px_34px_-8px_rgba(26,188,156,0.75)]"
+              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] text-white py-3.5 rounded-xl font-['Inter:SemiBold',sans-serif] text-[15px] disabled:opacity-40 disabled:cursor-not-allowed hover:translate-y-[-1px] transition-all duration-300 shadow-[0_10px_28px_-8px_rgba(47, 128, 237,0.55)] hover:shadow-[0_14px_34px_-8px_rgba(47, 128, 237,0.75)]"
             >
               {t("Continue to Booking")}
               <ArrowRight className="w-4 h-4" strokeWidth={2.4} />

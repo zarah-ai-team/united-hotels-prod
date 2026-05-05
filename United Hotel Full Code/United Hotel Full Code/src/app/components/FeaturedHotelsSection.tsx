@@ -182,7 +182,7 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
 
         {/* Discount badge (top-right) */}
         {hasDiscount && (
-          <div className="absolute top-3 right-3 inline-flex items-center rounded-full bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] px-2.5 py-1 text-[11px] font-['Inter:SemiBold',sans-serif] text-white shadow-[0_6px_18px_-6px_rgba(26,188,156,0.7)] ring-1 ring-white/30">
+          <div className="absolute top-3 right-3 inline-flex items-center rounded-full bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] px-2.5 py-1 text-[11px] font-['Inter:SemiBold',sans-serif] text-white shadow-[0_6px_18px_-6px_rgba(47, 128, 237,0.7)] ring-1 ring-white/30">
             −{hotel.discountPercent.toFixed(0)}%
           </div>
         )}
@@ -201,8 +201,8 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
         {/* Eyebrow row — accent + star class */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="h-px w-5 bg-gradient-to-r from-[#1abc9c] to-transparent shrink-0" />
-            <span className="font-['Inter:Medium',sans-serif] text-[9.5px] tracking-[0.26em] uppercase text-[#1abc9c] line-clamp-1">
+            <span className="h-px w-5 bg-gradient-to-r from-[#2F80ED] to-transparent shrink-0" />
+            <span className="font-['Inter:Medium',sans-serif] text-[9.5px] tracking-[0.26em] uppercase text-[#2F80ED] line-clamp-1">
               {hasDiscount ? t("Limited offer") : t("Editor's pick")}
             </span>
           </div>
@@ -221,7 +221,7 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
         </div>
 
         {/* Hotel name */}
-        <h3 className="font-['Poppins:Bold',sans-serif] text-[19px] md:text-[20px] leading-[1.22] tracking-[-0.018em] text-[#1f2937] dark:text-white line-clamp-1 mb-3.5 group-hover:text-[#1abc9c] transition-colors">
+        <h3 className="font-['Poppins:Bold',sans-serif] text-[19px] md:text-[20px] leading-[1.22] tracking-[-0.018em] text-[#1f2937] dark:text-white line-clamp-1 mb-3.5 group-hover:text-[#2F80ED] transition-colors">
           {hotel.name}
         </h3>
 
@@ -230,9 +230,9 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
           {hotel.features.map(({ Icon, label }) => (
             <span
               key={label}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/65 dark:bg-white/[0.05] backdrop-blur-sm ring-1 ring-[#1abc9c]/15 dark:ring-white/10 font-['Inter:Medium',sans-serif] text-[10.5px] text-[#3b3b3b] dark:text-white/80"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/65 dark:bg-white/[0.05] backdrop-blur-sm ring-1 ring-[#2F80ED]/15 dark:ring-white/10 font-['Inter:Medium',sans-serif] text-[10.5px] text-[#3b3b3b] dark:text-white/80"
             >
-              <Icon className="w-3 h-3 text-[#1abc9c]" strokeWidth={2.2} />
+              <Icon className="w-3 h-3 text-[#2F80ED]" strokeWidth={2.2} />
               {t(label)}
             </span>
           ))}
@@ -240,11 +240,11 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
       </div>
 
       {/* ───────── ZONE 3: PRICE — visually distinct teal-tinted band ───────── */}
-      <div className="relative px-5 py-4 bg-gradient-to-br from-[#1abc9c]/[0.07] via-[#2dd4bf]/[0.04] to-transparent dark:from-[#2dd4bf]/[0.08] dark:via-[#2dd4bf]/[0.04] border-t border-[#1abc9c]/15 dark:border-white/10">
+      <div className="relative px-5 py-4 bg-gradient-to-br from-[#2F80ED]/[0.07] via-[#5DA0F8]/[0.04] to-transparent dark:from-[#5DA0F8]/[0.08] dark:via-[#5DA0F8]/[0.04] border-t border-[#2F80ED]/15 dark:border-white/10">
         {/* Subtle accent dot left edge */}
         <span
           aria-hidden
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 rounded-r-full bg-gradient-to-b from-[#1abc9c] to-[#2dd4bf]"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 rounded-r-full bg-gradient-to-b from-[#2F80ED] to-[#5DA0F8]"
         />
 
         {/* Stack price + CTA vertically on mobile so the View pill never
@@ -253,7 +253,7 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-['Inter:SemiBold',sans-serif] text-[10px] tracking-[0.22em] uppercase text-[#1abc9c]">
+              <span className="font-['Inter:SemiBold',sans-serif] text-[10px] tracking-[0.22em] uppercase text-[#2F80ED]">
                 {t("From")}
               </span>
               {showOldPrice && (
@@ -263,15 +263,15 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
               )}
             </div>
             <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="font-['Poppins:Bold',sans-serif] text-[22px] sm:text-[26px] leading-none tracking-[-0.025em] text-[#0f9b86] dark:text-[#2dd4bf]">
+              <span className="font-['Poppins:Bold',sans-serif] text-[22px] sm:text-[26px] leading-none tracking-[-0.025em] text-[#1E5FBC] dark:text-[#5DA0F8]">
                 {format(hotel.directPrice)}
               </span>
-              <span className="font-['Inter:Medium',sans-serif] text-[12px] text-[#6b7280] dark:text-white/55">
+              <span className="font-['Inter:Medium',sans-serif] text-[12px] text-[#6b7280] dark:text-white/60">
                 / {t("night")}
               </span>
             </div>
             {hasDiscount && hotel.savings > 0 ? (
-              <div className="mt-1 inline-flex items-center gap-1 font-['Inter:SemiBold',sans-serif] text-[11px] text-[#0f9b86] dark:text-[#2dd4bf]">
+              <div className="mt-1 inline-flex items-center gap-1 font-['Inter:SemiBold',sans-serif] text-[11px] text-[#1E5FBC] dark:text-[#5DA0F8]">
                 <SparklesIcon className="w-3 h-3" strokeWidth={2.2} />
                 {t("You save")} {format(hotel.savings)}
               </div>
@@ -281,7 +281,7 @@ function HotelCard({ hotel, format, t }: HotelCardProps) {
           {/* CTA — gradient pill, full-width on mobile, auto on larger screens. */}
           <span
             aria-hidden
-            className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 h-10 rounded-full bg-gradient-to-r from-[#1abc9c] to-[#2dd4bf] text-white font-['Inter:SemiBold',sans-serif] text-[12px] shadow-[0_8px_22px_-8px_rgba(26,188,156,0.6)] transition-all duration-300 group-hover:shadow-[0_12px_28px_-8px_rgba(26,188,156,0.8)] group-hover:translate-x-0.5"
+            className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 h-10 rounded-full bg-gradient-to-r from-[#2F80ED] to-[#5DA0F8] text-white font-['Inter:SemiBold',sans-serif] text-[12px] shadow-[0_8px_22px_-8px_rgba(47, 128, 237,0.6)] transition-all duration-300 group-hover:shadow-[0_12px_28px_-8px_rgba(47, 128, 237,0.8)] group-hover:translate-x-0.5"
           >
             {t("View")}
             <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.4} />
@@ -327,17 +327,20 @@ export function FeaturedHotelsSection() {
   }, []);
 
   return (
-    <section id="featured-hotels" className="glass-section-bg pt-10 md:pt-32 pb-12 md:pb-24 relative overflow-hidden">
+    <section id="featured-hotels" className="glass-section-bg pt-8 md:pt-14 pb-8 md:pb-12 relative overflow-hidden">
       <div className="max-w-[1280px] mx-auto px-4 md:px-10 relative">
         {/* Editorial header with scroll controls aligned right */}
-        <div className="flex items-end justify-between gap-6 mb-10 md:mb-14">
+        <div className="flex items-end justify-between gap-6 mb-8 md:mb-10">
           <div className="max-w-[640px]">
             <div className="font-['Inter:Medium',sans-serif] text-[11px] tracking-[0.28em] uppercase text-[#8c8c8c] mb-4">
-              {t("Curated stays")}
+              {t("Our hotels")}
             </div>
-            <h2 className="font-['Poppins:Bold',sans-serif] text-[32px] md:text-[48px] leading-[1.08] tracking-[-0.022em] text-[#3b3b3b]">
-              {t("Stays worth booking this week.")}
+            <h2 className="font-['Poppins:Bold',sans-serif] text-[32px] md:text-[48px] leading-[1.08] tracking-[-0.022em] text-[#3b3b3b] dark:text-white mb-4 md:mb-5">
+              {t("Top stays this week.")}
             </h2>
+            <p className="font-['Inter:Regular',sans-serif] text-[15px] md:text-[16px] leading-[1.65] text-[#6b7280]">
+              {t("Our best hotel picks — verified, well-priced, and ready for your next trip.")}
+            </p>
           </div>
           <div className="hidden md:flex items-center gap-2 shrink-0">
             <button
@@ -428,11 +431,11 @@ export function FeaturedHotelsSection() {
         )}
 
         {/* View all CTA — beneath the row */}
-        <div className="flex justify-center mt-10 md:mt-12">
+        <div className="flex justify-center mt-8 md:mt-10">
           <Link
             to="/listing"
             onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "auto" })}
-            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#eaeaea] bg-white/70 backdrop-blur-md font-['Inter:Medium',sans-serif] text-[14px] md:text-[15px] text-[#3b3b3b] hover:border-[#1abc9c] hover:text-[#1abc9c] transition-colors dark:border-white/12 dark:bg-white/[0.04] dark:text-white/85 dark:hover:border-[#2dd4bf] dark:hover:text-[#2dd4bf] dark:hover:bg-[#2dd4bf]/[0.06]"
+            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#eaeaea] bg-white/70 backdrop-blur-md font-['Inter:Medium',sans-serif] text-[14px] md:text-[15px] text-[#3b3b3b] hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors dark:border-white/12 dark:bg-white/[0.04] dark:text-white/85 dark:hover:border-[#5DA0F8] dark:hover:text-[#5DA0F8] dark:hover:bg-[#5DA0F8]/[0.06]"
           >
             {t("View all stays")}
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />

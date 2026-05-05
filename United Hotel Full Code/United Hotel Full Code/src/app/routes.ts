@@ -8,6 +8,7 @@ import { BookingStep2 } from './pages/BookingStep2';
 import { BookingStep3 } from './pages/BookingStep3';
 import { ConfirmationPageNew } from './pages/ConfirmationPageNew';
 import { GuestPortal } from './pages/GuestPortal';
+import { GroupsPage } from './pages/GroupsPage';
 import { BlogPage } from './pages/BlogPage';
 import { BlogArticlePage } from './pages/BlogArticlePage';
 import { SupportPage } from './pages/SupportPage';
@@ -99,6 +100,11 @@ export const router = createBrowserRouter([
   {
     path: '/portal',
     Component: GuestPortal,
+    errorElement,
+  },
+  {
+    path: '/groups',
+    Component: GroupsPage,
     errorElement,
   },
   {

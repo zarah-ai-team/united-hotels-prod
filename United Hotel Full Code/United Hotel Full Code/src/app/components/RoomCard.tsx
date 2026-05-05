@@ -37,7 +37,7 @@ export function RoomCard({
   return (
     <div className={`
       bg-white rounded-[12px] overflow-hidden border-2 transition-all
-      ${isSelected ? 'border-[#1ABC9C] shadow-[0_4px_16px_rgba(26,188,156,0.2)]' : 'border-[#eaeaea]'}
+      ${isSelected ? 'border-[#2F80ED] shadow-[0_4px_16px_rgba(47, 128, 237,0.2)]' : 'border-[#eaeaea]'}
       ${available === 0 ? 'opacity-60' : ''}
     `}>
       <div className="md:flex">
@@ -74,7 +74,7 @@ export function RoomCard({
                 <div className="grid grid-cols-2 gap-[6px]">
                   {amenities.map((amenity, index) => (
                     <div key={index} className="flex items-center gap-[6px]">
-                      <Check className="w-[14px] h-[14px] text-[#1ABC9C]" />
+                      <Check className="w-[14px] h-[14px] text-[#2F80ED]" />
                       <span className="font-['Inter'] font-medium text-[14px] text-[#374151]">{amenity}</span>
                     </div>
                   ))}
@@ -106,7 +106,7 @@ export function RoomCard({
               )}
               
               <div className="mb-[2px]">
-                <span className="font-['Poppins'] font-bold text-[30px] text-[#0f766e]">
+                <span className="font-['Poppins'] font-bold text-[30px] text-[#1E5FBC]">
                   {format(directPrice)}
                 </span>
               </div>
