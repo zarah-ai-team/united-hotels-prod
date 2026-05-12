@@ -75,11 +75,6 @@ export function ListingHotelCard({
           </div>
         </div>
         
-        {/* Review count - Better visibility */}
-        <div className="text-[11px] md:text-[12px] text-[#8c8c8c] mb-3 font-['Inter:Regular',sans-serif]">
-          {reviewCount} reviews
-        </div>
-        
         {/* Price Section - Prominent */}
         <div className="pt-3 border-t border-[#e5e7eb]">
           <div className="flex items-baseline gap-1">

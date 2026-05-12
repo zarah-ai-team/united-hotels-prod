@@ -24,9 +24,11 @@ import { AdminAnalyticsPage } from './pages/admin/AdminAnalyticsPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { VendorPortalPage } from './pages/admin/VendorPortalPage';
+import { VendorLoginPage } from './pages/admin/VendorLoginPage';
 import { AdminHotelDetailPage } from './pages/admin/AdminHotelDetailPage';
 import { AdminEmailLogsPage } from './pages/admin/AdminEmailLogsPage';
 import { RequireAdmin } from './components/admin/RequireAdmin';
+import { RequireVendor } from './components/admin/RequireVendor';
 import { RouteErrorBoundary } from './components/ErrorBoundary';
 
 // Wrap an admin page in the RequireAdmin guard. Using a render-element route
@@ -34,6 +36,9 @@ import { RouteErrorBoundary } from './components/ErrorBoundary';
 // touching each page component.
 const guarded = (Component: ComponentType) =>
   createElement(RequireAdmin, null, createElement(Component));
+
+const vendorGuarded = (Component: ComponentType) =>
+  createElement(RequireVendor, null, createElement(Component));
 
 // React-router calls this whenever a loader or rendered component throws.
 // Attached to every route so users never see the default "Hey developer 👋"
@@ -168,10 +173,15 @@ export const router = createBrowserRouter([
     element: guarded(AdminEmailLogsPage),
     errorElement,
   },
-  // Vendor portal (separate role — not admin-guarded)
+  // Vendor portal (separate role — guarded by RequireVendor)
+  {
+    path: '/vendor/login',
+    Component: VendorLoginPage,
+    errorElement,
+  },
   {
     path: '/vendor',
-    Component: VendorPortalPage,
+    element: vendorGuarded(VendorPortalPage),
     errorElement,
   },
 ]);

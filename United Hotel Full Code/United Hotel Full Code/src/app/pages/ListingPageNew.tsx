@@ -117,14 +117,13 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/20 to-transparent opacity-60 mix-blend-overlay pointer-events-none" />
 
-        {/* Rating pill (top-left) */}
+        {/* Rating pill (top-left) — review count was a fixed seed stub
+            (~250 across all hotels), so we just show the star rating
+            until real review counts are wired in. */}
         <div className="card-glass-pill absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1">
           <Star className="w-3 h-3 fill-[#FFA500] text-[#FFA500] drop-shadow-[0_0_4px_rgba(255,165,0,0.6)]" strokeWidth={0} />
           <span className="font-['Inter:SemiBold',sans-serif] text-[11.5px] leading-none">
             {hotel.rating.toFixed(1)}
-          </span>
-          <span className="card-glass-muted font-['Inter:Regular',sans-serif] text-[11px] leading-none">
-            ({hotel.reviewCount})
           </span>
         </div>
 
@@ -170,21 +169,13 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
           {t(hotel.name)}
         </h3>
 
-        <div className="font-['Inter:Regular',sans-serif] italic text-[12px] text-[#6b7280] dark:text-white/60 mt-1.5 mb-3.5 flex items-center gap-2">
-          <span>
-            {hotel.reviewCount > 0
-              ? `${hotel.reviewCount} ${t("verified reviews")}`
-              : t("Newly listed stay")}
-          </span>
-          {hotel.district ? (
-            <>
-              <span className="text-[#d1d5db] dark:text-white/20">·</span>
-              <span className="not-italic font-['Inter:Medium',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/70 line-clamp-1">
-                {t(hotel.district)}
-              </span>
-            </>
-          ) : null}
-        </div>
+        {hotel.district ? (
+          <div className="mt-1.5 mb-3.5">
+            <span className="font-['Inter:Medium',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/70 line-clamp-1">
+              {t(hotel.district)}
+            </span>
+          </div>
+        ) : null}
 
         {hotel.amenities.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">

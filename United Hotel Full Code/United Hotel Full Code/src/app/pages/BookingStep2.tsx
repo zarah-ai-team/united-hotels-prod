@@ -17,6 +17,9 @@ import {
   TrendingDown,
   MessageSquare,
   ChevronRight,
+  Plus,
+  Minus,
+  Baby,
 } from "lucide-react";
 import { useBooking } from "../context/BookingContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -28,7 +31,7 @@ import { makeImageFallback } from "../utils/hotelImages";
 
 export function BookingStep2() {
   const navigate = useNavigate();
-  const { booking, setGuestDetails, calculateNights } = useBooking();
+  const { booking, setGuestDetails, setOccupancy, calculateNights } = useBooking();
   const { language } = useLanguage();
   const { user, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
@@ -38,6 +41,14 @@ export function BookingStep2() {
     phone: "",
     specialRequest: "",
   });
+  // Occupancy lives outside formData because it isn't part of the GuestDetails
+  // shape — it gets pushed into BookingContext via setOccupancy on submit.
+  const [adults, setAdults] = useState<number>(() =>
+    Math.max(1, Math.min(10, booking.adults || booking.guests || 2)),
+  );
+  const [childrenCount, setChildrenCount] = useState<number>(() =>
+    Math.max(0, Math.min(10, booking.children || 0)),
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Handle missing booking data
@@ -108,9 +119,15 @@ export function BookingStep2() {
 
     if (validateForm()) {
       setGuestDetails(formData);
+      setOccupancy(adults, childrenCount);
       navigate("/booking/step3");
     }
   };
+
+  const adjustAdults = (delta: number) =>
+    setAdults((v) => Math.max(1, Math.min(10, v + delta)));
+  const adjustChildren = (delta: number) =>
+    setChildrenCount((v) => Math.max(0, Math.min(10, v + delta)));
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -262,6 +279,103 @@ export function BookingStep2() {
             </p>
 
             <form onSubmit={handleSubmit}>
+              {/* Occupancy — adults & children */}
+              <div className="glass-card rounded-2xl p-4 md:p-5 mb-4">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                    <Users className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-['Poppins:SemiBold',sans-serif] text-[16px] md:text-[17px] text-[#3b3b3b] dark:text-white">
+                      Who's staying?
+                    </h3>
+                    <p className="font-['Inter:Regular',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/60">
+                      Confirm the number of adults and children for this booking
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] px-3.5 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                        <User className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-['Inter:SemiBold',sans-serif] text-[13.5px] text-[#3b3b3b] dark:text-white">
+                          Adults
+                        </span>
+                        <span className="text-[11.5px] text-[#6b7280] dark:text-white/55">
+                          Ages 13+
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => adjustAdults(-1)}
+                        disabled={adults <= 1}
+                        aria-label="Decrease adults"
+                        className="w-8 h-8 rounded-full border border-[#eaeaea] dark:border-white/15 flex items-center justify-center text-[#3b3b3b] dark:text-white hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Minus className="w-3.5 h-3.5" strokeWidth={2.4} />
+                      </button>
+                      <span className="w-6 text-center font-['Inter:SemiBold',sans-serif] text-[14px] text-[#3b3b3b] dark:text-white">
+                        {adults}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => adjustAdults(1)}
+                        disabled={adults >= 10}
+                        aria-label="Increase adults"
+                        className="w-8 h-8 rounded-full border border-[#eaeaea] dark:border-white/15 flex items-center justify-center text-[#3b3b3b] dark:text-white hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] px-3.5 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
+                        <Baby className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-['Inter:SemiBold',sans-serif] text-[13.5px] text-[#3b3b3b] dark:text-white">
+                          Children
+                        </span>
+                        <span className="text-[11.5px] text-[#6b7280] dark:text-white/55">
+                          Ages 0–12
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => adjustChildren(-1)}
+                        disabled={childrenCount <= 0}
+                        aria-label="Decrease children"
+                        className="w-8 h-8 rounded-full border border-[#eaeaea] dark:border-white/15 flex items-center justify-center text-[#3b3b3b] dark:text-white hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Minus className="w-3.5 h-3.5" strokeWidth={2.4} />
+                      </button>
+                      <span className="w-6 text-center font-['Inter:SemiBold',sans-serif] text-[14px] text-[#3b3b3b] dark:text-white">
+                        {childrenCount}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => adjustChildren(1)}
+                        disabled={childrenCount >= 10}
+                        aria-label="Increase children"
+                        className="w-8 h-8 rounded-full border border-[#eaeaea] dark:border-white/15 flex items-center justify-center text-[#3b3b3b] dark:text-white hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Contact Information */}
               <div className="glass-card rounded-2xl p-4 md:p-5 mb-4">
                 <div className="flex items-center gap-2.5 mb-4">

@@ -16,6 +16,7 @@ const paymentsRoute = require("./routes/paymentsRoute");
 const translateRoute = require("./routes/translateRoute");
 const adminRoute = require("./routes/adminRoute");
 const vendorRoute = require("./routes/vendorRoute");
+const localeRoute = require("./routes/localeRoute");
 
 
 // Trust the proxy chain so req.ip uses x-forwarded-for and the geoip util
@@ -69,6 +70,7 @@ app.use("/api/payments", paymentsRoute);
 app.use("/api/translate", translateRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/vendor", vendorRoute);
+app.use("/api/locale", localeRoute);
 
 // Keep health checks independent from database state.
 app.get('/api/health', (_request, response) => {

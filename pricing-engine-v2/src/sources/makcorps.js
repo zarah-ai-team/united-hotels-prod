@@ -38,6 +38,15 @@ const baseUrl = () =>
   (process.env.MAKECORPS_API_BASE_URL || 'https://api.makcorps.com').replace(/\/+$/, '');
 const apiKey = () => process.env.MAKECORPS_API_KEY || '';
 
+// Default-on opt-out flag. Set MAKECORPS_ENABLED=false in .env to short-circuit
+// this source — useful when the free-tier quota is exhausted and every call
+// would otherwise burn ~500ms on a 429 before the cooldown kicks in.
+const isEnabled = () => {
+  const v = String(process.env.MAKECORPS_ENABLED ?? '').toLowerCase();
+  if (v === '') return true;
+  return !(v === 'false' || v === '0' || v === 'no' || v === 'off');
+};
+
 /**
  * Public entry point — caller is the orchestrator.
  */
@@ -47,6 +56,10 @@ export async function fetchPrices(query) {
   if (!apiKey()) {
     log.debug('MAKECORPS_API_KEY not set — skipping makcorps');
     return { quotes: [], latencyMs: 0, source: 'makcorps', skipped: 'no-api-key' };
+  }
+
+  if (!isEnabled()) {
+    return { quotes: [], latencyMs: 0, source: 'makcorps', skipped: 'disabled' };
   }
 
   if (isCoolingDown()) {

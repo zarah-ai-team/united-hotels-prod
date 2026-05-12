@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
@@ -25,7 +25,23 @@ import {
   Search,
   Check,
   ChevronDown,
+  Plus,
+  Minus,
 } from "lucide-react";
+
+// Cities / districts (states) we currently serve. Drives the destination
+// dropdown in the hero search. Keep label = what the user sees, value = what
+// we send as the `destination` query param to /listing.
+type ServingDestination = { value: string; city: string; state: string };
+const SERVING_DESTINATIONS: ServingDestination[] = [
+  { value: "Sultanahmet, Istanbul", city: "Sultanahmet", state: "Istanbul" },
+  { value: "Beyoğlu, Istanbul", city: "Beyoğlu", state: "Istanbul" },
+  { value: "Galata, Istanbul", city: "Galata", state: "Istanbul" },
+  { value: "Karaköy, Istanbul", city: "Karaköy", state: "Istanbul" },
+  { value: "Pera, Istanbul", city: "Pera", state: "Istanbul" },
+  { value: "Sirkeci, Istanbul", city: "Sirkeci", state: "Istanbul" },
+  { value: "Fatih, Istanbul", city: "Fatih", state: "Istanbul" },
+];
 
 type RevealVariant = "up" | "left" | "right" | "pop";
 
@@ -70,17 +86,70 @@ const HERO_SLIDES = [
 ];
 const SLIDE_INTERVAL_MS = 6000;
 
+function GuestRow({
+  label,
+  sublabel,
+  value,
+  min,
+  onDec,
+  onInc,
+}: {
+  label: string;
+  sublabel: string;
+  value: number;
+  min: number;
+  onDec: () => void;
+  onInc: () => void;
+}) {
+  const decDisabled = value <= min;
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex flex-col">
+        <span className="font-['Inter:SemiBold',sans-serif] text-[14px] text-[#0B1F3B] dark:text-white">
+          {label}
+        </span>
+        <span className="text-[12px] text-[#6B7280] dark:text-white/60">{sublabel}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onDec}
+          disabled={decDisabled}
+          aria-label={`Decrease ${label}`}
+          className="w-8 h-8 rounded-full border border-[#E6EAF0] dark:border-white/15 flex items-center justify-center text-[#0B1F3B] dark:text-white hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          <Minus className="w-3.5 h-3.5" strokeWidth={2.4} />
+        </button>
+        <span className="w-6 text-center font-['Inter:SemiBold',sans-serif] text-[14px] text-[#0B1F3B] dark:text-white">
+          {value}
+        </span>
+        <button
+          type="button"
+          onClick={onInc}
+          aria-label={`Increase ${label}`}
+          className="w-8 h-8 rounded-full border border-[#E6EAF0] dark:border-white/15 flex items-center justify-center text-[#0B1F3B] dark:text-white hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function HeroSection() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { setDates, setGuests } = useBooking();
+  const { setDates, setGuests, setOccupancy } = useBooking();
   const [activeSlide, setActiveSlide] = useState(0);
   const [searchData, setSearchData] = useState({
     destination: "",
     checkIn: "",
     checkOut: "",
-    guests: "",
+    adults: 2,
+    children: 0,
   });
+  const [guestsOpen, setGuestsOpen] = useState(false);
+  const guestsRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-advance hero imagery
   useEffect(() => {
@@ -90,23 +159,63 @@ function HeroSection() {
     return () => window.clearInterval(id);
   }, []);
 
+  // Close the guests popover when clicking outside or hitting Escape
+  useEffect(() => {
+    if (!guestsOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (guestsRef.current && !guestsRef.current.contains(e.target as Node)) {
+        setGuestsOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setGuestsOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [guestsOpen]);
+
+  const totalGuests = searchData.adults + searchData.children;
+  const guestsLabel =
+    searchData.children > 0
+      ? `${searchData.adults} ${searchData.adults === 1 ? t("adult") : t("adults")} · ${searchData.children} ${
+          searchData.children === 1 ? t("child") : t("children")
+        }`
+      : `${searchData.adults} ${searchData.adults === 1 ? t("adult") : t("adults")}`;
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchData.checkIn && searchData.checkOut) {
       setDates(searchData.checkIn, searchData.checkOut);
     }
-    const guestsNum = parseInt(searchData.guests || "0", 10);
-    if (Number.isFinite(guestsNum) && guestsNum > 0) {
-      setGuests(guestsNum);
+    if (totalGuests > 0) {
+      setGuests(totalGuests);
+      setOccupancy(searchData.adults, searchData.children);
     }
     const params = new URLSearchParams();
     if (searchData.destination) params.set("destination", searchData.destination);
     if (searchData.checkIn) params.set("checkIn", searchData.checkIn);
     if (searchData.checkOut) params.set("checkOut", searchData.checkOut);
-    if (searchData.guests) params.set("guests", searchData.guests);
+    if (searchData.adults) params.set("adults", String(searchData.adults));
+    if (searchData.children) params.set("children", String(searchData.children));
+    if (totalGuests) params.set("guests", String(totalGuests));
     const qs = params.toString();
     navigate(qs ? `/listing?${qs}` : "/listing");
   };
+
+  const adjustAdults = (delta: number) =>
+    setSearchData((prev) => ({
+      ...prev,
+      adults: Math.max(1, Math.min(10, prev.adults + delta)),
+    }));
+  const adjustChildren = (delta: number) =>
+    setSearchData((prev) => ({
+      ...prev,
+      children: Math.max(0, Math.min(10, prev.children + delta)),
+    }));
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -138,17 +247,24 @@ function HeroSection() {
               aria-label="Hotel search"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {/* Destination */}
+                {/* Destination — dropdown of cities/states we currently serve */}
                 <div className="relative sm:col-span-2">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                  <input
+                  <select
                     id="destination"
-                    type="text"
-                    placeholder={t("Where to? (e.g. Istanbul)")}
                     value={searchData.destination}
                     onChange={(e) => setSearchData({ ...searchData, destination: e.target.value })}
-                    className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
-                  />
+                    aria-label={t("Where to?")}
+                    className="w-full h-[44px] pl-10 pr-9 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] appearance-none transition-colors"
+                  >
+                    <option value="">{t("Where to?")}</option>
+                    {SERVING_DESTINATIONS.map((d) => (
+                      <option key={d.value} value={d.value}>
+                        {d.city}, {d.state}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
                 </div>
 
                 {/* Check-in */}
@@ -179,24 +295,58 @@ function HeroSection() {
                   />
                 </div>
 
-                {/* Guests + Search button row */}
+                {/* Guests (adults + children) + Search button row */}
                 <div className="relative sm:col-span-2 grid grid-cols-[1fr_auto] gap-2">
-                  <div className="relative">
+                  <div className="relative" ref={guestsRef}>
                     <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                    <select
-                      id="guests"
-                      value={searchData.guests}
-                      onChange={(e) => setSearchData({ ...searchData, guests: e.target.value })}
+                    <button
+                      type="button"
+                      onClick={() => setGuestsOpen((v) => !v)}
+                      aria-haspopup="dialog"
+                      aria-expanded={guestsOpen}
                       aria-label={t("Guests")}
-                      className="w-full h-[44px] pl-10 pr-9 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] appearance-none transition-colors"
+                      className="w-full h-[44px] pl-10 pr-9 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] dark:text-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] text-left transition-colors"
                     >
-                      <option value="">{t("Add guests")}</option>
-                      <option value="1">{t("1 guest")}</option>
-                      <option value="2">{t("2 guests")}</option>
-                      <option value="3">{t("3 guests")}</option>
-                      <option value="4">{t("4+ guests")}</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                      {guestsLabel}
+                    </button>
+                    <ChevronDown
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none transition-transform ${
+                        guestsOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                    {guestsOpen && (
+                      <div
+                        role="dialog"
+                        aria-label={t("Select number of guests")}
+                        className="absolute z-30 mt-2 left-0 right-0 sm:right-auto sm:w-[320px] rounded-2xl bg-white dark:bg-[#1f2937] border border-[#E6EAF0] dark:border-white/10 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.25)] p-4 space-y-3"
+                      >
+                        <GuestRow
+                          label={t("Adults")}
+                          sublabel={t("Ages 13 or above")}
+                          value={searchData.adults}
+                          min={1}
+                          onDec={() => adjustAdults(-1)}
+                          onInc={() => adjustAdults(1)}
+                        />
+                        <GuestRow
+                          label={t("Children")}
+                          sublabel={t("Ages 0–12")}
+                          value={searchData.children}
+                          min={0}
+                          onDec={() => adjustChildren(-1)}
+                          onInc={() => adjustChildren(1)}
+                        />
+                        <div className="flex justify-end pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setGuestsOpen(false)}
+                            className="text-[13px] font-['Inter:SemiBold',sans-serif] text-[#2F80ED] hover:text-[#1E5FBC] px-3 py-1.5 rounded-lg"
+                          >
+                            {t("Done")}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <button
                     type="submit"

@@ -206,6 +206,13 @@ export interface BookingData {
   specialRequest?: string;
   email?: string;
   phoneNumber?: string;
+  guestName?: string;
+  guestFirstName?: string;
+  guestLastName?: string;
+  guests?: number;
+  adults?: number;
+  children?: number;
+  currency?: string;
 }
 
 // Core fetch wrapper. `base` lets us point at either backend (/api) or

@@ -147,15 +147,12 @@ export function HotelDetailPage() {
                 <div className="flex items-center gap-[8px]">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
+                      <Star
+                        key={i}
                         className={`w-[16px] h-[16px] ${i < hotel.rating ? 'fill-[#FFA500] text-[#FFA500]' : 'text-[#E5E7EB]'}`}
                       />
                     ))}
                   </div>
-                  <span className="font-['Inter'] text-[14px] text-[#8c8c8c]">
-                    ({hotel.reviewCount} reviews)
-                  </span>
                 </div>
               </div>
 

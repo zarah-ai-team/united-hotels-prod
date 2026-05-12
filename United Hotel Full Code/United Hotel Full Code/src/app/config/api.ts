@@ -108,6 +108,7 @@ export const API_ENDPOINTS = {
   },
 
   TRANSLATE: '/translate',
+  LOCALE_DETECT: '/locale/detect',
 };
 
 // Pricing-engine endpoints (joined onto PRICING_BASE_URL).

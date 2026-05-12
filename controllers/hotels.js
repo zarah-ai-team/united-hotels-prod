@@ -21,6 +21,18 @@ let recommendedPricesCache = {
   payload: null
 };
 
+// getBasePriceIndex was running on every recommended-pricing build, adding
+// ~150-300ms even when the rest of the response was warm-cached. The base
+// prices change at human-edit cadence, so a 5-minute memo is safe.
+const BASE_PRICE_INDEX_TTL_MS = 5 * 60 * 1000;
+let basePriceIndexCache = { expiresAt: 0, value: null };
+
+// Whole-response cache for the public hotels list. The biggest cost on a
+// cold call is the lateral-join SQL itself; this lets every visitor in the
+// next 60 seconds skip Postgres entirely.
+const PUBLIC_HOTELS_CACHE_TTL_MS = 60 * 1000;
+const publicHotelsCache = new Map(); // key = `${status}|${limit}|${offset}|${includePrices}`
+
 const getTableColumns = async (tableName) => {
   if (tableColumnsCache.has(tableName)) {
     return tableColumnsCache.get(tableName);
@@ -394,6 +406,16 @@ const getHotelRoomsForPricing = (hotel = {}) => {
 };
 
 const getBasePriceIndex = async () => {
+  const now = Date.now();
+  if (basePriceIndexCache.value && basePriceIndexCache.expiresAt > now) {
+    return basePriceIndexCache.value;
+  }
+  const value = await loadBasePriceIndex();
+  basePriceIndexCache = { value, expiresAt: now + BASE_PRICE_INDEX_TTL_MS };
+  return value;
+};
+
+const loadBasePriceIndex = async () => {
   const hasRoomCategoryTable = await hasPublicTable('hotel_room_categories');
 
   if (hasRoomCategoryTable) {
@@ -480,6 +502,7 @@ const buildAllHotelsRecommendedPricing = async ({
   forceRefresh = false,
   checkInDate = null,
   checkOutDate = null,
+  prefetchedHotels = null,
 }) => {
   const now = Date.now();
   // Cache key is per-date so different stay windows don't share results.
@@ -489,7 +512,11 @@ const buildAllHotelsRecommendedPricing = async ({
     return { ...cached.payload, cache: { hit: true, expiresAt: cached.expiresAt } };
   }
 
-  const hotelResult = await fetchHotels({ status, limit: 10000, offset: 0 });
+  // Reuse the caller's hotel rows when given — saves a second round trip
+  // through the heavy lateral-join query for the public hotels endpoint.
+  const hotelResult = prefetchedHotels
+    ? { rows: prefetchedHotels, total: prefetchedHotels.length }
+    : await fetchHotels({ status, limit: 10000, offset: 0 });
   const basePriceIndex = await getBasePriceIndex();
 
   // Step 1: shape every (hotel, room) into a flat priceable list. Doing this
@@ -1362,8 +1389,24 @@ const fetchHotels = async ({ status = 'active', limit = 50, offset = 0, managerI
 const getPublicHotels = async (req, res) => {
   try {
     const { status = 'active', limit = 50, offset = 0, includeRecommendedPrices = 'true', refreshPrices = 'false' } = req.query;
-    const result = await fetchHotels({ status, limit, offset });
-    const meta = await getHotelMeta();
+    const includePrices = String(includeRecommendedPrices).toLowerCase() === 'true';
+    const force = String(refreshPrices).toLowerCase() === 'true';
+
+    const cacheKey = `${status}|${limit}|${offset}|${includePrices}`;
+    const now = Date.now();
+    const cached = publicHotelsCache.get(cacheKey);
+    if (!force && cached && cached.expiresAt > now) {
+      res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+      res.set('X-Cache', 'HIT');
+      return res.json(cached.payload);
+    }
+
+    // Run the hotel + base-price queries in parallel — they're independent
+    // and together dominate the cold-call latency.
+    const [result, meta] = await Promise.all([
+      fetchHotels({ status, limit, offset }),
+      getHotelMeta(),
+    ]);
 
     const normalizedHotels = result.rows.map((hotelRow) => {
       const mapped = mapHotelRecord(hotelRow, meta);
@@ -1396,10 +1439,11 @@ const getPublicHotels = async (req, res) => {
     });
 
     let recommendedByHotelId = null;
-    if (String(includeRecommendedPrices).toLowerCase() === 'true') {
+    if (includePrices) {
       const pricing = await buildAllHotelsRecommendedPricing({
         status,
-        forceRefresh: String(refreshPrices).toLowerCase() === 'true'
+        forceRefresh: force,
+        prefetchedHotels: result.rows,
       });
       recommendedByHotelId = new Map(
         pricing.hotels.map((item) => [String(item.hotelId), item.recommendedPrices])
@@ -1413,12 +1457,25 @@ const getPublicHotels = async (req, res) => {
         }))
       : normalizedHotels.map(attachImageKitUrls);
 
-    return res.json({
+    const payload = {
       hotels,
       count: result.total,
       limit: toInt(limit) || 50,
       offset: toInt(offset) || 0
-    });
+    };
+
+    // Memoize the full response so subsequent visitors in the next 60s skip
+    // both Postgres and v2 entirely. Cap the cache so it can't grow without
+    // bound (different limit/offset combos accumulate keys).
+    publicHotelsCache.set(cacheKey, { payload, expiresAt: now + PUBLIC_HOTELS_CACHE_TTL_MS });
+    if (publicHotelsCache.size > 50) {
+      const oldest = publicHotelsCache.keys().next().value;
+      if (oldest) publicHotelsCache.delete(oldest);
+    }
+
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.set('X-Cache', 'MISS');
+    return res.json(payload);
   } catch (error) {
     console.error('Error fetching public hotels:', error);
     return res.status(400).json({ error: error.message });

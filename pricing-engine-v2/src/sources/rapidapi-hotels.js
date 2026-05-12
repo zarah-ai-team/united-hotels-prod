@@ -29,6 +29,16 @@ const host = () => process.env.RAPIDAPI_HOST || 'booking-com15.p.rapidapi.com';
 const apiKey = () => process.env.RAPIDAPI_KEY || '';
 const baseUrl = () => `https://${host()}`;
 
+// Default-on opt-out flag. Set BOOKINGCOM_ENABLED=false in .env to short-circuit
+// this source — useful when the booking-com15 free-tier quota is exhausted.
+// The shared RAPIDAPI_KEY is also used by the Hotels.com adapter, so we can't
+// just clear the key to disable booking-com15.
+const isEnabled = () => {
+  const v = String(process.env.BOOKINGCOM_ENABLED ?? '').toLowerCase();
+  if (v === '') return true;
+  return !(v === 'false' || v === '0' || v === 'no' || v === 'off');
+};
+
 // Process-local rate-limit cooldown — same idea as makcorps.js. RapidAPI
 // returns 429 with `{message: "exceeded the MONTHLY quota..."}` once the
 // free tier is exhausted; subsequent calls would just keep getting 429.
@@ -65,6 +75,10 @@ export async function fetchPrices(query) {
   if (!apiKey()) {
     log.debug('RAPIDAPI_KEY not set — skipping rapidapi');
     return { quotes: [], latencyMs: 0, source: 'rapidapi', skipped: 'no-api-key' };
+  }
+
+  if (!isEnabled()) {
+    return { quotes: [], latencyMs: 0, source: 'rapidapi', skipped: 'disabled' };
   }
 
   if (isCoolingDown()) {

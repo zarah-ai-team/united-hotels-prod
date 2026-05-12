@@ -748,7 +748,7 @@ export function HotelDetailPageNew() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, format } = useLanguage();
-  const { booking, setHotel, setRoom, setDates, setGuests, setRoomCount } = useBooking();
+  const { booking, setHotel, setRoom, setDates, setGuests, setOccupancy, setRoomCount } = useBooking();
   useScrollProgress();
 
   // Pull any pre-existing search from URL params (set by HomePage) — these
@@ -758,6 +758,8 @@ export function HotelDetailPageNew() {
   const urlCheckIn = searchParams.get("checkIn") || "";
   const urlCheckOut = searchParams.get("checkOut") || "";
   const urlGuests = parseInt(searchParams.get("guests") || "", 10);
+  const urlAdults = parseInt(searchParams.get("adults") || "", 10);
+  const urlChildren = parseInt(searchParams.get("children") || "", 10);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -877,6 +879,11 @@ export function HotelDetailPageNew() {
     // inherit the guest's choices instead of empty defaults.
     if (checkIn && checkOut) setDates(checkIn, checkOut);
     setGuests(guestCount);
+    // Carry adults/children from URL through to the booking flow when supplied;
+    // otherwise default to all adults so totals stay correct.
+    const adults = Number.isFinite(urlAdults) && urlAdults > 0 ? urlAdults : booking.adults || guestCount;
+    const children = Number.isFinite(urlChildren) && urlChildren >= 0 ? urlChildren : booking.children || 0;
+    setOccupancy(adults, children);
     setRoomCount(roomCount);
     navigate("/booking/step1");
   };

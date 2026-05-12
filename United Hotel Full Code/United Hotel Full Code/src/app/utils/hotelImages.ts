@@ -27,6 +27,24 @@ interface HotelImageInput {
 const TRANSPARENT_PIXEL =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
+// Picsum fallback — deterministic per-hotel real photo so the UI never
+// shows a gray placeholder, even when the backend omits image_url.
+const PICSUM_BASE = "https://picsum.photos/seed";
+const PICSUM_W = 1200;
+const PICSUM_H = 900;
+
+function picsumSeed(hotel: HotelImageInput, index = 1): string {
+  const idRaw = hotel?.id;
+  if (idRaw != null && idRaw !== "") return `hotel-${idRaw}-${index}`;
+  const name = hotel?.name || hotel?.hotel_name || "";
+  const slug = String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return slug ? `${slug}-${index}` : `hotel-${index}`;
+}
+
+export function picsumImage(hotel: HotelImageInput, index = 1): string {
+  return `${PICSUM_BASE}/${encodeURIComponent(picsumSeed(hotel, index))}/${PICSUM_W}/${PICSUM_H}`;
+}
+
 // Pull an image URL from any of the field aliases the API is known to use.
 function readApiImage(hotel: HotelImageInput): string | null {
   const direct =
@@ -87,22 +105,29 @@ function readApiGallery(hotel: HotelImageInput): string[] {
 export const HOTEL_IMAGE_POOL: string[] = [];
 
 export function pickHotelImage(hotel: HotelImageInput): string {
-  return readApiImage(hotel) || "";
+  return readApiImage(hotel) || picsumImage(hotel, 1);
 }
 
 // Kept for API compatibility; with no local pool the only source is the API.
 export function pickLocalFallback(hotel: HotelImageInput): string {
-  return readApiImage(hotel) || "";
+  return readApiImage(hotel) || picsumImage(hotel, 1);
 }
 
-// onError handler — the API URL failed to load (CDN miss, network blip).
-// Hide the broken-image icon by replacing src with a 1×1 transparent pixel
-// and dimming the element. Components decide visually how to handle the gap.
-export function makeImageFallback(_hotel: HotelImageInput) {
+// onError handler — when the backend image fails (CDN miss, 4xx, network),
+// swap to the deterministic Picsum URL for this hotel so the user always
+// sees a real photo instead of a broken-image icon. Falls back to a soft
+// transparent + gradient if even Picsum can't load.
+export function makeImageFallback(hotel: HotelImageInput) {
   return (event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
-    if (img.dataset.fallback === "applied") return;
-    img.dataset.fallback = "applied";
+    const stage = img.dataset.fallback || "";
+    if (stage === "final") return;
+    if (stage === "" || stage === "primary") {
+      img.dataset.fallback = "picsum";
+      img.src = picsumImage(hotel, 1);
+      return;
+    }
+    img.dataset.fallback = "final";
     img.src = TRANSPARENT_PIXEL;
     img.style.background = "linear-gradient(135deg, #f1f5f9, #e2e8f0)";
   };
@@ -110,11 +135,10 @@ export function makeImageFallback(_hotel: HotelImageInput) {
 
 export function pickHotelGallery(hotel: HotelImageInput, count = 4): string[] {
   const gallery = readApiGallery(hotel);
-  if (gallery.length === 0) return [];
   if (gallery.length >= count) return gallery.slice(0, count);
-  // Repeat the available images to fill `count` slots — better than padding
-  // with empties for carousel UIs that need a stable item count.
-  const out: string[] = [];
-  for (let i = 0; i < count; i++) out.push(gallery[i % gallery.length]);
+  const out = [...gallery];
+  for (let i = out.length; i < count; i++) {
+    out.push(picsumImage(hotel, i + 1));
+  }
   return out;
 }
