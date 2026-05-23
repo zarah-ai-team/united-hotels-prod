@@ -14,6 +14,8 @@ import {
   UserCircle2,
   ShieldCheck,
   LogOut,
+  MessageCircle,
+  Briefcase,
 } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
@@ -40,13 +42,20 @@ type NavLink = { id: string; label: string; href: string; route?: boolean };
 
 const NAV_LINKS: NavLink[] = [
   { id: "home", label: "Home", href: "/", route: true },
-  { id: "hotels", label: "Hotels", href: "/listing", route: true },
   { id: "for-travelers", label: "For Travelers", href: "/#for-travelers" },
   { id: "for-groups", label: "For Groups", href: "/groups", route: true },
   { id: "why-choose-united-hotels", label: "Why Us", href: "/#why-choose-united-hotels" },
   { id: "standards", label: "Standards", href: "/#standards" },
-  { id: "contact", label: "Contact", href: "/support", route: true },
 ];
+
+// WhatsApp support number — falls back to a safe default if the env var is not
+// set. Number is digits-only for the wa.me link.
+const WHATSAPP_NUMBER = (import.meta.env.VITE_SUPPORT_WHATSAPP || "15551234567")
+  .toString()
+  .replace(/[^\d]/g, "");
+const WHATSAPP_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  "Hi United Hotels! I'd like to get in touch."
+)}`;
 
 function useScrolled(threshold = 80) {
   const [scrolled, setScrolled] = useState(() => typeof window !== "undefined" && window.scrollY > threshold);
@@ -117,6 +126,7 @@ export function Navigation() {
   const displayName = pickDisplayName(user);
   const initial = pickInitial(user);
   const isAdmin = Boolean(user?.isAdmin);
+  const isVendor = Boolean(user?.role === "vendor" || user?.isManager);
   const handleSignOut = () => {
     logout();
     setIsLoginOpen(false);
@@ -194,6 +204,19 @@ export function Navigation() {
                   </a>
                 );
               })}
+
+              {/* WhatsApp Contact Us — sits to the right of the Standards nav link */}
+              <a
+                href={WHATSAPP_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 inline-flex items-center gap-2 h-9 px-3 rounded-full bg-[#25D366] hover:bg-[#1da851] text-white font-['Inter:SemiBold',sans-serif] text-[13px] transition-colors shadow-[0_2px_8px_rgba(37,211,102,0.30)]"
+                aria-label="Contact us on WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4" strokeWidth={2.4} />
+                <span className="hidden xl:inline">{t("Contact us")}</span>
+                <span className="xl:hidden">WhatsApp</span>
+              </a>
             </div>
 
             {/* Desktop right cluster */}
@@ -226,7 +249,7 @@ export function Navigation() {
                 >
                   <Globe className="w-4 h-4" strokeWidth={2} />
                   <span className="hidden xl:inline">{region.flag}</span>
-                  <span>{region.language.toUpperCase()} Â· {region.currency}</span>
+                  <span>{region.language.toUpperCase()} · {region.currency}</span>
                   <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform ${isLanguageOpen ? "rotate-180" : ""}`} />
                 </button>
                 {isLanguageOpen && (
@@ -245,7 +268,7 @@ export function Navigation() {
                             <span className="uh-region-flag" aria-hidden>{r.flag}</span>
                             <span className="uh-region-text">
                               <span className="uh-region-label">{r.label}</span>
-                              <span className="uh-region-sub">{r.languageLabel} Â· {r.currency}</span>
+                              <span className="uh-region-sub">{r.languageLabel} · {r.currency}</span>
                             </span>
                             {isActive && <Check className="w-4 h-4 text-[#2F80ED] shrink-0" />}
                           </button>
@@ -354,6 +377,29 @@ export function Navigation() {
                         <span className="flex flex-col items-start min-w-0">
                           <span className="font-['Inter:SemiBold',sans-serif]">{t(isAdmin ? "Admin Dashboard" : "Admin Login")}</span>
                           <span className="item-sub">{t("Staff access")}</span>
+                        </span>
+                      </Link>
+                    )}
+                    {(!isAuthenticated || isVendor) && (
+                      <Link
+                        to={isVendor ? "/vendor" : "/vendor/login"}
+                        role="menuitem"
+                        className="uh-dropdown-item !justify-start gap-3"
+                        onClick={() => setIsLoginOpen(false)}
+                      >
+                        <span
+                          className="flex h-8 w-8 items-center justify-center rounded-full shrink-0"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(20,184,166,0.15), rgba(94,234,212,0.30))',
+                            boxShadow: 'inset 0 0 0 1px rgba(20,184,166,0.30)',
+                          }}
+                          aria-hidden
+                        >
+                          <Briefcase className="w-4 h-4 text-[#0F766E]" strokeWidth={2} />
+                        </span>
+                        <span className="flex flex-col items-start min-w-0">
+                          <span className="font-['Inter:SemiBold',sans-serif]">{t(isVendor ? "Vendor Portal" : "Vendor Login")}</span>
+                          <span className="item-sub">{t("Property partners")}</span>
                         </span>
                       </Link>
                     )}
@@ -517,6 +563,18 @@ export function Navigation() {
                   </span>
                 </Link>
               )}
+              {(!isAuthenticated || isVendor) && (
+                <Link
+                  to={isVendor ? "/vendor" : "/vendor/login"}
+                  className="uh-drawer-link"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span className="flex items-center gap-3">
+                    <Briefcase className="w-4 h-4 opacity-70" />
+                    {t(isVendor ? "Vendor Portal" : "Vendor Login")}
+                  </span>
+                </Link>
+              )}
               {isAuthenticated && (
                 <button
                   type="button"
@@ -550,7 +608,7 @@ export function Navigation() {
                         <span className="text-[18px] leading-none" aria-hidden>{r.flag}</span>
                         <span className="flex-1 flex flex-col leading-tight">
                           <span>{r.label}</span>
-                          <span className="text-[11px] opacity-60">{r.languageLabel} Â· {r.currency}</span>
+                          <span className="text-[11px] opacity-60">{r.languageLabel} · {r.currency}</span>
                         </span>
                         {isActive && <Check className="w-4 h-4 shrink-0" />}
                       </button>
@@ -560,7 +618,17 @@ export function Navigation() {
               </div>
             </div>
 
-            <div className="p-4 border-t border-current/5">
+            <div className="p-4 border-t border-current/5 flex flex-col gap-2">
+              <a
+                href={WHATSAPP_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white font-['Inter:SemiBold',sans-serif] text-[14px] transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" strokeWidth={2.4} />
+                {t("Contact us on WhatsApp")}
+              </a>
               <Link
                 to="/listing"
                 className="uh-cta w-full justify-center"

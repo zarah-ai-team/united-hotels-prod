@@ -74,6 +74,12 @@ const ZERO_DECIMAL_CURRENCIES: CurrencyCode[] = ["JPY", "RUB", "CNY", "TRY"];
 // Legacy alias — kept so older code that imports `SiteLanguage` keeps working
 export type SiteLanguage = LanguageCode;
 
+export interface LocaleSuggestion {
+  region: Region;
+  country: string | null;
+  source: string;
+}
+
 interface LanguageContextValue {
   region: Region;
   language: LanguageCode;
@@ -85,6 +91,12 @@ interface LanguageContextValue {
   t: (text: string) => string;
   format: (amount: number | null | undefined) => string;
   convert: (amount: number) => number;
+  // Suggested region from IP detection — non-null only when the detected
+  // region is different from the currently active one and the user hasn't
+  // dismissed the suggestion. The locale modal listens for this.
+  suggestion: LocaleSuggestion | null;
+  acceptSuggestion: () => void;
+  dismissSuggestion: () => void;
 }
 
 const STORAGE_KEY = "united-hotels-region";
@@ -207,6 +219,36 @@ const COUNTRY_TO_REGION: Record<string, string> = {
 
 interface IpInfo { country?: string; country_code?: string }
 
+interface LocaleDetectResponse {
+  country: string | null;
+  region: string;
+  language: LanguageCode;
+  currency: CurrencyCode;
+  source: string;
+  matched: boolean;
+}
+
+// Backend-side detection. Preferred over the third-party calls below
+// because it works behind ad blockers, doesn't hit CORS, and reuses the
+// same priority chain (CDN header → IP geo → Accept-Language) the booking
+// flow already uses to tag bookings with a country.
+async function detectViaBackend(): Promise<LocaleDetectResponse | null> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const response = await fetch(joinUrl(API_BASE_URL, API_ENDPOINTS.LOCALE_DETECT), {
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!response.ok) return null;
+    const data = (await response.json()) as LocaleDetectResponse;
+    if (!data || !data.region) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 async function detectCountry(): Promise<string | null> {
   // Try a couple of free endpoints; ignore failures silently.
   const endpoints = [
@@ -314,24 +356,95 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return DEFAULT_REGION;
   });
 
-  // First-visit IP geolocation. Skips entirely if the user has already chosen
-  // a region (saved in localStorage) — manual selection always wins.
+  const [suggestion, setSuggestion] = useState<LocaleSuggestion | null>(null);
+
+  // IP geolocation runs once per visit and surfaces a suggestion to the UI.
+  // We always run detection (even when a region is saved) so a returning
+  // visitor who's now in a different country still gets the prompt — but
+  // a saved region keeps winning until they accept the suggestion.
   const autoDetectedRef = useRef(false);
   useEffect(() => {
     if (autoDetectedRef.current) return;
     if (typeof window === "undefined") return;
-    if (window.localStorage.getItem(STORAGE_KEY)) return;
     autoDetectedRef.current = true;
 
+    const SUGGESTION_DISMISSED_KEY = "united-hotels-suggestion-dismissed";
+    const dismissedFor = window.localStorage.getItem(SUGGESTION_DISMISSED_KEY);
+    const hasManualChoice = Boolean(window.localStorage.getItem(STORAGE_KEY));
+
     let cancelled = false;
-    detectCountry().then((country) => {
-      if (cancelled || !country) return;
-      const target = COUNTRY_TO_REGION[country];
-      const next = target ? findRegion(target) : null;
-      if (next) setRegionState(next);
-    });
+    (async () => {
+      // Backend detection first — works behind ad blockers and reuses the
+      // same chain the booking flow uses.
+      const backend = await detectViaBackend();
+      let suggestedRegion: Region | undefined;
+      let country: string | null = null;
+      let source = "fallback";
+
+      if (backend && backend.region) {
+        suggestedRegion = findRegion(backend.region);
+        country = backend.country;
+        source = backend.source;
+      }
+
+      // Fall back to the third-party endpoints if the backend couldn't
+      // resolve a country (e.g. localhost dev where there's no real IP).
+      if (!suggestedRegion) {
+        const fallbackCountry = await detectCountry();
+        if (fallbackCountry) {
+          country = fallbackCountry;
+          const target = COUNTRY_TO_REGION[fallbackCountry];
+          suggestedRegion = target ? findRegion(target) : undefined;
+          source = "browser-ipapi";
+        }
+      }
+
+      if (cancelled || !suggestedRegion) return;
+
+      // No prior choice → silently apply the suggestion (keeps the existing
+      // "first visit just works" behavior). Then also surface a small
+      // confirmation banner so the user knows it happened and can override.
+      if (!hasManualChoice) {
+        setRegionState(suggestedRegion);
+        if (dismissedFor !== suggestedRegion.code) {
+          setSuggestion({ region: suggestedRegion, country, source });
+        }
+        return;
+      }
+
+      // Prior choice exists → only prompt if the suggested region differs
+      // from what they have, and they haven't dismissed this same suggestion.
+      const currentSaved = window.localStorage.getItem(STORAGE_KEY);
+      if (
+        suggestedRegion.code !== currentSaved &&
+        dismissedFor !== suggestedRegion.code
+      ) {
+        setSuggestion({ region: suggestedRegion, country, source });
+      }
+    })();
+
     return () => { cancelled = true; };
   }, []);
+
+  const acceptSuggestion = useCallback(() => {
+    if (!suggestion) return;
+    setRegionState(suggestion.region);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("united-hotels-suggestion-dismissed");
+    }
+    setSuggestion(null);
+  }, [suggestion]);
+
+  const dismissSuggestion = useCallback(() => {
+    if (!suggestion) return;
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        "united-hotels-suggestion-dismissed",
+        suggestion.region.code,
+      );
+    }
+    setSuggestion(null);
+  }, [suggestion]);
 
   const [runtimeTranslations, setRuntimeTranslations] = useState<Record<string, string>>({});
   const pendingTranslations = useRef<Set<string>>(new Set());
@@ -414,8 +527,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       t,
       format,
       convert,
+      suggestion,
+      acceptSuggestion,
+      dismissSuggestion,
     };
-  }, [region, runtimeTranslations, setRegion, setLanguage]);
+  }, [region, runtimeTranslations, setRegion, setLanguage, suggestion, acceptSuggestion, dismissSuggestion]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

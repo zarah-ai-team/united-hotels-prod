@@ -206,6 +206,13 @@ export interface BookingData {
   specialRequest?: string;
   email?: string;
   phoneNumber?: string;
+  guestName?: string;
+  guestFirstName?: string;
+  guestLastName?: string;
+  guests?: number;
+  adults?: number;
+  children?: number;
+  currency?: string;
 }
 
 // Core fetch wrapper. `base` lets us point at either backend (/api) or
@@ -872,6 +879,43 @@ export const adminService = {
     return apiCall(API_ENDPOINTS.ADMIN.ROOM_PRICE(String(roomId)), {
       method: 'PATCH',
       body: JSON.stringify(data),
+    }, token);
+  },
+
+  async listGroupRequests(params: { status?: string; limit?: number } = {}): Promise<{
+    requests: Array<{
+      id: number;
+      name: string;
+      email: string;
+      phone: string;
+      destination: string | null;
+      dates: string | null;
+      groupSize: string | null;
+      budget: string | null;
+      groupType: string | null;
+      notes: string | null;
+      status: 'new' | 'contacted' | 'quoted' | 'won' | 'lost' | 'archived';
+      createdAt: string | null;
+      updatedAt: string | null;
+    }>;
+    count: number;
+  }> {
+    const token = getStoredToken() || undefined;
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.limit) qs.set('limit', String(params.limit));
+    const q = qs.toString();
+    return apiCall(`${API_ENDPOINTS.ADMIN.GROUP_REQUESTS}${q ? `?${q}` : ''}`, { method: 'GET' }, token);
+  },
+
+  async updateGroupRequestStatus(
+    id: number,
+    status: 'new' | 'contacted' | 'quoted' | 'won' | 'lost' | 'archived',
+  ): Promise<{ request: any }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.GROUP_REQUEST_STATUS(String(id)), {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
     }, token);
   },
 

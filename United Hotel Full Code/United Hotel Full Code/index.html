@@ -1,15 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>United Hotels</title>
-    </head>
+    <!-- Primary defaults. Per-route values are swapped in at runtime by the
+         useSEO() hook. Keep these defaults conservative so first-paint share
+         previews work even if a route forgets to call the hook. -->
+    <title>Book United Hotels | Trusted hotel stays across Turkey</title>
+    <meta
+      name="description"
+      content="Book hotels across Istanbul and Turkey with verified rooms, transparent pricing, and local support. Direct rates for individual travellers and groups."
+    />
+    <meta name="theme-color" content="#0B1F3B" />
+    <link rel="canonical" href="https://bookunitedhotels.com/" />
 
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+    <!-- Favicon set. Drop the matching files into /public:
+         favicon.ico, favicon-32x32.png, favicon-16x16.png, apple-touch-icon.png,
+         icon-192.png, icon-512.png, icon-maskable-512.png -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0B1F3B" />
+
+    <!-- Open Graph defaults -->
+    <meta property="og:site_name" content="Book United Hotels" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://bookunitedhotels.com/" />
+    <meta property="og:title" content="Book United Hotels | Trusted hotel stays across Turkey" />
+    <meta
+      property="og:description"
+      content="Verified hotels in Istanbul and across Turkey, with transparent pricing and local support."
+    />
+    <meta property="og:image" content="https://bookunitedhotels.com/og-default.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Book United Hotels | Trusted hotel stays across Turkey" />
+    <meta
+      name="twitter:description"
+      content="Verified hotels in Istanbul and across Turkey, with transparent pricing and local support."
+    />
+    <meta name="twitter:image" content="https://bookunitedhotels.com/og-default.jpg" />
+
+    <!-- Site-wide structured data. Per-page Hotel/Breadcrumb/FAQ blobs are
+         injected by useSEO() and don't conflict with these. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Book United Hotels",
+        "url": "https://bookunitedhotels.com",
+        "logo": "https://bookunitedhotels.com/logo-512.png",
+        "sameAs": []
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Book United Hotels",
+        "url": "https://bookunitedhotels.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://bookunitedhotels.com/listing?destination={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <!-- Analytics (env-opt-in). Vite substitutes %VITE_*% at build time; if the
+         env var is empty the script becomes a comment with no measurement ID
+         and the gtag/fbq calls become harmless no-ops. -->
+    <script>
+      // Google Analytics 4 — bootstrap dataLayer + gtag stub before the
+      // network call lands so any early calls are buffered.
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      // VITE_GA_MEASUREMENT_ID example: 'G-XXXXXXX'
+      if ('%VITE_GA_MEASUREMENT_ID%' && '%VITE_GA_MEASUREMENT_ID%'.indexOf('VITE_') !== 0) {
+        gtag('config', '%VITE_GA_MEASUREMENT_ID%', { anonymize_ip: true });
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%';
+        document.head.appendChild(s);
+      }
+      // Meta / Facebook Pixel — same pattern, only loads when an ID is set.
+      // VITE_FB_PIXEL_ID example: '1234567890123456'
+      if ('%VITE_FB_PIXEL_ID%' && '%VITE_FB_PIXEL_ID%'.indexOf('VITE_') !== 0) {
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+        document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '%VITE_FB_PIXEL_ID%');
+        fbq('track', 'PageView');
+      }
+    </script>
+  </head>
+
+  <body>
+    <!-- noscript fallback. Most of the page is React-rendered, so crawlers
+         that don't execute JS (and audit tools) see nothing useful. This
+         block gives them an H1, a meta-sized value-prop paragraph, and the
+         primary internal links. Hidden from real users by the SPA mount. -->
+    <noscript>
+      <div style="max-width:720px;margin:48px auto;padding:24px;font-family:system-ui,-apple-system,sans-serif;color:#0B1F3B;">
+        <h1>Trusted hotel stays across Turkey</h1>
+        <p style="font-size:17px;line-height:1.55;color:#374151;">
+          Book United Hotels connects travellers and travel agents with verified hotels
+          across Istanbul, Cappadocia, Antalya, Bodrum, and beyond. Transparent direct
+          rates, real local support, and dedicated group sourcing for tour operators
+          and corporate travel.
+        </p>
+        <h2>Browse stays</h2>
+        <ul>
+          <li><a href="/listing">All hotels in Turkey</a></li>
+          <li><a href="/listing?destination=Sultanahmet%2C%20Istanbul">Hotels in Sultanahmet, Istanbul</a></li>
+          <li><a href="/listing?destination=Beyo%C4%9Flu%2C%20Istanbul">Hotels in Beyoğlu, Istanbul</a></li>
+          <li><a href="/listing?destination=Galata%2C%20Istanbul">Hotels in Galata, Istanbul</a></li>
+          <li><a href="/groups">Group bookings &amp; corporate travel</a></li>
+          <li><a href="/blog">Travel guides &amp; neighborhood blogs</a></li>
+          <li><a href="/support">Help &amp; support</a></li>
+        </ul>
+        <p style="font-size:14px;color:#6b7280;">
+          Please enable JavaScript to use the full booking experience.
+        </p>
+      </div>
+    </noscript>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

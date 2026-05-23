@@ -4,9 +4,17 @@ import { Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle, Loader } from "
 import svgPaths from "../../imports/svg-nnzqmx1xjq";
 import { authService, RegisterRequest, LoginRequest } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useSEO } from "../hooks/useSEO";
 import { toast } from "sonner";
 
 export function AuthPage() {
+  useSEO({
+    title: "Sign in or create an account | Book United Hotels",
+    description: "Access your bookings, saved hotels, and group requests with Book United Hotels.",
+    canonical: "/auth",
+    robots: "noindex,follow",
+  });
+
   const navigate = useNavigate();
   const location = useLocation();
   const { login: authLogin } = useAuth();

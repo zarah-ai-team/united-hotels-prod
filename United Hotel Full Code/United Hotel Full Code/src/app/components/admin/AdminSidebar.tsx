@@ -14,10 +14,11 @@ import {
   Mail,
   Sun,
   Moon,
+  Handshake,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRole } from './RoleSwitcher';
-import { authService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import svgPaths from '../../../imports/svg-nkrjt6kvoj';
 
@@ -28,6 +29,7 @@ const navItems = [
   { icon: Users, label: 'Users', path: '/admin/users', roles: ['admin'] },
   { icon: BarChart3, label: 'Analytics', path: '/admin/analytics', roles: ['admin', 'vendor'] },
   { icon: Mail, label: 'Email Logs', path: '/admin/email-logs', roles: ['admin'] },
+  { icon: Handshake, label: 'Group Requests', path: '/admin/group-requests', roles: ['admin'] },
   { icon: Settings, label: 'Settings', path: '/admin/settings', roles: ['admin', 'vendor'] },
 ];
 
@@ -67,6 +69,7 @@ export function AdminSidebar() {
   });
   const currentRole = useRole();
   const { theme, toggleTheme } = useTheme();
+  const { logout } = useAuth();
 
   // Persist + broadcast width changes so AdminLayout can re-offset the main
   // content area (CSS only listens to its own width var).
@@ -76,7 +79,10 @@ export function AdminSidebar() {
   }, [collapsed]);
 
   const handleLogout = () => {
-    authService.logout();
+    // logout() clears the auth token AND resets AuthContext.user to null.
+    // Calling authService.logout() alone leaves React state stale, so the
+    // /admin/login page bounces straight back to /admin (loop).
+    logout();
     localStorage.removeItem('uh_active_role');
     localStorage.removeItem('uh_active_name');
     navigate('/admin/login', { replace: true });

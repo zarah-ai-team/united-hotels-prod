@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Search,
   X,
@@ -10,9 +10,11 @@ import {
   DollarSign,
   Filter,
   ChevronRight,
+  Plus,
 } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { vendorService } from '../../services/api';
+import { AdminBookingCreateDialog } from '../../components/admin/AdminBookingCreateDialog';
 
 type Booking = {
   id: number;
@@ -89,6 +91,16 @@ export function AdminBookingsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selected, setSelected] = useState<Booking | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const reload = useCallback(() => {
+    setLoading(true);
+    return vendorService
+      .getBookings()
+      .then((res) => setBookings(res.bookings as unknown as Booking[]))
+      .catch((e: any) => setError(e?.data?.error || e?.message || 'Failed to load bookings'))
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -165,8 +177,8 @@ export function AdminBookingsPage() {
               </div>
             </div>
 
-            {/* Status filter dropdown */}
-            <div className="flex items-center px-3 py-2 md:py-0 border-t md:border-t-0 md:border-l border-white/10">
+            {/* Status filter dropdown + New booking button */}
+            <div className="flex items-center gap-2 px-3 py-2 md:py-0 border-t md:border-t-0 md:border-l border-white/10">
               <div className="relative">
                 <Filter className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/45 pointer-events-none" />
                 <select
@@ -183,9 +195,24 @@ export function AdminBookingsPage() {
                 </select>
                 <ChevronRight className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 rotate-90 text-white/45 pointer-events-none" />
               </div>
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="inline-flex items-center gap-1.5 bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-[12.5px] font-semibold px-3 py-1.5 rounded-md shadow-[0_8px_18px_-8px_rgba(47,128,237,0.7)] transition-colors"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New booking
+              </button>
             </div>
           </div>
         </div>
+
+        <AdminBookingCreateDialog
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+          onCreated={reload}
+        />
 
         {error && (
           <div className="rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 px-3 py-2 text-[12.5px] text-red-700 dark:text-red-300">

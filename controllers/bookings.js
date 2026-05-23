@@ -50,6 +50,14 @@ const getBookingMeta = async (client) => {
         paymentModeCol: pickExistingColumn(columns, ['payment_mode']),
         transactionIdCol: pickExistingColumn(columns, ['transactionid', 'transaction_id', 'transactionId']),
         specialRequestCol: pickExistingColumn(columns, ['special_request', 'specialrequest']),
+        guestNameCol: pickExistingColumn(columns, ['guest_name', 'guestname']),
+        guestEmailCol: pickExistingColumn(columns, ['guest_email', 'guestemail']),
+        guestPhoneCol: pickExistingColumn(columns, ['guest_phone', 'guestphone']),
+        guestsCol: pickExistingColumn(columns, ['guests']),
+        adultsCol: pickExistingColumn(columns, ['adults', 'num_adults']),
+        childrenCol: pickExistingColumn(columns, ['children', 'num_children']),
+        bookedRoomsCol: pickExistingColumn(columns, ['booked_rooms', 'bookedrooms']),
+        currencyCol: pickExistingColumn(columns, ['currency']),
         createdCol: pickExistingColumn(columns, ['created_at', 'createdAt']),
         updatedCol: pickExistingColumn(columns, ['updated_at', 'updatedAt'])
     };
@@ -77,6 +85,32 @@ const ensureBookingPaymentColumns = async (client) => {
     }
 };
 
+// Bring legacy bookings tables up to the column set the controller wants to
+// write. Idempotent — safe to call on every BookRoom invocation; PG ignores
+// columns that already exist. Runs once per process via the cache flag.
+let bookingExtendedColumnsEnsured = false;
+const ensureBookingExtendedColumns = async (client) => {
+    if (bookingExtendedColumnsEnsured) return;
+    await client.query(`
+        ALTER TABLE bookings
+            ADD COLUMN IF NOT EXISTS payment_mode    text,
+            ADD COLUMN IF NOT EXISTS special_request text,
+            ADD COLUMN IF NOT EXISTS hotelid         integer,
+            ADD COLUMN IF NOT EXISTS guest_name      text,
+            ADD COLUMN IF NOT EXISTS guest_email     text,
+            ADD COLUMN IF NOT EXISTS guest_phone     text,
+            ADD COLUMN IF NOT EXISTS guests          integer,
+            ADD COLUMN IF NOT EXISTS adults          integer,
+            ADD COLUMN IF NOT EXISTS children        integer,
+            ADD COLUMN IF NOT EXISTS booked_rooms    integer,
+            ADD COLUMN IF NOT EXISTS currency        text;
+    `);
+    // Reset metadata cache so the next read picks up the new columns.
+    bookingMetaCache = null;
+    bookingColumnsCache = null;
+    bookingExtendedColumnsEnsured = true;
+};
+
 const getHotelColumnsMeta = async (client) => {
     if (hotelColumnsMetaCache) {
         return hotelColumnsMetaCache;
@@ -101,17 +135,32 @@ const getRoomColumnsMeta = async (client) => {
     }
 
     const result = await client.query(
-        `SELECT column_name FROM information_schema.columns WHERE table_name = 'rooms'`
+        `SELECT column_name, data_type, udt_name FROM information_schema.columns WHERE table_name = 'rooms'`
     );
     const cols = new Set(result.rows.map((r) => r.column_name));
+    const currentBookingsRow = result.rows.find((r) => r.column_name === 'currentbookings');
     roomColumnsMetaCache = {
         availableRoomsCol: cols.has('available_rooms') ? 'available_rooms' : (cols.has('availableRooms') ? 'availableRooms' : null),
         totalRoomsCol: cols.has('total_rooms') ? 'total_rooms' : (cols.has('totalRooms') ? 'totalRooms' : null),
         availableCol: cols.has('is_available') ? 'is_available' : null,
-        updatedCol: cols.has('updated_at') ? 'updated_at' : (cols.has('updatedAt') ? 'updatedAt' : null)
+        updatedCol: cols.has('updated_at') ? 'updated_at' : (cols.has('updatedAt') ? 'updatedAt' : null),
+        currentBookingsIsArray: currentBookingsRow?.data_type === 'ARRAY'
     };
 
     return roomColumnsMetaCache;
+};
+
+// rooms.currentbookings can be either a Postgres array (e.g. json[]) or a
+// scalar text/jsonb column depending on when the schema was provisioned.
+// Wrong serialization triggers "malformed array literal" and rolls back the
+// whole booking transaction, so we detect once and bind the right shape.
+const serializeCurrentBookings = async (client, entries) => {
+    const meta = await getRoomColumnsMeta(client);
+    const list = Array.isArray(entries) ? entries : [];
+    if (meta.currentBookingsIsArray) {
+        return list.map((entry) => (typeof entry === 'string' ? entry : JSON.stringify(entry)));
+    }
+    return JSON.stringify(list);
 };
 
 const toInt = (value) => {
@@ -136,7 +185,15 @@ const normalizeBookingRecord = (row) => ({
     totalAmount: row.totalamount ?? row.total_price ?? null,
     paymentMode: row.payment_mode ?? row.method ?? null,
     transactionId: row.transactionid ?? row.transaction_id ?? row.transactionId ?? null,
-    specialRequest: row.special_request ?? row.specialrequest ?? null
+    specialRequest: row.special_request ?? row.specialrequest ?? null,
+    guestName: row.guest_name ?? row.guestname ?? null,
+    guestEmail: row.guest_email ?? row.guestemail ?? null,
+    guestPhone: row.guest_phone ?? row.guestphone ?? null,
+    guests: row.guests ?? null,
+    adults: row.adults ?? null,
+    children: row.children ?? null,
+    bookedRooms: row.booked_rooms ?? row.bookedrooms ?? null,
+    currency: row.currency ?? null
 });
 
 const createBookingRecord = async ({
@@ -151,8 +208,17 @@ const createBookingRecord = async ({
     hotelId,
     transactionId,
     paymentMode,
-    specialRequest
+    specialRequest,
+    guestName,
+    guestEmail,
+    guestPhone,
+    guests,
+    adults,
+    children,
+    bookedRooms,
+    currency
 }) => {
+    await ensureBookingExtendedColumns(client);
     await ensureBookingPaymentColumns(client);
     const meta = await getBookingMeta(client);
     const resolvedTransactionId =
@@ -214,6 +280,40 @@ const createBookingRecord = async ({
     if (meta.specialRequestCol) {
         columns.push(meta.specialRequestCol);
         values.push(specialRequest || null);
+    }
+    if (meta.guestNameCol) {
+        columns.push(meta.guestNameCol);
+        values.push(guestName || null);
+    }
+    if (meta.guestEmailCol) {
+        columns.push(meta.guestEmailCol);
+        values.push(guestEmail || null);
+    }
+    if (meta.guestPhoneCol) {
+        columns.push(meta.guestPhoneCol);
+        values.push(guestPhone || null);
+    }
+    if (meta.guestsCol) {
+        columns.push(meta.guestsCol);
+        values.push(toInt(guests) || null);
+    }
+    if (meta.adultsCol) {
+        columns.push(meta.adultsCol);
+        values.push(toInt(adults) || null);
+    }
+    if (meta.childrenCol) {
+        columns.push(meta.childrenCol);
+        // children can legitimately be 0; only force null when missing
+        const c = toInt(children);
+        values.push(Number.isFinite(c) ? c : null);
+    }
+    if (meta.bookedRoomsCol) {
+        columns.push(meta.bookedRoomsCol);
+        values.push(toInt(bookedRooms) || null);
+    }
+    if (meta.currencyCol) {
+        columns.push(meta.currencyCol);
+        values.push(currency || 'USD');
     }
 
     if (!meta.roomIdCol || !meta.fromDateCol || !meta.toDateCol || !meta.totalAmountCol) {
@@ -449,7 +549,14 @@ const BookRoom = async (req, res) => {
         bookedRooms,
         paymentMode,
         transactionId,
-        specialRequest
+        specialRequest,
+        guestName,
+        guestFirstName,
+        guestLastName,
+        guests,
+        adults,
+        children,
+        currency
     } = req.body;
     const bookedCount = toInt(bookedRooms) || 1;
     const client = await pool.connect();
@@ -499,6 +606,30 @@ const BookRoom = async (req, res) => {
             return res.status(404).json({ error: 'Room not found' });
         }
 
+        // Vendor scope: a vendor can only create bookings for hotels they own.
+        // Admins bypass; unauthenticated guests and regular users are unaffected.
+        if (req.user && !req.user.isAdmin && req.user.role === 'vendor') {
+            const hotelIdForRoom = roomData.hotel_id;
+            if (!hotelIdForRoom) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ error: 'Room is not linked to a hotel' });
+            }
+            const ownerCheck = await client.query(
+                'SELECT vendor_id FROM hotels WHERE id = $1 LIMIT 1',
+                [hotelIdForRoom]
+            );
+            if (Number(ownerCheck.rows[0]?.vendor_id) !== Number(req.user.id)) {
+                await client.query('ROLLBACK');
+                return res.status(403).json({ error: 'Vendors can only create bookings for hotels they own' });
+            }
+        }
+
+        const composedGuestName = (
+            guestName ||
+            [guestFirstName, guestLastName].filter(Boolean).join(' ').trim() ||
+            null
+        );
+
         // Create booking with user-provided payment details.
         const bookingResult = await createBookingRecord({
             client,
@@ -512,7 +643,15 @@ const BookRoom = async (req, res) => {
             hotelId: roomData.hotel_id || room.hotelid || room.hotel_id || null,
             transactionId: finalTransactionId,
             paymentMode: finalPaymentMode,
-            specialRequest: normalizedSpecialRequest
+            specialRequest: normalizedSpecialRequest,
+            guestName: composedGuestName,
+            guestEmail: email,
+            guestPhone: phoneNumber,
+            guests,
+            adults,
+            children,
+            bookedRooms: bookedCount,
+            currency
         });
         const booking = normalizeBookingRecord(bookingResult.rows[0]);
         const persistedRoomId = booking.roomId || roomData.id;
@@ -550,7 +689,7 @@ const BookRoom = async (req, res) => {
             specialRequest: normalizedSpecialRequest
         });
         const updateRoomQuery = await getRoomUpdateQuery(client);
-        await client.query(updateRoomQuery, [JSON.stringify(currentbookings), persistedRoomId]);
+        await client.query(updateRoomQuery, [await serializeCurrentBookings(client, currentbookings), persistedRoomId]);
         await adjustRoomCategoryAvailability(client, roomData, -bookedCount);
 
         await adjustHotelRoomCount(client, roomData.hotel_id, -bookedCount);
@@ -571,8 +710,15 @@ const BookRoom = async (req, res) => {
                 )
             `).catch(() => {});
             await client.query(
-                `INSERT INTO payments (booking_id, amount, status) VALUES ($1, $2, 'paid')`,
-                [booking.id ?? bookingResult.rows[0].id, totalamount]
+                `INSERT INTO payments (booking_id, amount, currency, method, status, transaction_id)
+                 VALUES ($1, $2, $3, $4, 'paid', $5)`,
+                [
+                    booking.id ?? bookingResult.rows[0].id,
+                    totalamount,
+                    currency || 'USD',
+                    finalPaymentMode,
+                    finalTransactionId
+                ]
             );
         } catch (paymentErr) {
             console.warn('[bookings] payment row skipped:', paymentErr.message);
@@ -586,9 +732,11 @@ const BookRoom = async (req, res) => {
             booking,
             roomName: room.name || roomData.room_number || `room-${roomId}`,
             hotelName,
+            guestName: composedGuestName,
             fromDate,
             toDate,
             totalAmount: totalamount,
+            currency: currency || 'USD',
             paymentMode: finalPaymentMode,
             specialRequest: normalizedSpecialRequest
         });
@@ -633,9 +781,9 @@ const CancelBooking = async (req, res) => {
         if (typeof currentbookings === 'string') {
             try { currentbookings = JSON.parse(currentbookings); } catch { currentbookings = []; }
         }
-        const temp = currentbookings.filter(booking => booking.bookingid.toString() !== bookingid);
+        const temp = currentbookings.filter(booking => String(booking.bookingid) !== String(bookingid));
         const updateRoomQuery = await getRoomUpdateQuery(client);
-        await client.query(updateRoomQuery, [JSON.stringify(temp), roomid]);
+        await client.query(updateRoomQuery, [await serializeCurrentBookings(client, temp), roomid]);
         await adjustRoomCategoryAvailability(client, roomResult.rows[0], 1);
         if (roomResult.rows[0]?.hotel_id) {
             await adjustHotelRoomCount(client, roomResult.rows[0].hotel_id, 1);
@@ -693,11 +841,15 @@ const DeleteBooking = async (req, res) => {
 
         const nextBookings = currentbookings.filter((entry) => String(entry.bookingid) !== String(bookingid));
         const updateRoomQuery = await getRoomUpdateQuery(client);
-        await client.query(updateRoomQuery, [JSON.stringify(nextBookings), roomId]);
+        await client.query(updateRoomQuery, [await serializeCurrentBookings(client, nextBookings), roomId]);
 
-        await adjustRoomCategoryAvailability(client, roomRow, 1);
-        if (roomRow?.hotel_id) {
-            await adjustHotelRoomCount(client, roomRow.hotel_id, 1);
+        // Cancel already restored inventory; re-restoring would over-count.
+        const alreadyCancelled = String(booking.status || '').toLowerCase() === 'cancelled';
+        if (!alreadyCancelled) {
+            await adjustRoomCategoryAvailability(client, roomRow, 1);
+            if (roomRow?.hotel_id) {
+                await adjustHotelRoomCount(client, roomRow.hotel_id, 1);
+            }
         }
 
         await client.query('DELETE FROM bookings WHERE id = $1', [bookingid]);
@@ -705,7 +857,7 @@ const DeleteBooking = async (req, res) => {
 
         return res.json({
             message: 'Booking deleted successfully',
-            roomsRestoredBy: 1,
+            roomsRestoredBy: alreadyCancelled ? 0 : 1,
             deletedBookingId: bookingid
         });
     } catch (error) {
@@ -726,15 +878,19 @@ const getBookings = async (req, res) => {
         const isAdmin = Boolean(req.user?.isAdmin);
         const userId = req.user?.id;
 
+        const meta = await getBookingMeta(pool);
+        const userIdCol = meta.userIdCol ? quoteIdentifier(meta.userIdCol) : '"userid"';
+        const orderCol = meta.createdCol ? quoteIdentifier(meta.createdCol) : '"id"';
+
         let query = 'SELECT * FROM bookings';
         let params = [];
 
         if (!isAdmin && userId) {
-            query += ' WHERE userid = $1';
+            query += ` WHERE ${userIdCol} = $1`;
             params = [userId];
         }
 
-        query += ' ORDER BY created_at DESC';
+        query += ` ORDER BY ${orderCol} DESC`;
         const bookingsResult = await pool.query(query, params);
         res.json({
             bookings: bookingsResult.rows.map(normalizeBookingRecord),

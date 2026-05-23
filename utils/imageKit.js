@@ -1,10 +1,23 @@
-// Server-side ImageKit URL resolver. Mirrors the frontend logic so the API
+// Server-side image URL resolver. Mirrors the frontend logic so the API
 // is the single source of truth for hotel imagery — clients just consume
 // hotel.image_url / hotel.images[] verbatim.
+//
+// Resolution strategy:
+//   1. ImageKit CDN — when IMAGEKIT_ENDPOINT is set (production path).
+//   2. Picsum fallback — deterministic per-hotel photo URLs so the FE
+//      always renders something real instead of a gray placeholder.
+//      Triggered automatically when ImageKit is unset OR when the hotel
+//      sits outside the configured slug map.
 
 const ENDPOINT = String(process.env.IMAGEKIT_ENDPOINT || '').replace(/\/+$/, '');
 const FOLDER = String(process.env.IMAGEKIT_FOLDER || '/hotels').replace(/\/+$/, '');
 const DEFAULT_TR = 'tr=w-1200,h-900,q-78,fo-auto,c-maintain_ratio';
+// Picsum supports a stable `seed` so the same hotel always gets the same
+// photo across reloads. We append the gallery index to vary photos within a
+// single hotel.
+const PICSUM_BASE = 'https://picsum.photos/seed';
+const PICSUM_W = 1200;
+const PICSUM_H = 900;
 
 // Hotels we have confirmed to have folders on ImageKit, with the exact slug
 // + picture count seeded into the CDN. Anything outside this map either has
@@ -106,25 +119,48 @@ function isImageKitConfigured() {
   return ENDPOINT.length > 0;
 }
 
-function resolveHotelImage(hotel) {
-  if (!ENDPOINT) return null;
+// Stable seed per hotel, used by the Picsum fallback. ID is preferred since
+// it's immutable; we only fall back to the slug for hotels that haven't been
+// persisted yet (e.g. preview rendering).
+function picsumSeed(hotel, index = 1) {
   const id = hotelIdNum(hotel);
-  if (id != null && MISSING_HOTEL_IDS.has(id)) return null;
+  if (id != null) return `hotel-${id}-${index}`;
   const slug = resolveSlug(hotel);
-  if (!slug) return null;
-  return buildPictureUrl(slug, 1);
+  return slug ? `${slug}-${index}` : `hotel-${index}`;
+}
+
+function picsumUrl(hotel, index = 1) {
+  return `${PICSUM_BASE}/${encodeURIComponent(picsumSeed(hotel, index))}/${PICSUM_W}/${PICSUM_H}`;
+}
+
+function resolveHotelImage(hotel) {
+  if (ENDPOINT) {
+    const id = hotelIdNum(hotel);
+    if (id == null || !MISSING_HOTEL_IDS.has(id)) {
+      const slug = resolveSlug(hotel);
+      if (slug) return buildPictureUrl(slug, 1);
+    }
+  }
+  // Always fall back to Picsum so the FE never shows a gray placeholder.
+  return picsumUrl(hotel, 1);
 }
 
 function resolveHotelGallery(hotel, count = 3) {
-  if (!ENDPOINT) return [];
-  const id = hotelIdNum(hotel);
-  if (id != null && MISSING_HOTEL_IDS.has(id)) return [];
-  const slug = resolveSlug(hotel);
-  if (!slug) return [];
-  const available = pictureCountFor(hotel, count);
-  const total = Math.max(1, Math.min(count, available));
+  if (ENDPOINT) {
+    const id = hotelIdNum(hotel);
+    if (id == null || !MISSING_HOTEL_IDS.has(id)) {
+      const slug = resolveSlug(hotel);
+      if (slug) {
+        const available = pictureCountFor(hotel, count);
+        const total = Math.max(1, Math.min(count, available));
+        const urls = [];
+        for (let i = 0; i < total; i++) urls.push(buildPictureUrl(slug, i + 1));
+        return urls;
+      }
+    }
+  }
   const urls = [];
-  for (let i = 0; i < total; i++) urls.push(buildPictureUrl(slug, i + 1));
+  for (let i = 0; i < count; i++) urls.push(picsumUrl(hotel, i + 1));
   return urls;
 }
 

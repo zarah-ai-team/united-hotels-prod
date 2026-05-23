@@ -27,6 +27,8 @@ interface BookingState {
   checkIn: string;
   checkOut: string;
   guests: number;
+  adults: number;
+  children: number;
   roomCount: number;
   guestDetails: GuestDetails | null;
   nights: number;
@@ -39,6 +41,7 @@ interface BookingContextType {
   setRoom: (room: Room) => void;
   setDates: (checkIn: string, checkOut: string) => void;
   setGuests: (guests: number) => void;
+  setOccupancy: (adults: number, children: number) => void;
   setRoomCount: (roomCount: number) => void;
   setGuestDetails: (details: GuestDetails) => void;
   clearBooking: () => void;
@@ -55,6 +58,8 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     checkIn: '',
     checkOut: '',
     guests: 2,
+    adults: 2,
+    children: 0,
     roomCount: 1,
     guestDetails: null,
     nights: 0,
@@ -81,6 +86,17 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     setBooking(prev => ({ ...prev, guests }));
   }, []);
 
+  const setOccupancy = useCallback((adults: number, children: number) => {
+    const safeAdults = Math.max(1, Math.floor(adults) || 1);
+    const safeChildren = Math.max(0, Math.floor(children) || 0);
+    setBooking(prev => ({
+      ...prev,
+      adults: safeAdults,
+      children: safeChildren,
+      guests: safeAdults + safeChildren,
+    }));
+  }, []);
+
   const setRoomCount = useCallback((roomCount: number) => {
     setBooking(prev => ({ ...prev, roomCount: Math.max(1, roomCount) }));
   }, []);
@@ -100,6 +116,8 @@ export function BookingProvider({ children }: { children: ReactNode }) {
       checkIn: '',
       checkOut: '',
       guests: 2,
+      adults: 2,
+      children: 0,
       roomCount: 1,
       guestDetails: null,
       nights: 0,
@@ -127,6 +145,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
       setRoom,
       setDates,
       setGuests,
+      setOccupancy,
       setRoomCount,
       setGuestDetails,
       clearBooking,

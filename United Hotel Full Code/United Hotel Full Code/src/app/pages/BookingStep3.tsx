@@ -61,18 +61,10 @@ export function BookingStep3() {
   const roomCount = booking.roomCount || 1;
   const nightlyPrice = Number(currentRoom.price || 0);
   const total = nightlyPrice * nights * roomCount;
-  const isCardPaymentPending = paymentMethod === "card";
-  const isActionDisabled = isProcessing || isCardPaymentPending;
+  const isActionDisabled = isProcessing;
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (isCardPaymentPending) {
-      toast.info("Card payment will be enabled soon", {
-        description: "Please choose Pay at hotel to complete this booking now.",
-      });
-      return;
-    }
 
     setIsProcessing(true);
 
@@ -92,6 +84,13 @@ export function BookingStep3() {
         email: currentGuest.email,
         phoneNumber: currentGuest.phone,
         specialRequest: currentGuest.specialRequest || "",
+        guestFirstName: currentGuest.firstName,
+        guestLastName: currentGuest.lastName,
+        guestName: [currentGuest.firstName, currentGuest.lastName].filter(Boolean).join(" "),
+        guests: booking.guests,
+        adults: booking.adults,
+        children: booking.children,
+        currency: "USD",
       });
 
       const bookingId = response?.booking?.id || response?.id || response?.bookingId || null;
@@ -267,8 +266,25 @@ export function BookingStep3() {
               Review & Payment
             </h1>
             <p className="font-['Inter:Regular',sans-serif] text-[13px] text-[#6b7280] dark:text-white/60 mb-4 md:mb-5">
-              Please review your booking details and complete the payment
+              Please review your booking details before confirming
             </p>
+
+            {/* Payments-unavailable notice */}
+            <div className="bg-linear-to-br from-[#fef3c7]/80 to-[#fde68a]/40 dark:from-amber-500/[0.10] dark:to-amber-500/[0.05] border border-[#fcd34d] dark:border-amber-400/25 rounded-2xl p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 bg-[#f59e0b] dark:bg-amber-500/25 dark:ring-1 dark:ring-amber-400/40 rounded-xl flex items-center justify-center shrink-0">
+                  <Info className="w-4 h-4 text-white dark:text-amber-200" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-['Poppins:SemiBold',sans-serif] text-[14.5px] text-[#92400e] dark:text-amber-300 mb-1">
+                    Online payments are not available yet
+                  </h4>
+                  <p className="font-['Inter:Regular',sans-serif] text-[12.5px] text-[#78350f] dark:text-amber-100/80 leading-[19px]">
+                    We're still finishing setup with our payment provider. To complete your reservation, please reach out to our team on WhatsApp and we'll take care of the rest — quickly and personally.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Booking Review Card */}
             <div className="glass-card rounded-2xl p-4 md:p-5 mb-4">
@@ -634,25 +650,21 @@ export function BookingStep3() {
                     </span>
                   ) : (
                     <>
-                      <span className="relative z-10">
-                        {isCardPaymentPending
-                          ? "Pay Now (coming soon)"
-                          : "Confirm Booking"}
-                      </span>
+                      <span className="relative z-10">Confirm Booking</span>
                       <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/20 to-transparent" />
                     </>
                   )}
                 </button>
 
-                {/* When card payment is disabled, give the user a way out
-                    to talk to support directly via WhatsApp. The number is
-                    pulled from VITE_SUPPORT_WHATSAPP at build time so the
-                    operator can change it without a code edit. */}
-                {isCardPaymentPending && (() => {
+                {/* WhatsApp escape hatch — payments aren't live yet, so this is
+                    currently the recommended path to confirm a booking. The number
+                    comes from VITE_SUPPORT_WHATSAPP so the operator can change it
+                    without a code edit. */}
+                {(() => {
                   const rawNumber = import.meta.env.VITE_SUPPORT_WHATSAPP || '15551234567';
                   const phoneDigits = String(rawNumber).replace(/[^\d]/g, '');
                   const hotelName = currentHotel?.name || 'a hotel';
-                  const text = `Hi! I'd like to book ${hotelName} from ${booking.checkIn} to ${booking.checkOut} (${roomCount} room${roomCount > 1 ? 's' : ''}, ${nights} night${nights > 1 ? 's' : ''}). Card payment isn't enabled — can you help me complete the booking?`;
+                  const text = `Hi! I'd like to book ${hotelName} from ${booking.checkIn} to ${booking.checkOut} (${roomCount} room${roomCount > 1 ? 's' : ''}, ${nights} night${nights > 1 ? 's' : ''}).`;
                   const href = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(text)}`;
                   return (
                     <a

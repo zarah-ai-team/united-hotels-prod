@@ -96,6 +96,8 @@ export const API_ENDPOINTS = {
     ASSIGN_VENDOR: (hotelId: string) => `/admin/hotels/${hotelId}/assign-vendor`,
     ROOM_PRICE: (id: string) => `/admin/rooms/${id}/price`,
     EMAIL_LOGS: '/admin/email-logs',
+    GROUP_REQUESTS: '/admin/group-requests',
+    GROUP_REQUEST_STATUS: (id: string) => `/admin/group-requests/${id}`,
   },
 
   VENDOR: {
@@ -108,6 +110,15 @@ export const API_ENDPOINTS = {
   },
 
   TRANSLATE: '/translate',
+  LOCALE_DETECT: '/locale/detect',
+
+  SUPPORT: {
+    CONTACT: '/support/contact',
+  },
+
+  GROUP_REQUESTS: {
+    SUBMIT: '/group-requests',
+  },
 };
 
 // Pricing-engine endpoints (joined onto PRICING_BASE_URL).

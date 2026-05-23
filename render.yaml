@@ -32,3 +32,46 @@ services:
         sync: false
       - key: MAIL_FROM
         sync: false
+      - key: PRICING_V2_ENABLED
+        value: "true"
+      - key: PRICING_V2_BASE_URL
+        # Render internal hostname for the private service below.
+        # Same region required (both default to oregon).
+        value: http://pricing-engine-v2:5050
+      - key: PRICING_V2_TIMEOUT_MS
+        value: "5000"
+      - key: PRICING_V2_DEBUG
+        value: "false"
+
+  - type: pserv
+    name: pricing-engine-v2
+    runtime: node
+    plan: starter
+    rootDir: pricing-engine-v2
+    buildCommand: npm install
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5050"
+      - key: DATABASE_URL
+        sync: false
+      - key: PG_SSL
+        value: "true"
+      - key: MAKECORPS_API_KEY
+        sync: false
+      - key: MAKECORPS_API_BASE_URL
+        value: https://api.makcorps.com
+      - key: MAKECORPS_ENABLED
+        value: "true"
+      - key: RAPIDAPI_KEY
+        sync: false
+      - key: RAPIDAPI_HOST
+        value: booking-com15.p.rapidapi.com
+      - key: BOOKINGCOM_ENABLED
+        value: "true"
+      - key: HOTELSCOM_ENABLED
+        value: "true"

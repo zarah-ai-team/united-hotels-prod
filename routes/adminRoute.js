@@ -15,6 +15,10 @@ const {
   updateRoomPrice,
   listEmailLogs,
 } = require('../controllers/admin');
+const {
+  listGroupRequests,
+  updateGroupRequestStatus,
+} = require('../controllers/groupRequests');
 
 router.use(authenticate, authorizeAdmin);
 
@@ -32,5 +36,8 @@ router.patch('/hotels/:id/assign-vendor', assignVendorToHotel);
 router.patch('/rooms/:id/price', updateRoomPrice);
 
 router.get('/email-logs', listEmailLogs);
+
+router.get('/group-requests', listGroupRequests);
+router.patch('/group-requests/:id', updateGroupRequestStatus);
 
 module.exports = router;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { MapPin, Calendar, Clock, ArrowRight, Search } from "lucide-react";
 import { Navigation } from "../components/Navigation";
+import { useSEO, breadcrumbLd } from "../hooks/useSEO";
 
 // Blog Article Card
 interface BlogCardProps {
@@ -69,6 +70,17 @@ function BlogCard({ image, category, title, excerpt, date, readTime, slug }: Blo
 
 // Main Blog Page Component
 export function BlogPage() {
+  useSEO({
+    title: "Turkey travel blog & city guides | Book United Hotels",
+    description:
+      "Neighborhood guides, travel tips, food, and culture for Istanbul and Turkey. Plan your stay with insider advice from our local travel desk.",
+    canonical: "/blog",
+    jsonLd: breadcrumbLd([
+      { name: "Home", url: "/" },
+      { name: "Blog", url: "/blog" },
+    ]),
+  });
+
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   const categories = ["All", "Neighborhoods", "Travel Tips", "Budget Travel", "Food & Dining", "Culture"];

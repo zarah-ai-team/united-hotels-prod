@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
@@ -9,6 +9,7 @@ import { VerifiedCollectionSection } from "../components/VerifiedCollectionSecti
 import { SegmentationSection } from "../components/SegmentationSection";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { useScrollProgress } from "../hooks/useScrollProgress";
+import { useSEO, organizationLd, websiteLd, localBusinessLd } from "../hooks/useSEO";
 import { useLanguage } from "../context/LanguageContext";
 import { useBooking } from "../context/BookingContext";
 import heroFigma1 from "../../assets/hero-figma-1.webp";
@@ -25,7 +26,24 @@ import {
   Search,
   Check,
   ChevronDown,
+  Plus,
+  Minus,
+  AlertCircle,
 } from "lucide-react";
+
+// Cities / districts (states) we currently serve. Drives the destination
+// dropdown in the hero search. Keep label = what the user sees, value = what
+// we send as the `destination` query param to /listing.
+type ServingDestination = { value: string; city: string; state: string };
+const SERVING_DESTINATIONS: ServingDestination[] = [
+  { value: "Sultanahmet, Istanbul", city: "Sultanahmet", state: "Istanbul" },
+  { value: "Beyoğlu, Istanbul", city: "Beyoğlu", state: "Istanbul" },
+  { value: "Galata, Istanbul", city: "Galata", state: "Istanbul" },
+  { value: "Karaköy, Istanbul", city: "Karaköy", state: "Istanbul" },
+  { value: "Pera, Istanbul", city: "Pera", state: "Istanbul" },
+  { value: "Sirkeci, Istanbul", city: "Sirkeci", state: "Istanbul" },
+  { value: "Fatih, Istanbul", city: "Fatih", state: "Istanbul" },
+];
 
 type RevealVariant = "up" | "left" | "right" | "pop";
 
@@ -70,17 +88,78 @@ const HERO_SLIDES = [
 ];
 const SLIDE_INTERVAL_MS = 6000;
 
+function GuestRow({
+  label,
+  sublabel,
+  value,
+  min,
+  onDec,
+  onInc,
+}: {
+  label: string;
+  sublabel: string;
+  value: number;
+  min: number;
+  onDec: () => void;
+  onInc: () => void;
+}) {
+  const decDisabled = value <= min;
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex flex-col">
+        <span className="font-['Inter:SemiBold',sans-serif] text-[14px] text-[#0B1F3B] dark:text-white">
+          {label}
+        </span>
+        <span className="text-[12px] text-[#6B7280] dark:text-white/60">{sublabel}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onDec}
+          disabled={decDisabled}
+          aria-label={`Decrease ${label}`}
+          className="w-8 h-8 rounded-full border border-[#E6EAF0] dark:border-white/15 flex items-center justify-center text-[#0B1F3B] dark:text-white hover:border-[#2F80ED] hover:text-[#2F80ED] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          <Minus className="w-3.5 h-3.5" strokeWidth={2.4} />
+        </button>
+        <span className="w-6 text-center font-['Inter:SemiBold',sans-serif] text-[14px] text-[#0B1F3B] dark:text-white">
+          {value}
+        </span>
+        <button
+          type="button"
+          onClick={onInc}
+          aria-label={`Increase ${label}`}
+          className="w-8 h-8 rounded-full border border-[#E6EAF0] dark:border-white/15 flex items-center justify-center text-[#0B1F3B] dark:text-white hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function HeroSection() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { setDates, setGuests } = useBooking();
+  const { setDates, setGuests, setOccupancy, setRoomCount } = useBooking();
   const [activeSlide, setActiveSlide] = useState(0);
   const [searchData, setSearchData] = useState({
     destination: "",
     checkIn: "",
     checkOut: "",
-    guests: "",
+    adults: 2,
+    children: 0,
+    rooms: 1,
   });
+  const [guestsOpen, setGuestsOpen] = useState(false);
+  const guestsRef = useRef<HTMLDivElement | null>(null);
+  // Field-level validation errors surfaced under each input on submit.
+  // Cleared per-field as the user edits to avoid stale red after a fix.
+  const [errors, setErrors] = useState<{
+    destination?: string;
+    checkIn?: string;
+    checkOut?: string;
+  }>({});
 
   // Auto-advance hero imagery
   useEffect(() => {
@@ -90,25 +169,101 @@ function HeroSection() {
     return () => window.clearInterval(id);
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchData.checkIn && searchData.checkOut) {
-      setDates(searchData.checkIn, searchData.checkOut);
-    }
-    const guestsNum = parseInt(searchData.guests || "0", 10);
-    if (Number.isFinite(guestsNum) && guestsNum > 0) {
-      setGuests(guestsNum);
-    }
-    const params = new URLSearchParams();
-    if (searchData.destination) params.set("destination", searchData.destination);
-    if (searchData.checkIn) params.set("checkIn", searchData.checkIn);
-    if (searchData.checkOut) params.set("checkOut", searchData.checkOut);
-    if (searchData.guests) params.set("guests", searchData.guests);
-    const qs = params.toString();
-    navigate(qs ? `/listing?${qs}` : "/listing");
-  };
+  // Close the guests popover when clicking outside or hitting Escape
+  useEffect(() => {
+    if (!guestsOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (guestsRef.current && !guestsRef.current.contains(e.target as Node)) {
+        setGuestsOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setGuestsOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [guestsOpen]);
+
+  const totalGuests = searchData.adults + searchData.children;
+  const guestsBase =
+    searchData.children > 0
+      ? `${searchData.adults} ${searchData.adults === 1 ? t("adult") : t("adults")} · ${searchData.children} ${
+          searchData.children === 1 ? t("child") : t("children")
+        }`
+      : `${searchData.adults} ${searchData.adults === 1 ? t("adult") : t("adults")}`;
+  const guestsLabel = `${guestsBase} · ${searchData.rooms} ${
+    searchData.rooms === 1 ? t("room") : t("rooms")
+  }`;
 
   const today = new Date().toISOString().split("T")[0];
+
+  const validate = () => {
+    const e: typeof errors = {};
+    if (!searchData.destination) {
+      e.destination = t("Please select a destination.");
+    }
+    if (!searchData.checkIn) {
+      e.checkIn = t("Please choose a check-in date.");
+    } else if (searchData.checkIn < today) {
+      e.checkIn = t("Check-in cannot be in the past.");
+    }
+    if (!searchData.checkOut) {
+      e.checkOut = t("Please choose a check-out date.");
+    } else if (searchData.checkIn && searchData.checkOut <= searchData.checkIn) {
+      e.checkOut = t("Check-out must be after check-in.");
+    }
+    return e;
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = validate();
+    setErrors(v);
+    if (Object.keys(v).length > 0) {
+      // Move focus to the first failing field so keyboard users land on it.
+      const firstKey = Object.keys(v)[0];
+      const el = document.getElementById(firstKey);
+      if (el && typeof (el as HTMLElement).focus === "function") {
+        (el as HTMLElement).focus();
+      }
+      return;
+    }
+    setDates(searchData.checkIn, searchData.checkOut);
+    if (totalGuests > 0) {
+      setGuests(totalGuests);
+      setOccupancy(searchData.adults, searchData.children);
+    }
+    setRoomCount(searchData.rooms);
+    const params = new URLSearchParams();
+    params.set("destination", searchData.destination);
+    params.set("checkIn", searchData.checkIn);
+    params.set("checkOut", searchData.checkOut);
+    params.set("adults", String(searchData.adults));
+    if (searchData.children) params.set("children", String(searchData.children));
+    params.set("guests", String(totalGuests));
+    params.set("rooms", String(searchData.rooms));
+    navigate(`/listing?${params.toString()}`);
+  };
+
+  const adjustAdults = (delta: number) =>
+    setSearchData((prev) => ({
+      ...prev,
+      adults: Math.max(1, Math.min(10, prev.adults + delta)),
+    }));
+  const adjustChildren = (delta: number) =>
+    setSearchData((prev) => ({
+      ...prev,
+      children: Math.max(0, Math.min(10, prev.children + delta)),
+    }));
+  const adjustRooms = (delta: number) =>
+    setSearchData((prev) => ({
+      ...prev,
+      rooms: Math.max(1, Math.min(10, prev.rooms + delta)),
+    }));
 
   return (
     <section
@@ -138,65 +293,185 @@ function HeroSection() {
               aria-label="Hotel search"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {/* Destination */}
-                <div className="relative sm:col-span-2">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                  <input
-                    id="destination"
-                    type="text"
-                    placeholder={t("Where to? (e.g. Istanbul)")}
-                    value={searchData.destination}
-                    onChange={(e) => setSearchData({ ...searchData, destination: e.target.value })}
-                    className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
-                  />
+                {/* Destination — dropdown of cities/states we currently serve */}
+                <div className="sm:col-span-2">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                    <select
+                      id="destination"
+                      value={searchData.destination}
+                      onChange={(e) => {
+                        setSearchData({ ...searchData, destination: e.target.value });
+                        if (errors.destination) setErrors((p) => ({ ...p, destination: undefined }));
+                      }}
+                      aria-label={t("Where to?")}
+                      aria-invalid={!!errors.destination}
+                      aria-describedby={errors.destination ? "destination-error" : undefined}
+                      className={`w-full h-[44px] pl-10 pr-9 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] appearance-none transition-colors ${
+                        errors.destination
+                          ? "!border-[#DC2626] focus:!border-[#DC2626] focus:!ring-[#DC2626]/15"
+                          : ""
+                      }`}
+                    >
+                      <option value="">{t("Where to?")}</option>
+                      {SERVING_DESTINATIONS.map((d) => (
+                        <option key={d.value} value={d.value}>
+                          {d.city}, {d.state}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                  </div>
+                  {errors.destination && (
+                    <p
+                      id="destination-error"
+                      role="alert"
+                      className="mt-1.5 flex items-center gap-1.5 font-['Inter:Regular',sans-serif] text-[12px] leading-[1.3] text-[#DC2626]"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
+                      <span>{errors.destination}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Check-in */}
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                  <input
-                    id="checkIn"
-                    type="date"
-                    value={searchData.checkIn}
-                    onChange={(e) => setSearchData({ ...searchData, checkIn: e.target.value })}
-                    min={today}
-                    aria-label={t("Check-in")}
-                    className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
-                  />
+                <div>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                    <input
+                      id="checkIn"
+                      type="date"
+                      value={searchData.checkIn}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setSearchData((prev) => ({
+                          ...prev,
+                          checkIn: next,
+                          // If a previously-chosen checkOut is now <= new checkIn, clear it.
+                          checkOut: prev.checkOut && next && prev.checkOut <= next ? "" : prev.checkOut,
+                        }));
+                        if (errors.checkIn || errors.checkOut) {
+                          setErrors((p) => ({ ...p, checkIn: undefined, checkOut: undefined }));
+                        }
+                      }}
+                      min={today}
+                      aria-label={t("Check-in")}
+                      aria-invalid={!!errors.checkIn}
+                      aria-describedby={errors.checkIn ? "checkIn-error" : undefined}
+                      className={`w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors ${
+                        errors.checkIn
+                          ? "!border-[#DC2626] focus:!border-[#DC2626] focus:!ring-[#DC2626]/15"
+                          : ""
+                      }`}
+                    />
+                  </div>
+                  {errors.checkIn && (
+                    <p
+                      id="checkIn-error"
+                      role="alert"
+                      className="mt-1.5 flex items-center gap-1.5 font-['Inter:Regular',sans-serif] text-[12px] leading-[1.3] text-[#DC2626]"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
+                      <span>{errors.checkIn}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Check-out */}
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                  <input
-                    id="checkOut"
-                    type="date"
-                    value={searchData.checkOut}
-                    onChange={(e) => setSearchData({ ...searchData, checkOut: e.target.value })}
-                    min={searchData.checkIn || today}
-                    aria-label={t("Check-out")}
-                    className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
-                  />
+                <div>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                    <input
+                      id="checkOut"
+                      type="date"
+                      value={searchData.checkOut}
+                      onChange={(e) => {
+                        setSearchData({ ...searchData, checkOut: e.target.value });
+                        if (errors.checkOut) setErrors((p) => ({ ...p, checkOut: undefined }));
+                      }}
+                      min={searchData.checkIn || today}
+                      aria-label={t("Check-out")}
+                      aria-invalid={!!errors.checkOut}
+                      aria-describedby={errors.checkOut ? "checkOut-error" : undefined}
+                      className={`w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors ${
+                        errors.checkOut
+                          ? "!border-[#DC2626] focus:!border-[#DC2626] focus:!ring-[#DC2626]/15"
+                          : ""
+                      }`}
+                    />
+                  </div>
+                  {errors.checkOut && (
+                    <p
+                      id="checkOut-error"
+                      role="alert"
+                      className="mt-1.5 flex items-center gap-1.5 font-['Inter:Regular',sans-serif] text-[12px] leading-[1.3] text-[#DC2626]"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
+                      <span>{errors.checkOut}</span>
+                    </p>
+                  )}
                 </div>
 
-                {/* Guests + Search button row */}
+                {/* Guests (adults + children) + Search button row */}
                 <div className="relative sm:col-span-2 grid grid-cols-[1fr_auto] gap-2">
-                  <div className="relative">
+                  <div className="relative" ref={guestsRef}>
                     <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                    <select
-                      id="guests"
-                      value={searchData.guests}
-                      onChange={(e) => setSearchData({ ...searchData, guests: e.target.value })}
+                    <button
+                      type="button"
+                      onClick={() => setGuestsOpen((v) => !v)}
+                      aria-haspopup="dialog"
+                      aria-expanded={guestsOpen}
                       aria-label={t("Guests")}
-                      className="w-full h-[44px] pl-10 pr-9 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] appearance-none transition-colors"
+                      className="w-full h-[44px] pl-10 pr-9 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] dark:text-white focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] text-left transition-colors"
                     >
-                      <option value="">{t("Add guests")}</option>
-                      <option value="1">{t("1 guest")}</option>
-                      <option value="2">{t("2 guests")}</option>
-                      <option value="3">{t("3 guests")}</option>
-                      <option value="4">{t("4+ guests")}</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                      {guestsLabel}
+                    </button>
+                    <ChevronDown
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none transition-transform ${
+                        guestsOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                    {guestsOpen && (
+                      <div
+                        role="dialog"
+                        aria-label={t("Select number of guests")}
+                        className="absolute z-30 mt-2 left-0 right-0 sm:right-auto sm:w-[320px] rounded-2xl bg-white dark:bg-[#1f2937] border border-[#E6EAF0] dark:border-white/10 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.25)] p-4 space-y-3"
+                      >
+                        <GuestRow
+                          label={t("Adults")}
+                          sublabel={t("Ages 13 or above")}
+                          value={searchData.adults}
+                          min={1}
+                          onDec={() => adjustAdults(-1)}
+                          onInc={() => adjustAdults(1)}
+                        />
+                        <GuestRow
+                          label={t("Children")}
+                          sublabel={t("Ages 0–12")}
+                          value={searchData.children}
+                          min={0}
+                          onDec={() => adjustChildren(-1)}
+                          onInc={() => adjustChildren(1)}
+                        />
+                        <GuestRow
+                          label={t("Rooms")}
+                          sublabel={t("Number of rooms")}
+                          value={searchData.rooms}
+                          min={1}
+                          onDec={() => adjustRooms(-1)}
+                          onInc={() => adjustRooms(1)}
+                        />
+                        <div className="flex justify-end pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setGuestsOpen(false)}
+                            className="text-[13px] font-['Inter:SemiBold',sans-serif] text-[#2F80ED] hover:text-[#1E5FBC] px-3 py-1.5 rounded-lg"
+                          >
+                            {t("Done")}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <button
                     type="submit"
@@ -385,6 +660,28 @@ function CTASection() {
 // Main HomePage Component
 export default function HomePage() {
   useScrollProgress();
+  useSEO({
+    title: 'Book United Hotels | Trusted hotel stays across Turkey',
+    description:
+      'Verified hotels across Istanbul and Turkey with transparent pricing and local support. Direct rates for individual travellers and groups — book online or request a group quote.',
+    canonical: '/',
+    ogType: 'website',
+    jsonLd: [
+      organizationLd(),
+      websiteLd(),
+      localBusinessLd({
+        address: {
+          streetAddress: 'Beyoğlu, İstiklal Caddesi No: 123',
+          addressLocality: 'Istanbul',
+          postalCode: '34433',
+          addressCountry: 'TR',
+        },
+        telephone: '+90 555 123 45 67',
+        priceRange: '$$',
+        openingHours: ['Mo-Su 09:00-22:00'],
+      }),
+    ],
+  });
 
   return (
     <div className="bg-[#fafafa] min-h-screen">

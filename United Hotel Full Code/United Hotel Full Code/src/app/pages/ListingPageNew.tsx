@@ -7,6 +7,7 @@ import { hotelService, type PublicHotel } from "../services/api";
 import { formatCurrency } from "../utils/currency";
 import { useLanguage } from "../context/LanguageContext";
 import { useScrollProgress } from "../hooks/useScrollProgress";
+import { useSEO, breadcrumbLd } from "../hooks/useSEO";
 import { extractAmenityNames, capitalizeAmenity } from "../utils/amenities";
 import { pickHotelImage, makeImageFallback } from "../utils/hotelImages";
 import {
@@ -117,14 +118,13 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/20 to-transparent opacity-60 mix-blend-overlay pointer-events-none" />
 
-        {/* Rating pill (top-left) */}
+        {/* Rating pill (top-left) — review count was a fixed seed stub
+            (~250 across all hotels), so we just show the star rating
+            until real review counts are wired in. */}
         <div className="card-glass-pill absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1">
           <Star className="w-3 h-3 fill-[#FFA500] text-[#FFA500] drop-shadow-[0_0_4px_rgba(255,165,0,0.6)]" strokeWidth={0} />
           <span className="font-['Inter:SemiBold',sans-serif] text-[11.5px] leading-none">
             {hotel.rating.toFixed(1)}
-          </span>
-          <span className="card-glass-muted font-['Inter:Regular',sans-serif] text-[11px] leading-none">
-            ({hotel.reviewCount})
           </span>
         </div>
 
@@ -170,21 +170,13 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
           {t(hotel.name)}
         </h3>
 
-        <div className="font-['Inter:Regular',sans-serif] italic text-[12px] text-[#6b7280] dark:text-white/60 mt-1.5 mb-3.5 flex items-center gap-2">
-          <span>
-            {hotel.reviewCount > 0
-              ? `${hotel.reviewCount} ${t("verified reviews")}`
-              : t("Newly listed stay")}
-          </span>
-          {hotel.district ? (
-            <>
-              <span className="text-[#d1d5db] dark:text-white/20">·</span>
-              <span className="not-italic font-['Inter:Medium',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/70 line-clamp-1">
-                {t(hotel.district)}
-              </span>
-            </>
-          ) : null}
-        </div>
+        {hotel.district ? (
+          <div className="mt-1.5 mb-3.5">
+            <span className="font-['Inter:Medium',sans-serif] text-[11.5px] text-[#6b7280] dark:text-white/70 line-clamp-1">
+              {t(hotel.district)}
+            </span>
+          </div>
+        ) : null}
 
         {hotel.amenities.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">
@@ -380,6 +372,32 @@ export function ListingPageNew() {
     const start = (currentPage - 1) * LISTING_PAGE_SIZE;
     return filteredHotels.slice(start, start + LISTING_PAGE_SIZE);
   }, [filteredHotels, currentPage]);
+
+  // Per-route SEO. Title narrows when the user has filtered by destination so
+  // the listing page can compete on long-tail queries like "hotels in galata".
+  const destinationParam = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return (params.get("destination") || "").trim();
+  }, [location.search]);
+  const seoTitle = destinationParam
+    ? `Hotels in ${destinationParam} | Book United Hotels`
+    : "Hotels in Turkey | Book United Hotels";
+  const seoDescription = destinationParam
+    ? `Browse verified hotels in ${destinationParam}. Transparent direct rates, local support, and flexible cancellations.`
+    : "Browse verified hotels across Istanbul and Turkey. Transparent direct rates, local support, and flexible cancellations.";
+  const canonicalPath = destinationParam
+    ? `/listing?destination=${encodeURIComponent(destinationParam)}`
+    : "/listing";
+
+  useSEO({
+    title: seoTitle,
+    description: seoDescription,
+    canonical: canonicalPath,
+    jsonLd: breadcrumbLd([
+      { name: "Home", url: "/" },
+      { name: destinationParam || "Hotels", url: canonicalPath },
+    ]),
+  });
 
   const pageWindowStart = Math.max(1, currentPage - 2);
   const pageWindowEnd = Math.min(totalPages, pageWindowStart + 4);

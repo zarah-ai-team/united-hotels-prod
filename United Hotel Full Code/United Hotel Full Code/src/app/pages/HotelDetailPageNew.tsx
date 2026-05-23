@@ -7,6 +7,7 @@ import { useBooking } from "../context/BookingContext";
 import { hotelService, type PublicHotel, type PublicHotelRoom } from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
 import { useScrollProgress } from "../hooks/useScrollProgress";
+import { useSEO, hotelLd, breadcrumbLd } from "../hooks/useSEO";
 import { extractAmenityNames, capitalizeAmenity } from "../utils/amenities";
 import { pickAmenityIcon } from "../utils/amenityIcons";
 import { pickHotelImage, pickHotelGallery, makeImageFallback } from "../utils/hotelImages";
@@ -748,7 +749,7 @@ export function HotelDetailPageNew() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, format } = useLanguage();
-  const { booking, setHotel, setRoom, setDates, setGuests, setRoomCount } = useBooking();
+  const { booking, setHotel, setRoom, setDates, setGuests, setOccupancy, setRoomCount } = useBooking();
   useScrollProgress();
 
   // Pull any pre-existing search from URL params (set by HomePage) — these
@@ -758,6 +759,8 @@ export function HotelDetailPageNew() {
   const urlCheckIn = searchParams.get("checkIn") || "";
   const urlCheckOut = searchParams.get("checkOut") || "";
   const urlGuests = parseInt(searchParams.get("guests") || "", 10);
+  const urlAdults = parseInt(searchParams.get("adults") || "", 10);
+  const urlChildren = parseInt(searchParams.get("children") || "", 10);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -836,6 +839,53 @@ export function HotelDetailPageNew() {
       .filter((room) => room.price > 0 && Number.isFinite(Number(room.id)));
   }, [hotel]);
 
+  // Per-route SEO. Title + Hotel schema reflect the live hotel data so the
+  // detail page can rank for "<hotel name> Istanbul" queries with rich
+  // results (rating, price, image).
+  const hotelName = hotel?.hotel_name || hotel?.name || "Hotel";
+  const hotelLocation = hotel?.location || "Turkey";
+  const hotelImage = useMemo(() => (hotel ? pickHotelImage(hotel) : undefined), [hotel]);
+  const cheapestRoom = useMemo(
+    () => bookableRooms.slice().sort((a, b) => a.price - b.price)[0],
+    [bookableRooms],
+  );
+  const hotelAmenities = useMemo(
+    () => (hotel ? extractAmenityNames(hotel.amenities).map(capitalizeAmenity).slice(0, 12) : []),
+    [hotel],
+  );
+  const hotelDescription = hotel
+    ? `${hotelName} in ${hotelLocation}. Direct rates, transparent pricing, and local support — book your stay with Book United Hotels.`
+    : "View hotel details and book your stay with Book United Hotels.";
+  useSEO({
+    title: hotel ? `${hotelName} — ${hotelLocation} | Book United Hotels` : "Hotel | Book United Hotels",
+    description: hotelDescription,
+    canonical: id ? `/hotel/${id}` : undefined,
+    ogType: "website",
+    ogImage: hotelImage,
+    jsonLd: hotel
+      ? [
+          hotelLd({
+            name: hotelName,
+            description: hotel.hotel_description || hotelDescription,
+            image: hotelImage,
+            url: id ? `/hotel/${id}` : undefined,
+            address: {
+              addressLocality: hotelLocation,
+              addressCountry: "TR",
+            },
+            starRating: Number((hotel as any).starRating ?? (hotel as any).star_rating ?? 0) || undefined,
+            priceFromUSD: cheapestRoom?.price || undefined,
+            amenities: hotelAmenities,
+          }),
+          breadcrumbLd([
+            { name: "Home", url: "/" },
+            { name: "Hotels", url: "/listing" },
+            { name: hotelName, url: id ? `/hotel/${id}` : undefined },
+          ]),
+        ]
+      : undefined,
+  });
+
   // Pull the underlying bookable room (with id + price) from the selection key.
   const selectedRoomId = selectedRoomKey ? selectedRoomKey.split("::")[0] : null;
   const selectedDisplayName = selectedRoomKey
@@ -877,6 +927,11 @@ export function HotelDetailPageNew() {
     // inherit the guest's choices instead of empty defaults.
     if (checkIn && checkOut) setDates(checkIn, checkOut);
     setGuests(guestCount);
+    // Carry adults/children from URL through to the booking flow when supplied;
+    // otherwise default to all adults so totals stay correct.
+    const adults = Number.isFinite(urlAdults) && urlAdults > 0 ? urlAdults : booking.adults || guestCount;
+    const children = Number.isFinite(urlChildren) && urlChildren >= 0 ? urlChildren : booking.children || 0;
+    setOccupancy(adults, children);
     setRoomCount(roomCount);
     navigate("/booking/step1");
   };

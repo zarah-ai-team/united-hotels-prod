@@ -3,7 +3,7 @@ import { User, Sun, Moon, Save, Sparkles, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useTheme } from '../../context/ThemeContext';
-import { authService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 // Minimal settings — just the essentials a partner-portal user touches
 // regularly: their display name, the theme, and a sign-out shortcut.
@@ -69,6 +69,7 @@ function SectionCard({ title, icon: Icon, accent = '#2F80ED', children }: Sectio
 export function AdminSettingsPage() {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   // Cached display info from the login response. Optional — falls back
   // gracefully if the user object isn't in localStorage yet.
@@ -78,7 +79,7 @@ export function AdminSettingsPage() {
   const [name, setName] = useState<string>(cachedUser?.name || '');
 
   const handleSignOut = () => {
-    authService.logout();
+    logout();
     localStorage.removeItem('uh_active_role');
     localStorage.removeItem('uh_active_name');
     navigate('/admin/login', { replace: true });

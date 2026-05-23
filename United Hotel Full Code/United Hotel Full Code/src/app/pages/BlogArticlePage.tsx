@@ -1,8 +1,22 @@
 import { Link } from "react-router";
 import { Calendar, Clock, ArrowLeft, Share2, Bookmark, MapPin, Sparkles, TrendingUp, Heart, Users, Home, Building2, Coffee } from "lucide-react";
 import { Navigation } from "../components/Navigation";
+import { useSEO, breadcrumbLd } from "../hooks/useSEO";
 
 export function BlogArticlePage() {
+  useSEO({
+    title: "Where to Stay in Turkey: Complete Neighborhood Guide | Book United Hotels",
+    description:
+      "First-time visitor's guide to Turkey's neighborhoods — Sultanahmet, Beyoğlu, Galata, Kadıköy, and more. Pick the right base for your trip.",
+    canonical: "/blog/where-to-stay-in-turkey",
+    ogType: "article",
+    jsonLd: breadcrumbLd([
+      { name: "Home", url: "/" },
+      { name: "Blog", url: "/blog" },
+      { name: "Where to Stay in Turkey", url: "/blog/where-to-stay-in-turkey" },
+    ]),
+  });
+
   return (
     <div className="bg-[#fafafa] min-h-screen">
       <Navigation />
