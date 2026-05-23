@@ -14,6 +14,7 @@ import {
   Mail,
   Sun,
   Moon,
+  Handshake,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRole } from './RoleSwitcher';
@@ -28,6 +29,7 @@ const navItems = [
   { icon: Users, label: 'Users', path: '/admin/users', roles: ['admin'] },
   { icon: BarChart3, label: 'Analytics', path: '/admin/analytics', roles: ['admin', 'vendor'] },
   { icon: Mail, label: 'Email Logs', path: '/admin/email-logs', roles: ['admin'] },
+  { icon: Handshake, label: 'Group Requests', path: '/admin/group-requests', roles: ['admin'] },
   { icon: Settings, label: 'Settings', path: '/admin/settings', roles: ['admin', 'vendor'] },
 ];
 

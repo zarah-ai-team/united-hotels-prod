@@ -27,6 +27,8 @@ import { VendorPortalPage } from './pages/admin/VendorPortalPage';
 import { VendorLoginPage } from './pages/admin/VendorLoginPage';
 import { AdminHotelDetailPage } from './pages/admin/AdminHotelDetailPage';
 import { AdminEmailLogsPage } from './pages/admin/AdminEmailLogsPage';
+import { AdminGroupRequestsPage } from './pages/admin/AdminGroupRequestsPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { RequireAdmin } from './components/admin/RequireAdmin';
 import { RequireVendor } from './components/admin/RequireVendor';
 import { RouteErrorBoundary } from './components/ErrorBoundary';
@@ -173,6 +175,11 @@ export const router = createBrowserRouter([
     element: guarded(AdminEmailLogsPage),
     errorElement,
   },
+  {
+    path: '/admin/group-requests',
+    element: guarded(AdminGroupRequestsPage),
+    errorElement,
+  },
   // Vendor portal (separate role — guarded by RequireVendor)
   {
     path: '/vendor/login',
@@ -182,6 +189,13 @@ export const router = createBrowserRouter([
   {
     path: '/vendor',
     element: vendorGuarded(VendorPortalPage),
+    errorElement,
+  },
+  // Catch-all 404 — must be the LAST route. Anything that didn't match a
+  // real route above lands here with our branded NotFound experience.
+  {
+    path: '*',
+    Component: NotFoundPage,
     errorElement,
   },
 ]);

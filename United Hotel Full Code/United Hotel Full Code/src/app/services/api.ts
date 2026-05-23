@@ -882,6 +882,43 @@ export const adminService = {
     }, token);
   },
 
+  async listGroupRequests(params: { status?: string; limit?: number } = {}): Promise<{
+    requests: Array<{
+      id: number;
+      name: string;
+      email: string;
+      phone: string;
+      destination: string | null;
+      dates: string | null;
+      groupSize: string | null;
+      budget: string | null;
+      groupType: string | null;
+      notes: string | null;
+      status: 'new' | 'contacted' | 'quoted' | 'won' | 'lost' | 'archived';
+      createdAt: string | null;
+      updatedAt: string | null;
+    }>;
+    count: number;
+  }> {
+    const token = getStoredToken() || undefined;
+    const qs = new URLSearchParams();
+    if (params.status) qs.set('status', params.status);
+    if (params.limit) qs.set('limit', String(params.limit));
+    const q = qs.toString();
+    return apiCall(`${API_ENDPOINTS.ADMIN.GROUP_REQUESTS}${q ? `?${q}` : ''}`, { method: 'GET' }, token);
+  },
+
+  async updateGroupRequestStatus(
+    id: number,
+    status: 'new' | 'contacted' | 'quoted' | 'won' | 'lost' | 'archived',
+  ): Promise<{ request: any }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.ADMIN.GROUP_REQUEST_STATUS(String(id)), {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }, token);
+  },
+
   async listEmailLogs(params: { type?: string; status?: string; limit?: number } = {}): Promise<{
     logs: Array<{
       id: number;

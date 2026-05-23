@@ -7,6 +7,7 @@ import { hotelService, type PublicHotel } from "../services/api";
 import { formatCurrency } from "../utils/currency";
 import { useLanguage } from "../context/LanguageContext";
 import { useScrollProgress } from "../hooks/useScrollProgress";
+import { useSEO, breadcrumbLd } from "../hooks/useSEO";
 import { extractAmenityNames, capitalizeAmenity } from "../utils/amenities";
 import { pickHotelImage, makeImageFallback } from "../utils/hotelImages";
 import {
@@ -371,6 +372,32 @@ export function ListingPageNew() {
     const start = (currentPage - 1) * LISTING_PAGE_SIZE;
     return filteredHotels.slice(start, start + LISTING_PAGE_SIZE);
   }, [filteredHotels, currentPage]);
+
+  // Per-route SEO. Title narrows when the user has filtered by destination so
+  // the listing page can compete on long-tail queries like "hotels in galata".
+  const destinationParam = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return (params.get("destination") || "").trim();
+  }, [location.search]);
+  const seoTitle = destinationParam
+    ? `Hotels in ${destinationParam} | Book United Hotels`
+    : "Hotels in Turkey | Book United Hotels";
+  const seoDescription = destinationParam
+    ? `Browse verified hotels in ${destinationParam}. Transparent direct rates, local support, and flexible cancellations.`
+    : "Browse verified hotels across Istanbul and Turkey. Transparent direct rates, local support, and flexible cancellations.";
+  const canonicalPath = destinationParam
+    ? `/listing?destination=${encodeURIComponent(destinationParam)}`
+    : "/listing";
+
+  useSEO({
+    title: seoTitle,
+    description: seoDescription,
+    canonical: canonicalPath,
+    jsonLd: breadcrumbLd([
+      { name: "Home", url: "/" },
+      { name: destinationParam || "Hotels", url: canonicalPath },
+    ]),
+  });
 
   const pageWindowStart = Math.max(1, currentPage - 2);
   const pageWindowEnd = Math.min(totalPages, pageWindowStart + 4);

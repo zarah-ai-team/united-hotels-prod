@@ -204,23 +204,23 @@ export function Navigation() {
                   </a>
                 );
               })}
-            </div>
 
-            {/* Desktop right cluster */}
-            <div className="hidden lg:flex items-center gap-2">
-              {/* WhatsApp Contact Us */}
+              {/* WhatsApp Contact Us — sits to the right of the Standards nav link */}
               <a
                 href={WHATSAPP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 h-9 px-3 rounded-full bg-[#25D366] hover:bg-[#1da851] text-white font-['Inter:SemiBold',sans-serif] text-[13px] transition-colors shadow-[0_2px_8px_rgba(37,211,102,0.30)]"
+                className="ml-2 inline-flex items-center gap-2 h-9 px-3 rounded-full bg-[#25D366] hover:bg-[#1da851] text-white font-['Inter:SemiBold',sans-serif] text-[13px] transition-colors shadow-[0_2px_8px_rgba(37,211,102,0.30)]"
                 aria-label="Contact us on WhatsApp"
               >
                 <MessageCircle className="w-4 h-4" strokeWidth={2.4} />
                 <span className="hidden xl:inline">{t("Contact us")}</span>
                 <span className="xl:hidden">WhatsApp</span>
               </a>
+            </div>
 
+            {/* Desktop right cluster */}
+            <div className="hidden lg:flex items-center gap-2">
               {/* Theme toggle */}
               <button
                 type="button"

@@ -22,10 +22,15 @@ import {
   Compass,
   Zap,
   ArrowRight,
+  User,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { useLanguage } from "../context/LanguageContext";
+import { useSEO, breadcrumbLd } from "../hooks/useSEO";
+import { API_BASE_URL, API_ENDPOINTS, joinUrl } from "../config/api";
 
 // ─────────────────────────────────────────────
 // Hero — split layout: pitch left, intake form right
@@ -33,19 +38,50 @@ import { useLanguage } from "../context/LanguageContext";
 function GroupsHero() {
   const { t } = useLanguage();
   const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
     destination: "",
     dates: "",
     groupSize: "",
     budget: "",
     type: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    toast.success(t("Group request sent"), {
-      description: t("Our group desk will reply on WhatsApp within 24 hours."),
-    });
-    setForm({ destination: "", dates: "", groupSize: "", budget: "", type: "" });
+    setSubmitting(true);
+    try {
+      const res = await fetch(joinUrl(API_BASE_URL, API_ENDPOINTS.GROUP_REQUESTS.SUBMIT), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.message || "Could not send your request");
+      }
+      toast.success(t("Group request sent"), {
+        description: t("Our group desk will reply on WhatsApp or email within 24 hours."),
+      });
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        destination: "",
+        dates: "",
+        groupSize: "",
+        budget: "",
+        type: "",
+      });
+    } catch (err: any) {
+      toast.error(t("Could not send your request"), {
+        description: err?.message || t("Please try again in a moment."),
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -98,6 +134,46 @@ function GroupsHero() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Contact details — required so the group desk can actually reach the user. */}
+              <div className="relative sm:col-span-2">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder={t("Full name")}
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                  autoComplete="name"
+                  className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white dark:bg-[#161616] border border-[#E6EAF0] dark:border-white/10 text-[#111827] dark:text-white placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
+                />
+              </div>
+
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                <input
+                  type="email"
+                  placeholder={t("Email address")}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+                  autoComplete="email"
+                  className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white dark:bg-[#161616] border border-[#E6EAF0] dark:border-white/10 text-[#111827] dark:text-white placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
+                />
+              </div>
+
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                <input
+                  type="tel"
+                  placeholder={t("Phone / WhatsApp number")}
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  required
+                  autoComplete="tel"
+                  className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white dark:bg-[#161616] border border-[#E6EAF0] dark:border-white/10 text-[#111827] dark:text-white placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
+                />
+              </div>
+
               <div className="relative sm:col-span-2">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
                 <input
@@ -179,10 +255,11 @@ function GroupsHero() {
 
               <button
                 type="submit"
-                className="sm:col-span-2 h-[48px] px-6 rounded-xl bg-[#2F80ED] hover:bg-[#1E5FBC] text-white font-['Inter:SemiBold',sans-serif] text-[15px] flex items-center justify-center gap-2 transition-colors shadow-[0_4px_16px_rgba(47,128,237,0.3)]"
+                disabled={submitting}
+                className="sm:col-span-2 h-[48px] px-6 rounded-xl bg-[#2F80ED] hover:bg-[#1E5FBC] text-white font-['Inter:SemiBold',sans-serif] text-[15px] flex items-center justify-center gap-2 transition-colors shadow-[0_4px_16px_rgba(47,128,237,0.3)] disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Send className="w-4 h-4" strokeWidth={2.4} />
-                {t("Submit Request")}
+                {submitting ? t("Sending…") : t("Submit Request")}
               </button>
             </div>
 
@@ -476,6 +553,17 @@ function FinalCTASection() {
 // Page shell
 // ─────────────────────────────────────────────
 export function GroupsPage() {
+  useSEO({
+    title: "Group hotel bookings in Turkey | Book United Hotels",
+    description:
+      "Reliable hotel sourcing for tour groups, corporate travel, and events across Istanbul and Turkey. Direct hotel agreements, negotiated rates, 24-hour quote turnaround.",
+    canonical: "/groups",
+    jsonLd: breadcrumbLd([
+      { name: "Home", url: "/" },
+      { name: "Groups", url: "/groups" },
+    ]),
+  });
+
   return (
     <div className="min-h-screen bg-[#F7F9FC] dark:bg-[#0A0A0A]">
       <Navigation />

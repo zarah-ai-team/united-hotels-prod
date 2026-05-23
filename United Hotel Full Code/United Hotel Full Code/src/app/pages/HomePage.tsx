@@ -9,6 +9,7 @@ import { VerifiedCollectionSection } from "../components/VerifiedCollectionSecti
 import { SegmentationSection } from "../components/SegmentationSection";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { useScrollProgress } from "../hooks/useScrollProgress";
+import { useSEO, organizationLd, websiteLd, localBusinessLd } from "../hooks/useSEO";
 import { useLanguage } from "../context/LanguageContext";
 import { useBooking } from "../context/BookingContext";
 import heroFigma1 from "../../assets/hero-figma-1.webp";
@@ -27,6 +28,7 @@ import {
   ChevronDown,
   Plus,
   Minus,
+  AlertCircle,
 } from "lucide-react";
 
 // Cities / districts (states) we currently serve. Drives the destination
@@ -139,7 +141,7 @@ function GuestRow({
 function HeroSection() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { setDates, setGuests, setOccupancy } = useBooking();
+  const { setDates, setGuests, setOccupancy, setRoomCount } = useBooking();
   const [activeSlide, setActiveSlide] = useState(0);
   const [searchData, setSearchData] = useState({
     destination: "",
@@ -147,9 +149,17 @@ function HeroSection() {
     checkOut: "",
     adults: 2,
     children: 0,
+    rooms: 1,
   });
   const [guestsOpen, setGuestsOpen] = useState(false);
   const guestsRef = useRef<HTMLDivElement | null>(null);
+  // Field-level validation errors surfaced under each input on submit.
+  // Cleared per-field as the user edits to avoid stale red after a fix.
+  const [errors, setErrors] = useState<{
+    destination?: string;
+    checkIn?: string;
+    checkOut?: string;
+  }>({});
 
   // Auto-advance hero imagery
   useEffect(() => {
@@ -179,31 +189,64 @@ function HeroSection() {
   }, [guestsOpen]);
 
   const totalGuests = searchData.adults + searchData.children;
-  const guestsLabel =
+  const guestsBase =
     searchData.children > 0
       ? `${searchData.adults} ${searchData.adults === 1 ? t("adult") : t("adults")} · ${searchData.children} ${
           searchData.children === 1 ? t("child") : t("children")
         }`
       : `${searchData.adults} ${searchData.adults === 1 ? t("adult") : t("adults")}`;
+  const guestsLabel = `${guestsBase} · ${searchData.rooms} ${
+    searchData.rooms === 1 ? t("room") : t("rooms")
+  }`;
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const validate = () => {
+    const e: typeof errors = {};
+    if (!searchData.destination) {
+      e.destination = t("Please select a destination.");
+    }
+    if (!searchData.checkIn) {
+      e.checkIn = t("Please choose a check-in date.");
+    } else if (searchData.checkIn < today) {
+      e.checkIn = t("Check-in cannot be in the past.");
+    }
+    if (!searchData.checkOut) {
+      e.checkOut = t("Please choose a check-out date.");
+    } else if (searchData.checkIn && searchData.checkOut <= searchData.checkIn) {
+      e.checkOut = t("Check-out must be after check-in.");
+    }
+    return e;
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchData.checkIn && searchData.checkOut) {
-      setDates(searchData.checkIn, searchData.checkOut);
+    const v = validate();
+    setErrors(v);
+    if (Object.keys(v).length > 0) {
+      // Move focus to the first failing field so keyboard users land on it.
+      const firstKey = Object.keys(v)[0];
+      const el = document.getElementById(firstKey);
+      if (el && typeof (el as HTMLElement).focus === "function") {
+        (el as HTMLElement).focus();
+      }
+      return;
     }
+    setDates(searchData.checkIn, searchData.checkOut);
     if (totalGuests > 0) {
       setGuests(totalGuests);
       setOccupancy(searchData.adults, searchData.children);
     }
+    setRoomCount(searchData.rooms);
     const params = new URLSearchParams();
-    if (searchData.destination) params.set("destination", searchData.destination);
-    if (searchData.checkIn) params.set("checkIn", searchData.checkIn);
-    if (searchData.checkOut) params.set("checkOut", searchData.checkOut);
-    if (searchData.adults) params.set("adults", String(searchData.adults));
+    params.set("destination", searchData.destination);
+    params.set("checkIn", searchData.checkIn);
+    params.set("checkOut", searchData.checkOut);
+    params.set("adults", String(searchData.adults));
     if (searchData.children) params.set("children", String(searchData.children));
-    if (totalGuests) params.set("guests", String(totalGuests));
-    const qs = params.toString();
-    navigate(qs ? `/listing?${qs}` : "/listing");
+    params.set("guests", String(totalGuests));
+    params.set("rooms", String(searchData.rooms));
+    navigate(`/listing?${params.toString()}`);
   };
 
   const adjustAdults = (delta: number) =>
@@ -216,8 +259,11 @@ function HeroSection() {
       ...prev,
       children: Math.max(0, Math.min(10, prev.children + delta)),
     }));
-
-  const today = new Date().toISOString().split("T")[0];
+  const adjustRooms = (delta: number) =>
+    setSearchData((prev) => ({
+      ...prev,
+      rooms: Math.max(1, Math.min(10, prev.rooms + delta)),
+    }));
 
   return (
     <section
@@ -248,51 +294,122 @@ function HeroSection() {
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {/* Destination — dropdown of cities/states we currently serve */}
-                <div className="relative sm:col-span-2">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                  <select
-                    id="destination"
-                    value={searchData.destination}
-                    onChange={(e) => setSearchData({ ...searchData, destination: e.target.value })}
-                    aria-label={t("Where to?")}
-                    className="w-full h-[44px] pl-10 pr-9 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] appearance-none transition-colors"
-                  >
-                    <option value="">{t("Where to?")}</option>
-                    {SERVING_DESTINATIONS.map((d) => (
-                      <option key={d.value} value={d.value}>
-                        {d.city}, {d.state}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                <div className="sm:col-span-2">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                    <select
+                      id="destination"
+                      value={searchData.destination}
+                      onChange={(e) => {
+                        setSearchData({ ...searchData, destination: e.target.value });
+                        if (errors.destination) setErrors((p) => ({ ...p, destination: undefined }));
+                      }}
+                      aria-label={t("Where to?")}
+                      aria-invalid={!!errors.destination}
+                      aria-describedby={errors.destination ? "destination-error" : undefined}
+                      className={`w-full h-[44px] pl-10 pr-9 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] appearance-none transition-colors ${
+                        errors.destination
+                          ? "!border-[#DC2626] focus:!border-[#DC2626] focus:!ring-[#DC2626]/15"
+                          : ""
+                      }`}
+                    >
+                      <option value="">{t("Where to?")}</option>
+                      {SERVING_DESTINATIONS.map((d) => (
+                        <option key={d.value} value={d.value}>
+                          {d.city}, {d.state}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                  </div>
+                  {errors.destination && (
+                    <p
+                      id="destination-error"
+                      role="alert"
+                      className="mt-1.5 flex items-center gap-1.5 font-['Inter:Regular',sans-serif] text-[12px] leading-[1.3] text-[#DC2626]"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
+                      <span>{errors.destination}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Check-in */}
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                  <input
-                    id="checkIn"
-                    type="date"
-                    value={searchData.checkIn}
-                    onChange={(e) => setSearchData({ ...searchData, checkIn: e.target.value })}
-                    min={today}
-                    aria-label={t("Check-in")}
-                    className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
-                  />
+                <div>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                    <input
+                      id="checkIn"
+                      type="date"
+                      value={searchData.checkIn}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setSearchData((prev) => ({
+                          ...prev,
+                          checkIn: next,
+                          // If a previously-chosen checkOut is now <= new checkIn, clear it.
+                          checkOut: prev.checkOut && next && prev.checkOut <= next ? "" : prev.checkOut,
+                        }));
+                        if (errors.checkIn || errors.checkOut) {
+                          setErrors((p) => ({ ...p, checkIn: undefined, checkOut: undefined }));
+                        }
+                      }}
+                      min={today}
+                      aria-label={t("Check-in")}
+                      aria-invalid={!!errors.checkIn}
+                      aria-describedby={errors.checkIn ? "checkIn-error" : undefined}
+                      className={`w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors ${
+                        errors.checkIn
+                          ? "!border-[#DC2626] focus:!border-[#DC2626] focus:!ring-[#DC2626]/15"
+                          : ""
+                      }`}
+                    />
+                  </div>
+                  {errors.checkIn && (
+                    <p
+                      id="checkIn-error"
+                      role="alert"
+                      className="mt-1.5 flex items-center gap-1.5 font-['Inter:Regular',sans-serif] text-[12px] leading-[1.3] text-[#DC2626]"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
+                      <span>{errors.checkIn}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Check-out */}
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-                  <input
-                    id="checkOut"
-                    type="date"
-                    value={searchData.checkOut}
-                    onChange={(e) => setSearchData({ ...searchData, checkOut: e.target.value })}
-                    min={searchData.checkIn || today}
-                    aria-label={t("Check-out")}
-                    className="w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors"
-                  />
+                <div>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
+                    <input
+                      id="checkOut"
+                      type="date"
+                      value={searchData.checkOut}
+                      onChange={(e) => {
+                        setSearchData({ ...searchData, checkOut: e.target.value });
+                        if (errors.checkOut) setErrors((p) => ({ ...p, checkOut: undefined }));
+                      }}
+                      min={searchData.checkIn || today}
+                      aria-label={t("Check-out")}
+                      aria-invalid={!!errors.checkOut}
+                      aria-describedby={errors.checkOut ? "checkOut-error" : undefined}
+                      className={`w-full h-[44px] pl-10 pr-3 rounded-xl bg-white border border-[#E6EAF0] dark:bg-[#161616] dark:border-white/10 text-[#111827] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/15 font-['Inter:Regular',sans-serif] text-[14px] transition-colors ${
+                        errors.checkOut
+                          ? "!border-[#DC2626] focus:!border-[#DC2626] focus:!ring-[#DC2626]/15"
+                          : ""
+                      }`}
+                    />
+                  </div>
+                  {errors.checkOut && (
+                    <p
+                      id="checkOut-error"
+                      role="alert"
+                      className="mt-1.5 flex items-center gap-1.5 font-['Inter:Regular',sans-serif] text-[12px] leading-[1.3] text-[#DC2626]"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} aria-hidden="true" />
+                      <span>{errors.checkOut}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Guests (adults + children) + Search button row */}
@@ -335,6 +452,14 @@ function HeroSection() {
                           min={0}
                           onDec={() => adjustChildren(-1)}
                           onInc={() => adjustChildren(1)}
+                        />
+                        <GuestRow
+                          label={t("Rooms")}
+                          sublabel={t("Number of rooms")}
+                          value={searchData.rooms}
+                          min={1}
+                          onDec={() => adjustRooms(-1)}
+                          onInc={() => adjustRooms(1)}
                         />
                         <div className="flex justify-end pt-1">
                           <button
@@ -535,6 +660,28 @@ function CTASection() {
 // Main HomePage Component
 export default function HomePage() {
   useScrollProgress();
+  useSEO({
+    title: 'Book United Hotels | Trusted hotel stays across Turkey',
+    description:
+      'Verified hotels across Istanbul and Turkey with transparent pricing and local support. Direct rates for individual travellers and groups — book online or request a group quote.',
+    canonical: '/',
+    ogType: 'website',
+    jsonLd: [
+      organizationLd(),
+      websiteLd(),
+      localBusinessLd({
+        address: {
+          streetAddress: 'Beyoğlu, İstiklal Caddesi No: 123',
+          addressLocality: 'Istanbul',
+          postalCode: '34433',
+          addressCountry: 'TR',
+        },
+        telephone: '+90 555 123 45 67',
+        priceRange: '$$',
+        openingHours: ['Mo-Su 09:00-22:00'],
+      }),
+    ],
+  });
 
   return (
     <div className="bg-[#fafafa] min-h-screen">
