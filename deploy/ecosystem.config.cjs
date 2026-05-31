@@ -4,7 +4,8 @@
 // Deploy dir (cwd) holds the extracted standalone bundle, i.e. it contains
 // server.js, .next/, node_modules/, public/.
 //
-// Start:   pm2 start /var/www/unitedhotels-next/ecosystem.web-next.cjs
+// Start:   pm2 start /var/www/unitedhotels-next/ecosystem.config.cjs
+//          (filename MUST contain ".config." or PM2 runs it as a plain script)
 // Reload:  pm2 reload frontend
 //
 // The BFF reaches the other PM2 apps over loopback:

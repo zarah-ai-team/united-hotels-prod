@@ -194,6 +194,24 @@ export function Footer() {
               </Link>
             </div>
           </div>
+
+          <div className="mt-8 md:mt-10 flex flex-col items-center gap-3 text-center">
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/zarah-ai-logo.svg"
+                alt="Zarah AI"
+                width={512}
+                height={345}
+                className="h-10 md:h-12 w-auto object-contain"
+              />
+              <p
+                className="text-white/70 text-[12px] md:text-sm tracking-wide"
+                style={{ fontFamily: 'Poppins, sans-serif' }}
+              >
+                Powered by Zarah AI
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
