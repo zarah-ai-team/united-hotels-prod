@@ -1,0 +1,60 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+
+  // Self-contained production server in .next/standalone — lets us build on the
+  // laptop and ship a minimal bundle to the (512MB) droplet without running
+  // `next build` or `npm install` there. Run with `node server.js`.
+  output: 'standalone',
+
+  // Allow building to an alternate dir (e.g. for a verification build that must
+  // not clobber a running `next dev`). Defaults to the standard .next.
+  distDir: process.env.NEXT_BUILD_DIR || '.next',
+
+  // Lift-and-shift migration: don't fail the production build on lint/type
+  // errors while the port stabilises. Tighten these once the migration is done.
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+
+  // MUI + emotion ship ESM that benefits from transpilation in the Next build.
+  transpilePackages: ['@mui/material', '@mui/icons-material', '@mui/system'],
+
+  images: {
+    // Remote hotel imagery (ImageKit etc.) — allow https sources. Tighten to
+    // specific hostnames once the live image domains are confirmed.
+    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+  },
+
+  // No dev proxy: the BFF route handlers under app/api/* own /api/* and forward
+  // to the upstreams (BACKEND_URL / PRICING_URL) server-side, in dev and prod
+  // alike. See src/server/bff/backend.ts.
+
+  // gzip/br compression for HTML/JS/CSS responses.
+  compress: true,
+  // Drop the X-Powered-By: Next.js header (minor fingerprinting reduction).
+  poweredByHeader: false,
+
+  // Security + caching headers. HSTS satisfies the Strict-Transport-Security
+  // audit; the static-asset rules add long-lived immutable caching for images
+  // and fonts so returning visitors don't re-download them.
+  async headers() {
+    const securityHeaders = [
+      { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      { key: 'X-DNS-Prefetch-Control', value: 'on' },
+      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+    ];
+    const longCache = [
+      { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+    ];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      { source: '/assets/:path*', headers: longCache },
+      { source: '/figma-assets/:path*', headers: longCache },
+    ];
+  },
+};
+
+export default nextConfig;

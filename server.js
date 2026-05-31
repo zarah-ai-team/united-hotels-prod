@@ -113,9 +113,12 @@ const explicitStaticDir = process.env.FRONTEND_STATIC_DIR
     ? path.resolve(process.env.FRONTEND_STATIC_DIR)
     : null;
 
+// The frontend is now the Next.js app (web-next), served by its own Node
+// process behind nginx — Express is API-only. These candidates remain as an
+// optional fallback (set FRONTEND_STATIC_DIR to serve a prebuilt SPA from
+// Express); when none exist, the static/SPA-fallback block below is skipped.
 const defaultStaticCandidates = [
     path.join(__dirname, 'client', 'build'),
-    path.join(__dirname, 'United Hotel Full Code', 'United Hotel Full Code', 'dist')
 ];
 
 const staticDir = [explicitStaticDir, ...defaultStaticCandidates]

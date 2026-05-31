@@ -6,9 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "client": "npm --prefix \"United Hotel Full Code/United Hotel Full Code\" run dev",
+    "client": "npm --prefix web-next run dev",
     "dev": "concurrently \"npm start\" \"npm run client\" ",
-    "build:frontend": "npm --prefix \"United Hotel Full Code/United Hotel Full Code\" run build",
+    "build:frontend": "npm --prefix web-next run build",
+    "start:web": "npm --prefix web-next run start",
     "start:prod": "npm run build:frontend; node server.js"
   },
   "repository": {

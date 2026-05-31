@@ -986,6 +986,7 @@ const normalizeHotelInput = (source = {}) => {
   const childPolicy = pickValue(source, ['child_policy', 'childPolicy']);
   const petPolicy = pickValue(source, ['pet_policy', 'petPolicy']);
   const smokingPolicy = pickValue(source, ['smoking_policy', 'smokingPolicy']);
+  const cancellationPolicy = pickValue(source, ['cancellation_policy', 'cancellationPolicy', 'CANCELLATION POLICY']);
 
   const mapped = {
     hotelId: pickValue(source, ['hotel_id', 'hotelId']),
@@ -1014,7 +1015,8 @@ const normalizeHotelInput = (source = {}) => {
     checkInOutRaw,
     childPolicy,
     petPolicy,
-    smokingPolicy
+    smokingPolicy,
+    cancellationPolicy
   };
 
   const totalRooms = parseTotalRooms(
@@ -1110,6 +1112,7 @@ const mapHotelRecord = (row, meta) => {
     childPolicy: (meta.childPolicyCol ? row[meta.childPolicyCol] : null) || details.childPolicy || null,
     petPolicy: (meta.petPolicyCol ? row[meta.petPolicyCol] : null) || details.petPolicy || null,
     smokingPolicy: (meta.smokingPolicyCol ? row[meta.smokingPolicyCol] : null) || details.smokingPolicy || null,
+    cancellationPolicy: (meta.cancellationPolicyCol ? row[meta.cancellationPolicyCol] : null) || details.cancellationPolicy || null,
     createdAt: meta.hotelCreatedCol ? row[meta.hotelCreatedCol] : row.created_at || row.createdAt || null,
     updatedAt: meta.hotelUpdatedCol ? row[meta.hotelUpdatedCol] : row.updated_at || row.updatedAt || null
   };
@@ -1155,12 +1158,15 @@ const getHotelMeta = async () => {
   const childPolicyCol = pickColumn(hotelCols, ['child_policy']);
   const petPolicyCol = pickColumn(hotelCols, ['pet_policy']);
   const smokingPolicyCol = pickColumn(hotelCols, ['smoking_policy']);
+  const cancellationPolicyCol = pickColumn(hotelCols, ['cancellation_policy']);
 
   const roomHotelIdCol = pickColumn(roomCategoryCols, ['hotel_id']);
   const roomHotelIdAnyCol = roomHotelIdCol || pickColumn(roomCategoryCols, ['hotelid', 'hotelId']);
   const roomCategoryCol = pickColumn(roomCategoryCols, ['room_category', 'category', 'type']);
   const roomNameCol = pickColumn(roomCategoryCols, ['room_name', 'name']);
   const roomPriceCol = pickColumn(roomCategoryCols, ['base_price', 'price_per_night', 'rentperday', 'price']);
+  const roomMinPriceCol = pickColumn(roomCategoryCols, ['min_price', 'minPrice', 'min_amount']);
+  const roomMaxPriceCol = pickColumn(roomCategoryCols, ['max_price', 'maxPrice', 'max_amount']);
   const roomCurrencyCol = pickColumn(roomCategoryCols, ['currency_code', 'currency']);
   const occupancyCodeCol = pickColumn(roomCategoryCols, ['occupancy_code']);
   const occupancyTypeCol = pickColumn(roomCategoryCols, ['occupancy_type']);
@@ -1175,6 +1181,8 @@ const getHotelMeta = async () => {
   const roomTableCategoryCol = pickColumn(roomCols, ['category', 'room_category', 'type']);
   const roomTableNameCol = pickColumn(roomCols, ['room_number', 'room_name', 'name', 'category']);
   const roomTablePriceCol = pickColumn(roomCols, ['price_per_night', 'rentperday', 'base_price', 'price']);
+  const roomTableMinPriceCol = pickColumn(roomCols, ['min_price', 'minPrice', 'min_amount']);
+  const roomTableMaxPriceCol = pickColumn(roomCols, ['max_price', 'maxPrice', 'max_amount']);
   const roomTableCurrencyCol = pickColumn(roomCols, ['currency_code', 'currency']);
   const roomTableMaxCountCol = pickColumn(roomCols, ['max_count', 'maxcount']);
   const roomTableTotalRoomsCol = pickColumn(roomCols, ['total_rooms', 'totalRooms']);
@@ -1213,6 +1221,7 @@ const getHotelMeta = async () => {
     childPolicyCol,
     petPolicyCol,
     smokingPolicyCol,
+    cancellationPolicyCol,
     hotelIdExpr: expr('h', hotelIdCol, `NULL::text`),
     hotelStatusExpr: expr('h', statusCol, `'active'::text`),
     hotelManagerExpr: expr('h', managerCol, `NULL::int`),
@@ -1227,6 +1236,8 @@ const getHotelMeta = async () => {
     roomCategoryExpr: expr('rc', roomCategoryCol, `NULL::text`),
     roomNameExpr: expr('rc', roomNameCol, `NULL::text`),
     roomPriceExpr: expr('rc', roomPriceCol, `NULL::numeric`),
+    roomMinPriceExpr: expr('rc', roomMinPriceCol, `NULL::numeric`),
+    roomMaxPriceExpr: expr('rc', roomMaxPriceCol, `NULL::numeric`),
     roomCurrencyExpr: expr('rc', roomCurrencyCol, `NULL::text`),
     occupancyCodeExpr: expr('rc', occupancyCodeCol, `NULL::text`),
     occupancyTypeExpr: expr('rc', occupancyTypeCol, `NULL::text`),
@@ -1241,6 +1252,8 @@ const getHotelMeta = async () => {
     roomTableCategoryExpr: expr('r', roomTableCategoryCol, `NULL::text`),
     roomTableNameExpr: expr('r', roomTableNameCol, `NULL::text`),
     roomTablePriceExpr: expr('r', roomTablePriceCol, `NULL::numeric`),
+    roomTableMinPriceExpr: expr('r', roomTableMinPriceCol, `NULL::numeric`),
+    roomTableMaxPriceExpr: expr('r', roomTableMaxPriceCol, `NULL::numeric`),
     roomTableCurrencyExpr: expr('r', roomTableCurrencyCol, `NULL::text`),
     roomTableMaxCountExpr: expr('r', roomTableMaxCountCol, `NULL::int`),
     roomTableTotalRoomsExpr: expr('r', roomTableTotalRoomsCol, `NULL::int`),
@@ -1305,6 +1318,8 @@ const fetchHotels = async ({ status = 'active', limit = 50, offset = 0, managerI
           'total_rooms', NULL,
           'available_rooms', NULL,
           'price_per_night', ${meta.roomPriceExpr},
+          'min_price', ${meta.roomMinPriceExpr},
+          'max_price', ${meta.roomMaxPriceExpr},
           'vendor_id', ${meta.roomVendorIdExpr},
           'tax_percent', ${meta.roomTaxPercentExpr},
           'tax_amount', ${meta.roomTaxAmountExpr},
@@ -1337,6 +1352,8 @@ const fetchHotels = async ({ status = 'active', limit = 50, offset = 0, managerI
           'total_rooms', ${meta.roomTableTotalRoomsExpr},
           'available_rooms', ${meta.roomTableAvailableRoomsExpr},
           'price_per_night', ${meta.roomTablePriceExpr},
+          'min_price', ${meta.roomTableMinPriceExpr},
+          'max_price', ${meta.roomTableMaxPriceExpr},
           'vendor_id', ${meta.roomTableVendorIdExpr},
           'tax_percent', ${meta.roomTableTaxPercentExpr},
           'tax_amount', ${meta.roomTableTaxAmountExpr},
@@ -1434,7 +1451,8 @@ const getPublicHotels = async (req, res) => {
         rooms: normalizedRooms,
         roomCategories,
         check_in_time: hotelRow.check_in_time || mapped.checkInTime,
-        check_out_time: hotelRow.check_out_time || mapped.checkOutTime
+        check_out_time: hotelRow.check_out_time || mapped.checkOutTime,
+        cancellationPolicy: hotelRow.cancellation_policy || mapped.cancellationPolicy || null
       };
     });
 
@@ -1523,6 +1541,8 @@ const getPublicHotelById = async (req, res) => {
           'total_rooms', NULL,
           'available_rooms', NULL,
           'price_per_night', ${meta.roomPriceExpr},
+          'min_price', ${meta.roomMinPriceExpr},
+          'max_price', ${meta.roomMaxPriceExpr},
           'vendor_id', ${meta.roomVendorIdExpr},
           'is_available', true,
           'images', '[]'::json,
@@ -1551,6 +1571,8 @@ const getPublicHotelById = async (req, res) => {
           'total_rooms', ${meta.roomTableTotalRoomsExpr},
           'available_rooms', ${meta.roomTableAvailableRoomsExpr},
           'price_per_night', ${meta.roomTablePriceExpr},
+          'min_price', ${meta.roomTableMinPriceExpr},
+          'max_price', ${meta.roomTableMaxPriceExpr},
           'is_available', ${meta.roomTableIsAvailableExpr},
           'images', ${meta.roomTableImagesExpr},
           'room_number', ${meta.roomTableNameExpr}
@@ -1602,7 +1624,8 @@ const getPublicHotelById = async (req, res) => {
       rooms: normalizedRooms,
       roomCategories,
       check_in_time: hotelRow.check_in_time || mapped.checkInTime,
-      check_out_time: hotelRow.check_out_time || mapped.checkOutTime
+      check_out_time: hotelRow.check_out_time || mapped.checkOutTime,
+      cancellationPolicy: hotelRow.cancellation_policy || mapped.cancellationPolicy || null
     };
 
     // Attach recommended pricing — date-aware when query params are provided.
@@ -1713,7 +1736,8 @@ const adminCreateHotel = async (req, res) => {
       checkOutTime,
       childPolicy,
       petPolicy,
-      smokingPolicy
+      smokingPolicy,
+      cancellationPolicy
     } = normalized;
     const resolvedName = name || normalized.raw?.['HOTEL NAMES'] || normalized.raw?.name || 'Unnamed Hotel';
     const resolvedAddress =
@@ -1750,6 +1774,7 @@ const adminCreateHotel = async (req, res) => {
     setWritableValue(writeValues, meta.childPolicyCol, childPolicy);
     setWritableValue(writeValues, meta.petPolicyCol, petPolicy);
     setWritableValue(writeValues, meta.smokingPolicyCol, smokingPolicy);
+    setWritableValue(writeValues, meta.cancellationPolicyCol, cancellationPolicy);
 
     const columns = Object.keys(writeValues);
     const values = Object.values(writeValues);
@@ -1825,7 +1850,8 @@ const adminUpdateHotel = async (req, res) => {
       checkOutTime,
       childPolicy,
       petPolicy,
-      smokingPolicy
+      smokingPolicy,
+      cancellationPolicy
     } = normalized;
 
     const updates = [];
@@ -1944,6 +1970,11 @@ const adminUpdateHotel = async (req, res) => {
     if (meta.smokingPolicyCol && typeof smokingPolicy !== 'undefined') {
       values.push(smokingPolicy);
       updates.push(`"${meta.smokingPolicyCol}" = $${values.length}`);
+    }
+
+    if (meta.cancellationPolicyCol && typeof cancellationPolicy !== 'undefined') {
+      values.push(cancellationPolicy);
+      updates.push(`"${meta.cancellationPolicyCol}" = $${values.length}`);
     }
 
     const updatedCol = pickColumn(meta.hotelCols, ['updated_at', 'updatedAt']);

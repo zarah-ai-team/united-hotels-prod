@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: npm install && npm --prefix "United Hotel Full Code/United Hotel Full Code" install && npm run build:frontend
+    buildCommand: npm install && npm --prefix web-next install && npm run build:frontend
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
