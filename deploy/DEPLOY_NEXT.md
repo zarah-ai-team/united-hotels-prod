@@ -23,7 +23,7 @@ powershell -ExecutionPolicy Bypass -File scripts\package-web-next.ps1
 
 # 2. Ship the bundle + the deploy configs to the droplet
 scp web-next\web-next-standalone.tar.gz root@209.38.102.94:/tmp/
-scp deploy\ecosystem.web-next.cjs        root@209.38.102.94:/tmp/
+scp deploy\ecosystem.config.cjs        root@209.38.102.94:/tmp/
 scp deploy\nginx-bookunitedhotels.conf   root@209.38.102.94:/tmp/
 ```
 
@@ -45,12 +45,12 @@ free -h
 rm -rf /var/www/unitedhotels-next && mkdir -p /var/www/unitedhotels-next
 tar -xzf /tmp/web-next-standalone.tar.gz -C /var/www/unitedhotels-next
 test -f /var/www/unitedhotels-next/server.js && echo "OK: server.js present" || echo "MISSING server.js — stop"
-cp /tmp/ecosystem.web-next.cjs /var/www/unitedhotels-next/ecosystem.web-next.cjs
+cp /tmp/ecosystem.config.cjs /var/www/unitedhotels-next/ecosystem.config.cjs
 ```
 
 ### B3. Start Next under PM2 on :3000 (does NOT touch the live site yet)
 ```bash
-pm2 start /var/www/unitedhotels-next/ecosystem.web-next.cjs
+pm2 start /var/www/unitedhotels-next/ecosystem.config.cjs
 pm2 save
 pm2 status        # 'frontend' should be 'online'
 pm2 logs frontend --lines 20 --nostream
@@ -117,7 +117,7 @@ scp web-next\web-next-standalone.tar.gz root@209.38.102.94:/tmp/
 # droplet
 rm -rf /var/www/unitedhotels-next && mkdir -p /var/www/unitedhotels-next
 tar -xzf /tmp/web-next-standalone.tar.gz -C /var/www/unitedhotels-next
-cp /tmp/ecosystem.web-next.cjs /var/www/unitedhotels-next/ 2>/dev/null || true
+cp /tmp/ecosystem.config.cjs /var/www/unitedhotels-next/ 2>/dev/null || true
 pm2 reload frontend
 ```
 
