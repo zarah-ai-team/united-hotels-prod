@@ -20,6 +20,12 @@ const nextConfig = {
   transpilePackages: ['@mui/material', '@mui/icons-material', '@mui/system'],
 
   images: {
+    // Serve AVIF (then WebP) at device-appropriate widths via next/image. This
+    // is the single biggest LCP/payload lever: the raw hero WebPs are 260–575KB
+    // each; resized + AVIF they drop to ~30–70KB on a phone.
+    formats: ['image/avif', 'image/webp'],
+    // Cache optimized variants for a day so repeat crawls/visits don't re-encode.
+    minimumCacheTTL: 86400,
     // Remote hotel imagery (ImageKit etc.) — allow https sources. Tighten to
     // specific hostnames once the live image domains are confirmed.
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
@@ -38,6 +44,39 @@ const nextConfig = {
   // audit; the static-asset rules add long-lived immutable caching for images
   // and fonts so returning visitors don't re-download them.
   async headers() {
+    // CSP delivered REPORT-ONLY for now: it logs violations to the browser
+    // console but never blocks a resource, so it cannot break SSR, the booking
+    // flow, ImageKit images, GA, or Resend. Origins below come from the Phase 0
+    // audit. Flip to an enforced `Content-Security-Policy` only after the
+    // console is clean across home → listing → hotel → booking.
+    //
+    // KNOWN LOOSE SPOTS to tighten before enforcing (tracked, intentional):
+    //   - script-src 'unsafe-inline': Next's inline bootstrap + GA init + JSON-LD
+    //     blobs. Replace with per-request nonces (needs a middleware) at enforce
+    //     time. 'unsafe-eval' is deliberately ABSENT — it's only needed by the
+    //     dev bundler (next dev); expect eval warnings in dev, none in prod.
+    //   - style-src 'unsafe-inline': MUI/emotion inject runtime <style> + inline
+    //     style= attributes (e.g. layout.tsx body). Hard to drop without nonces.
+    const cspReportOnly = [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'self'",
+      "form-action 'self'",
+      "manifest-src 'self'",
+      "worker-src 'self' blob:",
+      // ImageKit hotel photos + next/image data/blob URIs + GA tracking pixels.
+      "img-src 'self' data: blob: https://ik.imagekit.io https://www.google-analytics.com https://www.googletagmanager.com",
+      // Self bundle + Next inline bootstrap/JSON-LD + GA loader.
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+      // MUI/emotion runtime styles + inline style attributes.
+      "style-src 'self' 'unsafe-inline'",
+      // Fonts are self-hosted via next/font — no external CDN.
+      "font-src 'self' data:",
+      // XHR/fetch: same-origin API (the BFF) + GA beacons.
+      "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://region1.google-analytics.com",
+      "frame-src 'self'",
+    ].join('; ');
     const securityHeaders = [
       { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
       { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -45,6 +84,7 @@ const nextConfig = {
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
       { key: 'X-DNS-Prefetch-Control', value: 'on' },
       { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+      { key: 'Content-Security-Policy-Report-Only', value: cspReportOnly },
     ];
     const longCache = [
       { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
