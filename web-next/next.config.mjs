@@ -66,7 +66,8 @@ const nextConfig = {
       "manifest-src 'self'",
       "worker-src 'self' blob:",
       // ImageKit hotel photos + next/image data/blob URIs + GA tracking pixels.
-      "img-src 'self' data: blob: https://ik.imagekit.io https://www.google-analytics.com https://www.googletagmanager.com",
+      // images.unsplash.com (blog imagery) + picsum.photos (hotel image fallback).
+      "img-src 'self' data: blob: https://ik.imagekit.io https://images.unsplash.com https://picsum.photos https://www.google-analytics.com https://www.googletagmanager.com",
       // Self bundle + Next inline bootstrap/JSON-LD + GA loader.
       "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
       // MUI/emotion runtime styles + inline style attributes.
@@ -75,7 +76,8 @@ const nextConfig = {
       "font-src 'self' data:",
       // XHR/fetch: same-origin API (the BFF) + GA beacons.
       "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://region1.google-analytics.com",
-      "frame-src 'self'",
+      // OpenStreetMap embed on the support page.
+      "frame-src 'self' https://www.openstreetmap.org",
     ].join('; ');
     const securityHeaders = [
       { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
