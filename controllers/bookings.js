@@ -789,7 +789,7 @@ const CancelBooking = async (req, res) => {
             await adjustHotelRoomCount(client, roomResult.rows[0].hotel_id, 1);
         }
         await client.query('COMMIT');
-        res.send("Your booking cancelled Sucessfully");
+        res.json({ message: "Your booking cancelled Sucessfully" });
     } catch (error) {
         try {
             await client.query('ROLLBACK');

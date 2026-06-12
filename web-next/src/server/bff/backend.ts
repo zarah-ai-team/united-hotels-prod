@@ -28,8 +28,46 @@ const HOP_BY_HOP = new Set([
   'accept-encoding', // let fetch negotiate; avoids forwarding a gzip body undecoded
 ]);
 
+// Security/transport headers the upstream Express backend also sets. These are
+// browser-facing concerns owned by the Next layer (next.config.mjs headers()),
+// so we must NOT re-emit the upstream's copy onto /api/* responses — doing so
+// produced DUPLICATE Strict-Transport-Security / X-Content-Type-Options entries
+// (Express max-age=31536000 alongside Next's max-age=63072000), which ZAP
+// flagged as non-compliant. Stripping them here makes Next the single source.
+const STRIP_UPSTREAM_SECURITY_HEADERS = new Set([
+  'strict-transport-security',
+  'x-content-type-options',
+  'x-frame-options',
+  'referrer-policy',
+  'permissions-policy',
+  'content-security-policy',
+  'content-security-policy-report-only',
+  'x-dns-prefetch-control',
+  'x-xss-protection',
+  'x-powered-by',
+]);
+
+// User-specific / booking / payment / admin data must never be stored by the
+// browser or a shared cache (ZAP: "Re-examine Cache-control" / "Retrieved from
+// Cache"). We force Cache-Control: no-store on these prefixes at the single BFF
+// chokepoint. Public catalog data (/api/hotels/public, /api/pricing, /api/geo,
+// /api/locale, /api/translate) is intentionally left untouched.
+const NO_STORE_PREFIXES = [
+  '/api/payments',
+  '/api/bookings',
+  '/api/users',
+  '/api/admin',
+  '/api/vendor',
+  '/api/support',
+  '/api/group-requests',
+];
+
+function isSensitivePath(pathname: string): boolean {
+  return NO_STORE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
 async function forward(targetBase: string, targetPath: string, req: NextRequest): Promise<Response> {
-  const { search } = new URL(req.url);
+  const { search, pathname } = new URL(req.url);
   const target = `${targetBase}${targetPath}${search}`;
 
   const headers = new Headers();
@@ -59,8 +97,16 @@ async function forward(targetBase: string, targetPath: string, req: NextRequest)
 
   const resHeaders = new Headers();
   upstream.headers.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase())) resHeaders.set(key, value);
+    const lower = key.toLowerCase();
+    if (HOP_BY_HOP.has(lower) || STRIP_UPSTREAM_SECURITY_HEADERS.has(lower)) return;
+    resHeaders.set(key, value);
   });
+
+  // Override any upstream caching for sensitive resources — the browser-facing
+  // policy is owned here, not by Express.
+  if (isSensitivePath(pathname)) {
+    resHeaders.set('Cache-Control', 'no-store');
+  }
 
   const buf = await upstream.arrayBuffer();
   return new Response(buf, {
