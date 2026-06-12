@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SITE } from '@/shared/lib/seo';
 import { allLandingSlugs } from '@/shared/lib/landing';
+import { allDestinationSlugs } from '@/shared/lib/destinations';
 
 // Regenerate at most hourly so new/updated hotels appear without a redeploy.
 export const revalidate = 3600;
@@ -58,6 +59,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
+  // Destination landing pages (e.g. /destinations/sultanahmet) — real,
+  // indexable neighbourhood routes that funnel into the booking app.
+  const destinationRoutes: MetadataRoute.Sitemap = allDestinationSlugs().map((slug) => ({
+    url: `${SITE.url}/destinations/${slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.85,
+  }));
+
   const hotels = await fetchHotelEntries();
-  return [...staticRoutes, ...landingRoutes, ...hotels];
+  return [...staticRoutes, ...landingRoutes, ...destinationRoutes, ...hotels];
 }

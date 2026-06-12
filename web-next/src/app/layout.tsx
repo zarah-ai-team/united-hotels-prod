@@ -1,7 +1,25 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, Poppins } from 'next/font/google';
 import { SITE } from '@/shared/lib/seo';
 import Analytics from './Analytics';
 import '../styles/index.css';
+
+// Self-hosted, non-render-blocking webfonts (replaces the old render-blocking
+// Google Fonts @import). `display: swap` paints text immediately in the
+// fallback, then swaps — no invisible-text delay. Exposed as CSS variables so
+// styles can opt in; Inter is the document default.
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-poppins',
+  display: 'swap',
+});
 
 // Site-wide metadata defaults. Per-route values (title, description, canonical,
 // OG, hreflang, robots) are produced by generateMetadata in [[...slug]]/page.tsx
@@ -48,8 +66,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
+      <body style={{ fontFamily: 'var(--font-inter), system-ui, -apple-system, sans-serif' }}>
         {children}
         <Analytics />
       </body>

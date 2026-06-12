@@ -4,7 +4,15 @@
       "Bash(node *)",
       "Bash(curl *)",
       "Bash(npm run *)",
-      "PowerShell(Get-NetTCPConnection *)"
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(ls *.html index.html public/*.html)",
+      "Bash(find . -maxdepth 2 -name \"*.html\" -not -path \"./node_modules/*\")",
+      "Bash(npm install *)",
+      "Bash(cd /d/united-hotels/united-hotels-prod/web-next/src)",
+      "Bash(sed -n '1,140p' shared/api/services.ts)",
+      "Bash(sed -n '1,60p' shared/lib/amenities.ts)",
+      "Bash(cat ../next.config.mjs)",
+      "Bash(npm start *)"
     ]
   }
 }

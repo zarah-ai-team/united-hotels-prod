@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import {
   SITE,
   abs,
@@ -84,12 +85,12 @@ export default function LandingPage({ slug }: { slug: string }) {
           ))}
         </div>
 
-        <img
+        <Image
           src="/assets/hero-figma-7.webp"
           alt="Budget hotels across Istanbul and Turkey — bookable at direct rates with United Hotels"
           width={1000}
           height={460}
-          loading="lazy"
+          sizes="(max-width: 1000px) 100vw, 1000px"
           style={{ width: '100%', height: 'auto', borderRadius: 12, margin: '8px 0 16px' }}
         />
 

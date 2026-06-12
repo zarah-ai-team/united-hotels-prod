@@ -1,4 +1,5 @@
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Link, useNavigate } from "react-router";
 import { Navigation } from "@/shared/components/Navigation";
 import { Footer } from "@/shared/components/Footer";
@@ -143,6 +144,12 @@ function HeroSection() {
   const { t } = useLanguage();
   const { setDates, setGuests, setOccupancy, setRoomCount } = useBooking();
   const [activeSlide, setActiveSlide] = useState(0);
+  // Only the slides the user has actually reached are allowed to load. Without
+  // this every hero image fetches on first paint (they're all stacked
+  // `absolute inset-0`, so `loading="lazy"` never applies) — ~2.7MB up front.
+  // Slide 0 loads immediately (priority); later slides load as the carousel
+  // advances, by which point the page is interactive.
+  const [maxRevealed, setMaxRevealed] = useState(0);
   const [searchData, setSearchData] = useState({
     destination: "",
     checkIn: "",
@@ -168,6 +175,12 @@ function HeroSection() {
     }, SLIDE_INTERVAL_MS);
     return () => window.clearInterval(id);
   }, []);
+
+  // Reveal (i.e. allow loading of) each slide once it becomes active. Tracks a
+  // high-water mark so already-seen slides stay loaded when the loop wraps.
+  useEffect(() => {
+    setMaxRevealed((m) => (activeSlide > m ? activeSlide : m));
+  }, [activeSlide]);
 
   // Close the guests popover when clicking outside or hitting Escape
   useEffect(() => {
@@ -513,15 +526,28 @@ function HeroSection() {
           <div className="order-2 relative">
             <div className="relative aspect-[4/3] lg:aspect-auto lg:h-full lg:min-h-[440px] rounded-2xl overflow-hidden bg-[#F1F4F9]">
               {HERO_SLIDES.map((slide, i) => (
-                <img
+                <div
                   key={i}
-                  src={slide.src}
-                  alt={slide.alt}
-                  loading={i === 0 ? "eager" : "lazy"}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1200ms] ease-out ${
+                  aria-hidden={i !== activeSlide}
+                  className={`absolute inset-0 transition-opacity duration-[1200ms] ease-out ${
                     i === activeSlide ? "opacity-100" : "opacity-0"
                   }`}
-                />
+                >
+                  {/* Gated: a slide only mounts (and thus loads) once revealed.
+                      Slide 0 is the LCP image — priority preloads it and marks
+                      it fetchpriority=high. next/image serves a phone-sized
+                      AVIF instead of the full ~260KB+ WebP. */}
+                  {i <= maxRevealed && (
+                    <Image
+                      src={slide.src}
+                      alt={slide.alt}
+                      fill
+                      priority={i === 0}
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
               ))}
               {/* Subtle bottom gradient for any caption overlay */}
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />

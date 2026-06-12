@@ -493,3 +493,82 @@ export const faqLd = (items: FaqItem[]) => ({
     acceptedAnswer: { '@type': 'Answer', text: q.answer },
   })),
 });
+
+export interface HotelLdInput {
+  name: string;
+  description?: string;
+  /** Absolute or root-relative canonical URL of the hotel page. */
+  url: string;
+  image?: string | null;
+  addressLocality?: string;
+  streetAddress?: string;
+  addressCountry?: string;
+  /** 0–5; omitted from output when falsy (never fabricate a star rating). */
+  starRating?: number;
+  amenities?: string[];
+  /** Cheapest nightly rate, for the priceRange / Offer signal. */
+  priceFrom?: number;
+  priceCurrency?: string;
+}
+
+// Per-hotel structured data. Uses schema.org/Hotel with a nested makesOffer so
+// the price surfaces in rich results. We deliberately DO NOT emit
+// aggregateRating — review counts here are placeholder stubs, and faking
+// ratings risks a Google manual penalty (per the SEO audit).
+export const hotelLd = (h: HotelLdInput) => {
+  const ld: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Hotel',
+    name: h.name,
+    url: abs(h.url),
+  };
+  if (h.description) ld.description = h.description;
+  if (h.image) ld.image = abs(h.image);
+  if (h.addressLocality || h.streetAddress) {
+    ld.address = {
+      '@type': 'PostalAddress',
+      ...(h.streetAddress ? { streetAddress: h.streetAddress } : {}),
+      addressLocality: h.addressLocality || SITE.address.addressLocality,
+      addressCountry: h.addressCountry || 'TR',
+    };
+  }
+  if (h.starRating && h.starRating > 0) {
+    ld.starRating = { '@type': 'Rating', ratingValue: h.starRating, bestRating: 5 };
+  }
+  if (h.amenities?.length) {
+    ld.amenityFeature = h.amenities.map((name) => ({
+      '@type': 'LocationFeatureSpecification',
+      name,
+      value: true,
+    }));
+  }
+  if (h.priceFrom && h.priceFrom > 0) {
+    ld.makesOffer = {
+      '@type': 'Offer',
+      priceCurrency: h.priceCurrency || 'USD',
+      price: Math.round(h.priceFrom),
+      availability: 'https://schema.org/InStock',
+      url: abs(h.url),
+    };
+  }
+  return ld;
+};
+
+export interface ItemListEntry {
+  url: string;
+  name: string;
+}
+
+// ItemList of hotels — helps Google understand a listing/destination page as a
+// curated collection and discover each hotel URL.
+export const itemListLd = (items: ItemListEntry[]) => ({
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  numberOfItems: items.length,
+  itemListElement: items.map((it, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: abs(it.url),
+    name: it.name,
+  })),
+});

@@ -1,1 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+/* Inter + Poppins are now self-hosted via next/font (see app/layout.tsx),
+   exposed as the CSS variables --font-inter / --font-poppins. The previous
+   `@import url(fonts.googleapis.com)` was render-blocking (a serial round-trip
+   discovered only after this CSS downloaded); next/font ships the fonts
+   same-origin with display:swap, so they no longer block first paint. */

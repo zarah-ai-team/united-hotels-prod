@@ -1,0 +1,8 @@
+# Modern targets — tells Next/SWC to skip legacy transpilation and the
+# polyfills bundle (Lighthouse "Legacy JavaScript"). Covers ~97%+ of real
+# users; the booking flow doesn't need to support pre-2020 browsers.
+chrome >= 87
+edge >= 88
+firefox >= 78
+safari >= 14
+not dead

@@ -92,9 +92,13 @@ interface ListingCardProps {
   hotel: ListingHotel;
   language: string;
   t: (s: string) => string;
+  // True while the recommended/live price fetch is still in flight. The rest of
+  // the card (image, name, location, amenities) is already populated from static
+  // data; only the price slot shows a shimmer until prices arrive.
+  pricingLoading: boolean;
 }
 
-function ListingCard({ hotel, language, t }: ListingCardProps) {
+function ListingCard({ hotel, language, t, pricingLoading }: ListingCardProps) {
   const hasDiscount = hotel.discountPercent > 0;
   const showOldPrice = hotel.basePrice && hotel.basePrice > hotel.directPrice;
   const hasPrice = Number.isFinite(hotel.directPrice) && hotel.directPrice > 0;
@@ -208,13 +212,21 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
               <span className="font-['Inter:SemiBold',sans-serif] text-[10px] tracking-[0.22em] uppercase text-[#2F80ED]">
                 {t("From")}
               </span>
-              {hasPrice && showOldPrice && (
+              {!pricingLoading && hasPrice && showOldPrice && (
                 <span className="font-['Inter:Regular',sans-serif] text-[11.5px] line-through text-[#9aa0a6]">
                   {formatCurrency(hotel.basePrice ?? 0, language)}
                 </span>
               )}
             </div>
-            {hasPrice ? (
+            {pricingLoading ? (
+              // Card is already on screen from static data; the live price is
+              // still being fetched, so shimmer only the price slot.
+              <div
+                role="status"
+                aria-label={t("Loading price")}
+                className="h-[26px] w-28 rounded-md bg-gradient-to-r from-[#2F80ED]/12 via-[#2F80ED]/5 to-[#2F80ED]/12 dark:from-white/10 dark:via-white/5 dark:to-white/10 animate-pulse"
+              />
+            ) : hasPrice ? (
               <div className="flex items-baseline gap-1.5 flex-wrap">
                 <span className="font-['Poppins:Bold',sans-serif] text-[22px] sm:text-[26px] leading-none tracking-[-0.025em] text-[#1E5FBC] dark:text-[#5DA0F8]">
                   {formatCurrency(hotel.directPrice, language)}
@@ -228,7 +240,7 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
                 {t("Price on request")}
               </div>
             )}
-            {hasPrice && hasDiscount && hotel.savings > 0 ? (
+            {!pricingLoading && hasPrice && hasDiscount && hotel.savings > 0 ? (
               <div className="mt-1 inline-flex items-center gap-1 font-['Inter:SemiBold',sans-serif] text-[11px] text-[#1E5FBC] dark:text-[#5DA0F8]">
                 <Sparkles className="w-3 h-3" strokeWidth={2.2} />
                 {t("You save")} {formatCurrency(hotel.savings, language)}
@@ -249,12 +261,38 @@ function ListingCard({ hotel, language, t }: ListingCardProps) {
   );
 }
 
+// The /listing server page seeds the hotels it already fetched onto the window
+// (see app/listing/page.tsx) so this client SPA can paint cards immediately
+// rather than flashing a full-page skeleton. Returns null when there is no seed
+// (e.g. in-app navigation to /listing), in which case we fall back to the normal
+// client fetch + skeleton.
+function readSeedHotels(): PublicHotel[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const seed = (window as any).__UH_LISTING_HOTELS__;
+    return Array.isArray(seed) && seed.length > 0 ? (seed as PublicHotel[]) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function ListingPageNew() {
   const { language, t } = useLanguage();
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
+  // Seed the grid from the server-injected hotels (if present) so cards render
+  // on the very first paint with no full-page skeleton.
+  const [hotels, setHotels] = useState<ListingHotel[]>(() => {
+    const seed = readSeedHotels();
+    return seed ? seed.map(mapHotel) : [];
+  });
+  // Only show the full-page skeleton when we have nothing to show yet (no seed).
+  const [loading, setLoading] = useState(() => readSeedHotels() === null);
+  // Distinct from `loading`: the grid is already visible (seed/static data in)
+  // while this stays true and the live/recommended prices are still being
+  // fetched. Seeded loads start with prices pending so only the price slots
+  // shimmer.
+  const [pricingLoading, setPricingLoading] = useState(() => readSeedHotels() !== null);
   const [error, setError] = useState<string | null>(null);
-  const [hotels, setHotels] = useState<ListingHotel[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -303,9 +341,20 @@ export function ListingPageNew() {
           allHotels.push(...(nextResponse.hotels || []));
         }
 
-        // Forward the user's selected dates so the v2 engine fetches LIVE
-        // OTA anchors for that stay window. Without dates the engine has
-        // to fall back to the analytical formula.
+        if (!active) return;
+
+        // Stage 1 — render the grid immediately from static hotel data (image,
+        // name, location, amenities, rating). The slow recommended-price fetch
+        // below must not block the cards from appearing.
+        setHotels(allHotels.map((hotel) => mapHotel(hotel)));
+        setLoading(false);
+        setPricingLoading(true);
+
+        // Stage 2 — fetch LIVE/recommended prices (the heavy OTA-anchor step)
+        // and merge them into the already-visible cards once they arrive.
+        // Forward the user's selected dates so the v2 engine fetches LIVE OTA
+        // anchors for that stay window; without dates it falls back to the
+        // analytical formula.
         const params = new URLSearchParams(location.search);
         const checkInDate = params.get("checkInDate") || params.get("checkin") || null;
         const checkOutDate = params.get("checkOutDate") || params.get("checkout") || null;
@@ -313,14 +362,14 @@ export function ListingPageNew() {
           .getAllRecommended("active", true, checkInDate, checkOutDate)
           .catch(() => null);
 
+        if (!active) return;
+
         const recommendedByHotelId = new Map<string, any[]>();
         if (pricingPayload && Array.isArray(pricingPayload.hotels)) {
           for (const item of pricingPayload.hotels) {
             recommendedByHotelId.set(String(item.hotelId), item.recommendedPrices || []);
           }
         }
-
-        if (!active) return;
 
         const mergedHotels = allHotels.map((hotel) => ({
           ...hotel,
@@ -330,13 +379,16 @@ export function ListingPageNew() {
             [],
         }));
 
-        const mapped = mergedHotels.map((hotel) => mapHotel(hotel));
-        setHotels(mapped);
+        setHotels(mergedHotels.map((hotel) => mapHotel(hotel)));
+        setPricingLoading(false);
       } catch (e: any) {
         if (!active) return;
         setError(e?.data?.error || e?.message || "Failed to load hotels");
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+          setPricingLoading(false);
+        }
       }
     };
 
@@ -465,7 +517,7 @@ export function ListingPageNew() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
                 {paginatedHotels.map((hotel) => (
-                  <ListingCard key={hotel.id} hotel={hotel} language={language} t={t} />
+                  <ListingCard key={hotel.id} hotel={hotel} language={language} t={t} pricingLoading={pricingLoading} />
                 ))}
               </div>
 

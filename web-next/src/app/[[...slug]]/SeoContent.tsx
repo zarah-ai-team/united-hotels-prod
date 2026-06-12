@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import {
   SITE,
   getRouteSeo,
@@ -64,13 +65,14 @@ export default function SeoContent({ pathname }: { pathname: string }) {
         <p key={`intro-${i}`}>{p}</p>
       ))}
 
-      {/* Brand image with descriptive alt (gives crawlers an image + og context) */}
-      <img
+      {/* Brand image with descriptive alt (gives crawlers an image + og context).
+          next/image serves a responsive AVIF/WebP — the source WebP is 575KB. */}
+      <Image
         src="/assets/hero-figma-7.webp"
         alt="Aerial view of Istanbul and the Golden Horn — hotels bookable with Book United Hotels"
         width={1100}
         height={500}
-        loading="lazy"
+        sizes="(max-width: 1100px) 100vw, 1100px"
         style={{ width: '100%', height: 'auto', borderRadius: 12, margin: '16px 0' }}
       />
 
