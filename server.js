@@ -156,6 +156,29 @@ if (staticDir) {
 }
 
 
+// Global error handler — MUST be registered last (Express identifies it by the
+// 4-arg signature). Any handler that calls next(err) lands here. In production
+// we log the full error server-side but return a generic body, so stack traces,
+// SQL strings, and file paths never reach the client (ZAP: Application Error
+// Disclosure). In development we surface the message + stack to keep debugging
+// fast. Intentional user-facing validation errors are NOT routed here — they
+// still respond with their own 4xx + message at the call site.
+app.use((err, req, res, next) => {
+    // If a response already started streaming, hand off to Express's default
+    // handler, which closes the connection without double-sending headers.
+    if (res.headersSent) {
+        return next(err);
+    }
+    const ts = new Date().toISOString().slice(11, 19);
+    console.error(`[${ts}] ERROR ${req.method} ${req.originalUrl}:`, err);
+
+    const status = err.status || err.statusCode || 500;
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(status).json({ error: 'Internal server error' });
+    }
+    return res.status(status).json({ error: err.message, stack: err.stack });
+});
+
 app.listen(port, ()=>{
     console.log(`Server started at port ${port}`);
 })

@@ -180,7 +180,7 @@ const getMyBookings = async (req, res) => {
   }
 };
 
-const getVendorStats = async (req, res) => {
+const getVendorStats = async (req, res, next) => {
   try {
     const isAdmin = !!req.user.isAdmin;
     const scopeFilter = isAdmin ? '' : 'WHERE h.vendor_id = $1';
@@ -271,7 +271,7 @@ const getVendorStats = async (req, res) => {
     });
   } catch (error) {
     console.error('getVendorStats error', error);
-    return res.status(500).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -280,7 +280,7 @@ const getVendorStats = async (req, res) => {
 // AdminAnalyticsPage can render either side without branching, but every
 // query is filtered to the staff member's hotels via h.vendor_id.
 
-const getVendorAnalytics = async (req, res) => {
+const getVendorAnalytics = async (req, res, next) => {
   try {
     const days = Math.max(7, Math.min(365, parseInt(req.query.days, 10) || 30));
     const userId = req.user.id;
@@ -413,7 +413,7 @@ const getVendorAnalytics = async (req, res) => {
     });
   } catch (error) {
     console.error('getVendorAnalytics error', error);
-    return res.status(500).json({ error: error.message });
+    return next(error);
   }
 };
 

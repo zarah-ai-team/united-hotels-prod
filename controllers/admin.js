@@ -30,7 +30,7 @@ const ensureBookingsCountryColumn = async () => {
 
 // ─── Stats ───────────────────────────────────────────────────────────────
 
-const getDashboardStats = async (_req, res) => {
+const getDashboardStats = async (_req, res, next) => {
   try {
     const [
       hotelsCount,
@@ -111,13 +111,13 @@ const getDashboardStats = async (_req, res) => {
     });
   } catch (error) {
     console.error('getDashboardStats error', error);
-    return res.status(500).json({ error: error.message });
+    return next(error);
   }
 };
 
 // ─── Analytics (richer breakdowns for charts) ─────────────────────────────
 
-const getAnalytics = async (req, res) => {
+const getAnalytics = async (req, res, next) => {
   try {
     const days = Math.max(7, Math.min(365, parseInt(req.query.days, 10) || 30));
 
@@ -255,13 +255,13 @@ const getAnalytics = async (req, res) => {
     });
   } catch (error) {
     console.error('getAnalytics error', error);
-    return res.status(500).json({ error: error.message });
+    return next(error);
   }
 };
 
 // ─── Bookings by country (admin world map) ───────────────────────────────
 
-const getBookingsByCountry = async (_req, res) => {
+const getBookingsByCountry = async (_req, res, next) => {
   try {
     await ensureBookingsCountryColumn();
     // Make sure users.country exists too so the COALESCE join below doesn't trip.
@@ -295,7 +295,7 @@ const getBookingsByCountry = async (_req, res) => {
     });
   } catch (error) {
     console.error('getBookingsByCountry error', error);
-    return res.status(500).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -305,7 +305,7 @@ const getBookingsByCountry = async (_req, res) => {
 // utils/geoip on register). Used for the "where are our customers from?"
 // tile next to the bookings-by-country chart on the dashboard.
 
-const getUsersByCountry = async (_req, res) => {
+const getUsersByCountry = async (_req, res, next) => {
   try {
     // The country column is added lazily on first registration; make sure
     // it exists so the SELECT doesn't 500 on a brand-new database.
@@ -332,7 +332,7 @@ const getUsersByCountry = async (_req, res) => {
     });
   } catch (error) {
     console.error('getUsersByCountry error', error);
-    return res.status(500).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -536,7 +536,7 @@ const updateRoomPrice = async (req, res) => {
 // admin can audit what the system actually emailed out, see Resend message
 // IDs for delivery investigation, and spot failures fast.
 
-const listEmailLogs = async (req, res) => {
+const listEmailLogs = async (req, res, next) => {
   try {
     const limit = Math.max(1, Math.min(500, parseInt(req.query.limit, 10) || 100));
     const type = req.query.type || null;
@@ -573,7 +573,7 @@ const listEmailLogs = async (req, res) => {
     });
   } catch (error) {
     console.error('listEmailLogs error', error);
-    return res.status(500).json({ error: error.message });
+    return next(error);
   }
 };
 
