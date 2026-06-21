@@ -86,6 +86,7 @@ export const API_ENDPOINTS = {
     GET_ALL: '/bookings',
     GET_BY_USER: '/bookings/getbookingsbyuserid',
     BOOK_ROOM: '/bookings/bookroom',
+    CANCEL: '/bookings/cancel',
   },
 
   ADMIN: {

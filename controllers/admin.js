@@ -523,6 +523,8 @@ const updateRoomPrice = async (req, res) => {
     );
 
     if (result.rowCount === 0) return res.status(404).json({ error: 'Room not found' });
+    // Bust the public price caches so the change is visible on the site now.
+    try { require('./hotels').invalidatePriceCaches(); } catch (_e) { /* non-fatal */ }
     return res.json({ message: 'Room price updated', room: result.rows[0] });
   } catch (error) {
     return res.status(400).json({ error: error.message });

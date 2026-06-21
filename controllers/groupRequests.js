@@ -111,6 +111,27 @@ const submitGroupRequest = async (req, res) => {
       }).catch((err) => console.warn('[group_requests] inbox email failed:', err?.message));
     }
 
+    // Acknowledge to the requester so they know it landed (best-effort).
+    const ackHtml = renderEmail({
+      title: 'Group request received',
+      preview: 'Thanks — our group desk will be in touch shortly.',
+      body: `
+        ${heading(`Thanks, ${escapeHtml(name)}!`)}
+        ${paragraph('We&rsquo;ve received your group request. Our team will get back to you shortly with options and pricing.')}
+        ${paragraph(`<strong>Destination:</strong> ${escapeHtml(destination || '—')}`)}
+        ${paragraph(`<strong>Dates:</strong> ${escapeHtml(dates || '—')}`)}
+        ${paragraph(`<strong>Group size:</strong> ${escapeHtml(groupSize || '—')}`)}
+        ${muted('Need anything sooner? Just reply to this email or message us on WhatsApp.')}
+      `,
+    });
+    sendEmail({
+      type: 'group_request_ack',
+      to: email,
+      subject: 'We received your group request — United Hotels',
+      html: ackHtml,
+      text: `Hi ${name},\n\nWe received your group request and will be in touch shortly.\n\nDestination: ${destination || '—'}\nDates: ${dates || '—'}\nGroup size: ${groupSize || '—'}\n\n— United Hotels`,
+    }).catch((err) => console.warn('[group_requests] ack email failed:', err?.message));
+
     return res.status(201).json({
       message: 'Your group request has been received.',
       request: saved,

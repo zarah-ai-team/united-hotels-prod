@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 import { useBooking } from "@/shared/context/BookingContext";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { bookingService } from "@/shared/api/services";
+import { bookingService, paymentService } from "@/shared/api/services";
+import { postToIsbankGateway, isbankUiEnabled } from "@/shared/lib/isbankCheckout";
 import svgPaths from "@/shared/imports/svg-nnzqmx1xjq";
 import { Navigation } from "@/shared/components/Navigation";
 import { formatCurrency } from "@/shared/lib/currency";
@@ -36,10 +37,6 @@ export function BookingStep3() {
   const { language } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
 
   // Handle missing booking data
   useEffect(() => {
@@ -62,6 +59,11 @@ export function BookingStep3() {
   const nightlyPrice = Number(currentRoom.price || 0);
   const total = nightlyPrice * nights * roomCount;
   const isActionDisabled = isProcessing;
+  // When the bank gateway is live, the card is entered on İş Bankası's hosted
+  // page — so we hide the manual card fields and the "payments unavailable"
+  // notice, and show a secure-redirect note instead.
+  const isbankEnabled = isbankUiEnabled();
+  const cardViaBank = paymentMethod === "card" && isbankEnabled;
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +96,41 @@ export function BookingStep3() {
       });
 
       const bookingId = response?.booking?.id || response?.id || response?.bookingId || null;
+
+      // When the card gateway is live and the guest is paying by card, the
+      // backend returns paymentRequired=true and leaves the booking pending.
+      // Start the İş Bankası payment and hand the browser to the bank's hosted
+      // page; the booking is confirmed (and emailed) by the payment callback.
+      if (response?.paymentRequired && bookingId) {
+        const init = await paymentService.initiateIsbank({
+          bookingId,
+          amount: Number(response.amount ?? total),
+          currency: response.currency || "USD",
+          notify: {
+            hotelId: Number(currentHotel.id),
+            guestEmail: currentGuest.email,
+            guestName: [currentGuest.firstName, currentGuest.lastName].filter(Boolean).join(" "),
+            guestPhone: currentGuest.phone,
+            hotelName: currentHotel.name,
+            roomName: currentRoom.name,
+            checkIn: booking.checkIn,
+            checkOut: booking.checkOut,
+            nights,
+          },
+        });
+
+        if (init?.gateUrl && init?.fields) {
+          if (bookingId) setConfirmationId(String(bookingId));
+          toast.info("Redirecting to secure payment…", {
+            description: "You'll complete your card details on İş Bankası's secure page.",
+          });
+          postToIsbankGateway(init.gateUrl, init.fields);
+          return; // browser navigates away to the bank
+        }
+        throw new Error("Could not start secure payment. Please try again.");
+      }
+
+      // Pay-at-hotel, or gateway disabled — booking is already recorded.
       if (bookingId) {
         setConfirmationId(String(bookingId));
       }
@@ -123,21 +160,6 @@ export function BookingStep3() {
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  // Format card number with spaces
-  const handleCardNumberChange = (value: string) => {
-    const formatted = value
-      .replace(/\s/g, "")
-      .replace(/(\d{4})/g, "$1 ")
-      .trim();
-    setCardNumber(formatted.slice(0, 19));
-  };
-
-  // Format expiry date
-  const handleExpiryChange = (value: string) => {
-    const formatted = value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2");
-    setExpiry(formatted.slice(0, 5));
   };
 
   return (
@@ -269,7 +291,8 @@ export function BookingStep3() {
               Please review your booking details before confirming
             </p>
 
-            {/* Payments-unavailable notice */}
+            {/* Payments-unavailable notice — hidden once the card gateway is live. */}
+            {!isbankEnabled && (
             <div className="bg-linear-to-br from-[#fef3c7]/80 to-[#fde68a]/40 dark:from-amber-500/[0.10] dark:to-amber-500/[0.05] border border-[#fcd34d] dark:border-amber-400/25 rounded-2xl p-4 mb-4">
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 bg-[#f59e0b] dark:bg-amber-500/25 dark:ring-1 dark:ring-amber-400/40 rounded-xl flex items-center justify-center shrink-0">
@@ -285,6 +308,7 @@ export function BookingStep3() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Booking Review Card */}
             <div className="glass-card rounded-2xl p-4 md:p-5 mb-4">
@@ -401,7 +425,9 @@ export function BookingStep3() {
             </div>
 
             {/* Payment Method */}
-            <form onSubmit={handlePayment}>
+            {/* id lets the CTA button (which lives outside this form, in the
+                right-column sticky summary) submit it via the `form` attribute. */}
+            <form id="booking-payment-form" onSubmit={handlePayment}>
               <div className="glass-card rounded-2xl p-4 md:p-5 mb-4">
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
@@ -444,127 +470,21 @@ export function BookingStep3() {
                       <CheckCircle2 className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
                     )}
                   </label>
-
-                  {/* Pay at Hotel Option */}
-                  <label
-                    className={`flex items-center gap-3 p-3.5 border-2 rounded-xl cursor-pointer transition-all ${
-                      paymentMethod === "hotel"
-                        ? "border-[#2F80ED] bg-[#2F80ED]/5 dark:bg-[#5DA0F8]/[0.07]"
-                        : "border-[#eaeaea] dark:border-white/[0.08] hover:border-[#2F80ED]/30"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="hotel"
-                      checked={paymentMethod === "hotel"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-4 h-4 accent-[#2F80ED]"
-                    />
-                    <div className="w-8 h-8 bg-[#2F80ED]/10 dark:bg-[#5DA0F8]/15 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-['Inter:SemiBold',sans-serif] text-[13.5px] text-[#3b3b3b] dark:text-white">
-                        Pay at Hotel
-                      </div>
-                      <div className="font-['Inter:Regular',sans-serif] text-[11.5px] text-[#8c8c8c]">
-                        Pay when you check-in
-                      </div>
-                    </div>
-                    {paymentMethod === "hotel" && (
-                      <CheckCircle2 className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8]" />
-                    )}
-                  </label>
                 </div>
 
-                {/* Card Details Form */}
-                {paymentMethod === "card" && (
-                  <div className="space-y-3.5 pt-4 border-t border-[#eaeaea] dark:border-white/[0.06]">
-                    <div>
-                      <label className="font-['Inter:Medium',sans-serif] text-[13px] text-[#3b3b3b] dark:text-white/85 mb-1.5 block">
-                        Card Number
-                      </label>
-                      <div className="relative">
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8c8c8c]">
-                          <CreditCard className="w-4 h-4" />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="1234 5678 9012 3456"
-                          value={cardNumber}
-                          onChange={(e) =>
-                            handleCardNumberChange(e.target.value)
-                          }
-                          className="w-full pl-9 pr-20 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/10 transition-all"
-                        />
-                        {/* Card Brand Icons */}
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1.5">
-                          <div className="w-7 h-5 bg-[#f3f4f6] dark:bg-white/[0.08] rounded flex items-center justify-center text-[9px] font-bold dark:text-white/75">
-                            VISA
-                          </div>
-                          <div className="w-7 h-5 bg-[#f3f4f6] dark:bg-white/[0.08] rounded flex items-center justify-center text-[9px] font-bold dark:text-white/75">
-                            MC
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="font-['Inter:Medium',sans-serif] text-[13px] text-[#3b3b3b] dark:text-white/85 mb-1.5 block">
-                        Cardholder Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="JOHN DOE"
-                        value={cardName}
-                        onChange={(e) =>
-                          setCardName(e.target.value.toUpperCase())
-                        }
-                        className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/10 transition-all"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="font-['Inter:Medium',sans-serif] text-[13px] text-[#3b3b3b] dark:text-white/85 mb-1.5 block">
-                          Expiry Date
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="MM/YY"
-                          value={expiry}
-                          onChange={(e) => handleExpiryChange(e.target.value)}
-                          className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/10 transition-all"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="font-['Inter:Medium',sans-serif] text-[13px] text-[#3b3b3b] dark:text-white/85 mb-1.5 flex items-center gap-1.5">
-                          CVV
-                          <div className="group relative">
-                            <Info className="w-3.5 h-3.5 text-[#8c8c8c] cursor-help" />
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-[#3b3b3b] text-white text-[11px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                              3 digits on back of card
-                            </div>
-                          </div>
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="123"
-                          value={cvv}
-                          onChange={(e) =>
-                            setCvv(
-                              e.target.value.replace(/\D/g, "").slice(0, 3),
-                            )
-                          }
-                          maxLength={3}
-                          className="w-full px-3 py-2.5 border border-[#eaeaea] dark:border-white/[0.08] bg-white/80 dark:bg-white/[0.04] dark:text-white rounded-xl font-['Inter:Regular',sans-serif] text-[13.5px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/10 transition-all"
-                        />
-                      </div>
+                {/* Bank-hosted card flow: card is entered on İş Bankası's secure
+                    page after redirect, so we don't collect card data here. */}
+                {cardViaBank && (
+                  <div className="pt-4 border-t border-[#eaeaea] dark:border-white/[0.06]">
+                    <div className="flex items-start gap-3 bg-[#2F80ED]/[0.06] dark:bg-[#5DA0F8]/[0.08] border border-[#2F80ED]/20 rounded-xl p-3.5">
+                      <Lock className="w-4 h-4 text-[#2F80ED] dark:text-[#5DA0F8] mt-0.5 shrink-0" />
+                      <p className="font-['Inter:Regular',sans-serif] text-[12.5px] text-[#3b3b3b] dark:text-white/80 leading-[19px]">
+                        You'll be redirected to <strong>İş Bankası's secure payment page</strong> to enter your card details and complete 3-D Secure verification. We never see or store your card number.
+                      </p>
                     </div>
                   </div>
                 )}
+
               </div>
 
               {/* Security Notice */}
@@ -638,6 +558,7 @@ export function BookingStep3() {
                 {/* CTA Button */}
                 <button
                   type="submit"
+                  form="booking-payment-form"
                   disabled={isActionDisabled}
                   className={`w-full bg-[#2F80ED] text-white py-3 rounded-xl hover:bg-[#1E5FBC] transition-all font-['Inter:Bold',sans-serif] text-[14px] mb-2.5 relative overflow-hidden group ${
                     isActionDisabled ? "opacity-70 cursor-not-allowed" : ""
@@ -650,7 +571,7 @@ export function BookingStep3() {
                     </span>
                   ) : (
                     <>
-                      <span className="relative z-10">Confirm Booking</span>
+                      <span className="relative z-10">{cardViaBank ? "Continue to secure payment" : "Confirm Booking"}</span>
                       <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/20 to-transparent" />
                     </>
                   )}

@@ -2,6 +2,9 @@ const moment = require("moment");
 const pool = require("../db");
 const sendMail = require("../utils/mailer");
 const { sendBookingConfirmationEmail: sendBookingConfirmationEmailResend } = require('../utils/emails/bookingConfirmationEmail');
+const { sendVendorBookingNotification } = require('../utils/emails/vendorBookingNotification');
+const { sendBookingCancellationEmail } = require('../utils/emails/bookingCancellationEmail');
+const pos = require('../utils/isbankPos');
 // Resolve the guest's country via the priority chain in utils/geoip.js
 // (explicit body → Cloudflare/Vercel header → IP lookup → Accept-Language).
 const { detectCountry } = require('../utils/geoip');
@@ -196,6 +199,35 @@ const normalizeBookingRecord = (row) => ({
     currency: row.currency ?? null
 });
 
+// Fetch bookings joined with their hotel's name/location/address/image so the
+// client (guest portal, admin) can render full booking cards instead of generic
+// "Hotel #id" placeholders. The room name already lives on the booking's `room`
+// column. Falls back to a plain select if the hotels join isn't possible on the
+// current schema (e.g. a differently-named hotel id column).
+const fetchBookingsEnriched = async (whereSql, params, userIdCol, orderCol) => {
+    const where = whereSql ? ` WHERE ${whereSql}` : '';
+    try {
+        return await pool.query(
+            `SELECT b.*,
+                    h.name     AS hotel_name,
+                    h.location AS location,
+                    h.address  AS address,
+                    h.image    AS hotel_image
+               FROM bookings b
+               LEFT JOIN hotels h ON h.id = b.hotelid${where}
+              ORDER BY b.${orderCol} DESC`,
+            params
+        );
+    } catch (joinErr) {
+        console.warn('[bookings] hotel enrich join failed, falling back to plain select:', joinErr.message);
+        const plainWhere = whereSql ? ` WHERE ${whereSql.replace(/\bb\./g, '')}` : '';
+        return pool.query(
+            `SELECT * FROM bookings${plainWhere} ORDER BY ${orderCol} DESC`,
+            params
+        );
+    }
+};
+
 const createBookingRecord = async ({
     client,
     roomData,
@@ -364,6 +396,58 @@ const getHotelDisplayName = async (client, hotelId) => {
     );
 
     return result.rows[0]?.hotel_name || null;
+};
+
+// Resolve where a vendor/property booking notification should go for a hotel.
+// Priority: the hotel's own contact email column → the owning vendor user's
+// email (hotels.vendor_id → users.email) → BOOKING_OPS_INBOX / SUPPORT_INBOX so
+// a booking is never lost silently. Schema-tolerant: missing columns are
+// skipped rather than throwing. Returns { hotelName, to, vendorName }.
+const getHotelContactForEmails = async (client, hotelId) => {
+    const opsFallback = process.env.BOOKING_OPS_INBOX || process.env.SUPPORT_INBOX || null;
+    if (!hotelId) {
+        return { hotelName: null, to: opsFallback, vendorName: null };
+    }
+
+    const hotelColumns = await client.query(
+        `SELECT column_name FROM information_schema.columns WHERE table_name = 'hotels'`
+    );
+    const cols = new Set(hotelColumns.rows.map((row) => row.column_name));
+    const nameCol = pickExistingColumn(cols, ['hotel_name', 'name']);
+    const vendorIdCol = pickExistingColumn(cols, ['vendor_id', 'vendorid', 'vendorId', 'provider_id', 'providerid']);
+    const hotelEmailCol = pickExistingColumn(cols, ['email', 'contact_email', 'contactemail']);
+
+    const select = [
+        nameCol ? `"${nameCol}" AS hotel_name` : `NULL AS hotel_name`,
+        vendorIdCol ? `"${vendorIdCol}" AS vendor_id` : `NULL AS vendor_id`,
+        hotelEmailCol ? `"${hotelEmailCol}" AS hotel_email` : `NULL AS hotel_email`,
+    ].join(', ');
+
+    let hotelRow = {};
+    try {
+        const result = await client.query(`SELECT ${select} FROM hotels WHERE id = $1 LIMIT 1`, [hotelId]);
+        hotelRow = result.rows[0] || {};
+    } catch (e) {
+        console.warn('[bookings] hotel contact lookup failed:', e.message);
+    }
+
+    let vendorEmail = null;
+    let vendorName = null;
+    if (hotelRow.vendor_id) {
+        try {
+            const vendorResult = await client.query(
+                `SELECT email, name FROM users WHERE id = $1 LIMIT 1`,
+                [hotelRow.vendor_id]
+            );
+            vendorEmail = vendorResult.rows[0]?.email || null;
+            vendorName = vendorResult.rows[0]?.name || null;
+        } catch (e) {
+            console.warn('[bookings] vendor email lookup failed:', e.message);
+        }
+    }
+
+    const to = hotelRow.hotel_email || vendorEmail || opsFallback;
+    return { hotelName: hotelRow.hotel_name || null, to, vendorName };
 };
 
 const sendBookingConfirmationEmail = async ({
@@ -694,58 +778,121 @@ const BookRoom = async (req, res) => {
 
         await adjustHotelRoomCount(client, roomData.hotel_id, -bookedCount);
 
-        // Record a payment row so the admin dashboard's revenue rollup
-        // (which sums payments.amount) reflects this booking. On schemas
-        // without a payments table the catch keeps the booking from rolling
-        // back — the table is optional.
-        try {
-            await client.query(`
-                CREATE TABLE IF NOT EXISTS payments (
-                    id            SERIAL PRIMARY KEY,
-                    booking_id    integer REFERENCES bookings(id) ON DELETE CASCADE,
-                    amount        numeric(12,2) NOT NULL DEFAULT 0,
-                    status        text NOT NULL DEFAULT 'paid',
-                    created_at    timestamptz NOT NULL DEFAULT NOW(),
-                    updated_at    timestamptz NOT NULL DEFAULT NOW()
-                )
-            `).catch(() => {});
+        // When the İş Bankası card gateway is live and the guest chose to pay by
+        // card, payment is NOT settled here — the booking is left pending and is
+        // only confirmed (and emailed) by the POS callback after the card is
+        // actually charged. Any other case (pay-at-hotel, or gateway disabled)
+        // keeps the original behaviour of recording the booking as paid.
+        const deferToPos = pos.isConfigured() && finalPaymentMode === 'card';
+
+        if (deferToPos) {
+            // Mark the booking pending until the card payment succeeds.
             await client.query(
-                `INSERT INTO payments (booking_id, amount, currency, method, status, transaction_id)
-                 VALUES ($1, $2, $3, $4, 'paid', $5)`,
-                [
-                    booking.id ?? bookingResult.rows[0].id,
-                    totalamount,
-                    currency || 'USD',
-                    finalPaymentMode,
-                    finalTransactionId
-                ]
-            );
-        } catch (paymentErr) {
-            console.warn('[bookings] payment row skipped:', paymentErr.message);
+                `UPDATE bookings SET status = 'pending' WHERE id = $1`,
+                [booking.id ?? bookingResult.rows[0].id]
+            ).catch((e) => console.warn('[bookings] pending status set skipped:', e.message));
+        } else {
+            // Record a payment row so the admin dashboard's revenue rollup
+            // (which sums payments.amount) reflects this booking. On schemas
+            // without a payments table the catch keeps the booking from rolling
+            // back — the table is optional.
+            try {
+                await client.query(`
+                    CREATE TABLE IF NOT EXISTS payments (
+                        id            SERIAL PRIMARY KEY,
+                        booking_id    integer REFERENCES bookings(id) ON DELETE CASCADE,
+                        amount        numeric(12,2) NOT NULL DEFAULT 0,
+                        status        text NOT NULL DEFAULT 'paid',
+                        created_at    timestamptz NOT NULL DEFAULT NOW(),
+                        updated_at    timestamptz NOT NULL DEFAULT NOW()
+                    )
+                `).catch(() => {});
+                await client.query(
+                    `INSERT INTO payments (booking_id, amount, currency, method, status, transaction_id)
+                     VALUES ($1, $2, $3, $4, 'paid', $5)`,
+                    [
+                        booking.id ?? bookingResult.rows[0].id,
+                        totalamount,
+                        currency || 'USD',
+                        finalPaymentMode,
+                        finalTransactionId
+                    ]
+                );
+            } catch (paymentErr) {
+                console.warn('[bookings] payment row skipped:', paymentErr.message);
+            }
         }
 
         await client.query('COMMIT');
 
-        const hotelName = await getHotelDisplayName(client, roomData.hotel_id || room.hotelid || room.hotel_id || null);
-        await sendBookingConfirmationEmail({
-            email,
-            booking,
-            roomName: room.name || roomData.room_number || `room-${roomId}`,
-            hotelName,
-            guestName: composedGuestName,
-            fromDate,
-            toDate,
-            totalAmount: totalamount,
-            currency: currency || 'USD',
-            paymentMode: finalPaymentMode,
-            specialRequest: normalizedSpecialRequest
-        });
+        const { hotelName, to: vendorEmailTo, vendorName } = await getHotelContactForEmails(
+            client,
+            roomData.hotel_id || room.hotelid || room.hotel_id || null
+        );
+        const roomLabel = room.name || roomData.room_number || `room-${roomId}`;
+
+        // Confirmation + vendor notification emails are sent now ONLY when
+        // payment isn't being deferred to the card gateway. For the POS card
+        // flow, the İş Bankası callback sends both emails after the charge
+        // actually succeeds (so we never email "confirmed" for an unpaid stay).
+        if (!deferToPos) {
+            // 1) Confirmation to the guest.
+            await sendBookingConfirmationEmail({
+                email,
+                booking,
+                roomName: roomLabel,
+                hotelName,
+                guestName: composedGuestName,
+                fromDate,
+                toDate,
+                totalAmount: totalamount,
+                currency: currency || 'USD',
+                paymentMode: finalPaymentMode,
+                specialRequest: normalizedSpecialRequest
+            });
+
+            // 2) Notification to the owning vendor/property AND the admin/ops
+            // inbox (best-effort — a mail failure must never break an
+            // already-committed booking). Admin is always notified; sent as
+            // separate messages so vendor and admin don't see each other.
+            const adminInbox = process.env.BOOKING_OPS_INBOX || process.env.SUPPORT_INBOX || process.env.EMAIL_FROM || null;
+            const staffRecipients = [...new Set([vendorEmailTo, adminInbox].filter(Boolean))];
+            for (const to of staffRecipients) {
+                try {
+                    await sendVendorBookingNotification({
+                        to,
+                        vendorName: to === vendorEmailTo ? vendorName : undefined,
+                        guestName: composedGuestName,
+                        guestEmail: email,
+                        guestPhone: phoneNumber,
+                        hotelName: hotelName || 'United Hotels Partner Property',
+                        roomName: roomLabel,
+                        checkIn: fromDate,
+                        checkOut: toDate,
+                        nights: computeNights(fromDate, toDate),
+                        totalAmount: totalamount,
+                        currency: currency || 'USD',
+                        bookingId: booking.id,
+                        paymentMode: finalPaymentMode,
+                        specialRequest: normalizedSpecialRequest,
+                        manageUrl: `${FRONTEND_URL()}/vendor`,
+                    });
+                } catch (vendorEmailErr) {
+                    console.error('Vendor/admin booking notification failed:', vendorEmailErr?.message || vendorEmailErr);
+                }
+            }
+        }
 
         res.json({
-            message: 'Room booked successfully',
+            message: deferToPos ? 'Booking created — payment required' : 'Room booked successfully',
+            // When true, the frontend must start the İş Bankası payment for this
+            // booking; the booking stays pending until the card is charged.
+            paymentRequired: deferToPos,
             paymentAuthenticated: !isGuestBooking,
             bookingType: isGuestBooking ? 'guest' : 'user',
             roomsReducedBy: bookedCount,
+            amount: Number(totalamount),
+            currency: currency || 'USD',
             booking: normalizeBookingRecord(booking)
         });
     } catch (error) {
@@ -760,34 +907,55 @@ const BookRoom = async (req, res) => {
     }
 };
 
+// Cancel a booking + restore room inventory, within the caller's transaction.
+// Idempotent: the conditional UPDATE means a booking already 'cancelled' is not
+// restored twice (avoids over-counting availability). roomId is optional — when
+// omitted it's derived from the booking row (used by the stale-payment sweeper).
+// Returns the cancelled booking row, or null if it was already cancelled / gone.
+const cancelBookingCore = async (client, bookingId, roomId = null) => {
+    const bookingColumns = await getBookingColumns(client);
+    const bookingUpdatedCol = pickExistingColumn(bookingColumns, ['updated_at', 'updatedAt']);
+    const setUpdated = bookingUpdatedCol ? `, "${bookingUpdatedCol}" = NOW()` : '';
+
+    const bookingResult = await client.query(
+        `UPDATE bookings SET status = 'cancelled'${setUpdated}
+          WHERE id = $1 AND COALESCE(LOWER(status), '') <> 'cancelled'
+          RETURNING *`,
+        [bookingId]
+    );
+    if (bookingResult.rowCount === 0) return null; // already cancelled / not found
+
+    const booking = bookingResult.rows[0];
+    const effectiveRoomId = roomId || booking.roomid || booking.room_id || null;
+
+    if (effectiveRoomId) {
+        const roomResult = await client.query('SELECT * FROM rooms WHERE id = $1 FOR UPDATE', [effectiveRoomId]);
+        const roomRow = roomResult.rows[0];
+        if (roomRow) {
+            let currentbookings = roomRow.currentbookings || [];
+            if (typeof currentbookings === 'string') {
+                try { currentbookings = JSON.parse(currentbookings); } catch { currentbookings = []; }
+            }
+            const remaining = currentbookings.filter((b) => String(b.bookingid) !== String(bookingId));
+            const updateRoomQuery = await getRoomUpdateQuery(client);
+            await client.query(updateRoomQuery, [await serializeCurrentBookings(client, remaining), effectiveRoomId]);
+            await adjustRoomCategoryAvailability(client, roomRow, 1);
+            if (roomRow.hotel_id) {
+                await adjustHotelRoomCount(client, roomRow.hotel_id, 1);
+            }
+        }
+    }
+    return booking;
+};
+
 // Cancel a booking
 const CancelBooking = async (req, res) => {
     const { bookingid, roomid } = req.body;
     const client = await pool.connect();
+    let cancelled = null;
     try {
         await client.query('BEGIN');
-        const bookingColumns = await getBookingColumns(client);
-        const bookingUpdatedCol = pickExistingColumn(bookingColumns, ['updated_at', 'updatedAt']);
-        // Update booking status
-        const bookingUpdateAssignments = ['status = $1'];
-        if (bookingUpdatedCol) {
-            bookingUpdateAssignments.push(`"${bookingUpdatedCol}" = NOW()`);
-        }
-        const bookingResult = await client.query(`UPDATE bookings SET ${bookingUpdateAssignments.join(', ')} WHERE id = $2 RETURNING *`, ['cancelled', bookingid]);
-        const booking = bookingResult.rows[0];
-        // Update room's currentbookings
-        const roomResult = await client.query('SELECT * FROM rooms WHERE id = $1 FOR UPDATE', [roomid]);
-        let currentbookings = roomResult.rows[0].currentbookings || [];
-        if (typeof currentbookings === 'string') {
-            try { currentbookings = JSON.parse(currentbookings); } catch { currentbookings = []; }
-        }
-        const temp = currentbookings.filter(booking => String(booking.bookingid) !== String(bookingid));
-        const updateRoomQuery = await getRoomUpdateQuery(client);
-        await client.query(updateRoomQuery, [await serializeCurrentBookings(client, temp), roomid]);
-        await adjustRoomCategoryAvailability(client, roomResult.rows[0], 1);
-        if (roomResult.rows[0]?.hotel_id) {
-            await adjustHotelRoomCount(client, roomResult.rows[0].hotel_id, 1);
-        }
+        cancelled = await cancelBookingCore(client, bookingid, roomid);
         await client.query('COMMIT');
         res.json({ message: "Your booking cancelled Sucessfully" });
     } catch (error) {
@@ -799,6 +967,49 @@ const CancelBooking = async (req, res) => {
         return res.status(400).json({ error });
     } finally {
         client.release();
+    }
+
+    // Notify guest + vendor + admin that the booking was cancelled. Best-effort,
+    // after the response — a mail failure must never affect the cancellation.
+    // `cancelled` is null if the booking was already cancelled (no re-notify).
+    if (cancelled) {
+        notifyBookingCancelled(cancelled).catch((e) =>
+            console.error('[bookings] cancellation emails failed:', e?.message || e)
+        );
+    }
+};
+
+// Send cancellation emails to the guest, the owning vendor, and the admin/ops
+// inbox. Resolves the hotel name + vendor contact from the cancelled booking row.
+const notifyBookingCancelled = async (booking, reason) => {
+    const hotelId = booking.hotelid ?? booking.hotel_id ?? null;
+    const { hotelName, to: vendorEmailTo } = await getHotelContactForEmails(pool, hotelId);
+    const adminInbox = process.env.BOOKING_OPS_INBOX || process.env.SUPPORT_INBOX || process.env.EMAIL_FROM || null;
+    const guestEmail = booking.guest_email || booking.guestemail || null;
+
+    const details = {
+        guestName: booking.guest_name || booking.guestname || null,
+        hotelName: hotelName || 'United Hotels Partner Property',
+        roomName: booking.room || `Room #${booking.roomid ?? booking.room_id ?? ''}`,
+        checkIn: booking.fromdate ?? booking.check_in_date ?? null,
+        checkOut: booking.todate ?? booking.check_out_date ?? null,
+        bookingId: booking.id,
+        totalAmount: booking.totalamount ?? booking.total_price ?? null,
+        currency: booking.currency || 'USD',
+        reason: reason || null,
+    };
+
+    // 1) Guest.
+    if (guestEmail) {
+        await sendBookingCancellationEmail({ to: guestEmail, audience: 'guest', ...details })
+            .catch((e) => console.error('[bookings] guest cancellation email failed:', e?.message));
+    }
+    // 2) Vendor + admin (dedup; admin always notified). Sent separately so the
+    // two recipients don't see each other's address.
+    const staff = [...new Set([vendorEmailTo, adminInbox].filter(Boolean))];
+    for (const to of staff) {
+        await sendBookingCancellationEmail({ to, audience: 'vendor', ...details })
+            .catch((e) => console.error('[bookings] staff cancellation email failed:', e?.message));
     }
 };
 
@@ -882,16 +1093,14 @@ const getBookings = async (req, res) => {
         const userIdCol = meta.userIdCol ? quoteIdentifier(meta.userIdCol) : '"userid"';
         const orderCol = meta.createdCol ? quoteIdentifier(meta.createdCol) : '"id"';
 
-        let query = 'SELECT * FROM bookings';
-        let params = [];
-
-        if (!isAdmin && userId) {
-            query += ` WHERE ${userIdCol} = $1`;
-            params = [userId];
-        }
-
-        query += ` ORDER BY ${orderCol} DESC`;
-        const bookingsResult = await pool.query(query, params);
+        const filterByUser = !isAdmin && userId;
+        const params = filterByUser ? [userId] : [];
+        const bookingsResult = await fetchBookingsEnriched(
+            filterByUser ? `b.${userIdCol} = $1` : '',
+            params,
+            userIdCol,
+            orderCol
+        );
         res.json({
             bookings: bookingsResult.rows.map(normalizeBookingRecord),
             count: bookingsResult.rowCount,
@@ -918,9 +1127,11 @@ const getBookingById = async (req, res) => {
         const meta = await getBookingMeta(pool);
         const userIdCol = quoteIdentifier(meta.userIdCol || 'userid');
         const orderCol = meta.createdCol ? quoteIdentifier(meta.createdCol) : '"id"';
-        const bookingsResult = await pool.query(
-            `SELECT * FROM bookings WHERE ${userIdCol} = $1 ORDER BY ${orderCol} DESC`,
-            [effectiveUserId]
+        const bookingsResult = await fetchBookingsEnriched(
+            `b.${userIdCol} = $1`,
+            [effectiveUserId],
+            userIdCol,
+            orderCol
         );
         res.json({
             bookings: bookingsResult.rows.map(normalizeBookingRecord),
@@ -932,4 +1143,4 @@ const getBookingById = async (req, res) => {
     }
 };
 
-module.exports = { BookRoom, getBookingById, CancelBooking, DeleteBooking, getBookings };
+module.exports = { BookRoom, getBookingById, CancelBooking, DeleteBooking, getBookings, cancelBookingCore };
