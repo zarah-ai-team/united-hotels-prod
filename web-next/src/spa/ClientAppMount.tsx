@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState, type ReactNode } from 'react';
+import SeoFallbackShell from '@/spa/SeoFallbackShell';
 
 // The SPA (<App />) uses react-router's createBrowserRouter, which needs
 // `window`, so it must load client-only (ssr:false is only allowed inside a
@@ -22,6 +23,6 @@ export default function ClientAppMount({ fallback }: { fallback: ReactNode }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <>{fallback}</>;
+  if (!mounted) return <SeoFallbackShell fallback={fallback} />;
   return <App />;
 }

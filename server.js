@@ -89,6 +89,13 @@ app.use("/api/bookings", bookingRoute);
 app.use("/api/hotels", hotelsRoute);
 app.use("/api/payments/isbank", isbankPaymentsRoute);
 app.use("/api/payments", paymentsRoute);
+
+// DEV-ONLY mock İş Bankası gateway — lets you test the full payment flow without
+// real bank credentials. Never mounted in production or unless explicitly enabled.
+if (process.env.NODE_ENV !== "production" && /^(1|true|yes)$/i.test(process.env.ISBANK_MOCK_GATEWAY || "")) {
+    app.use("/mock/isbank", require("./routes/isbankMockGateway"));
+    console.log("[mock] İş Bankası mock gateway ENABLED at /mock/isbank (dev only)");
+}
 app.use("/api/translate", translateRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/vendor", vendorRoute);
@@ -183,4 +190,44 @@ app.use((err, req, res, next) => {
 
 app.listen(port, ()=>{
     console.log(`Server started at port ${port}`);
-})
+});
+
+// Production payment-gateway readiness check. Surfaces (loudly) the common ways
+// the İş Bankası gateway can be misconfigured for live use, so a deploy doesn't
+// silently fail to take real payments. Warnings only — never blocks boot.
+(() => {
+    if (process.env.NODE_ENV !== 'production') return;
+    try {
+        const pos = require('./utils/isbankPos');
+        const cfg = pos.config();
+        const warn = (m) => console.warn(`[payments] PROD WARNING: ${m}`);
+        if (/^(1|true|yes)$/i.test(process.env.ISBANK_MOCK_GATEWAY || '')) {
+            warn('ISBANK_MOCK_GATEWAY is set in production — ignored (mock is force-disabled), but unset it.');
+        }
+        if (!cfg.enabled) {
+            warn('ISBANK_POS_ENABLED is not true — card payments will return 503.');
+            return;
+        }
+        if (/localhost|127\.0\.0\.1|\/mock\//i.test(cfg.gateUrl)) {
+            warn(`gateUrl points at a non-production/mock URL (${cfg.gateUrl}) — set ISBANK_POS_GATE_URL to the real İş Bankası gate.`);
+        }
+        if (!cfg.storeKey || cfg.storeKey.length < 12 || /^uni|placeholder|changeme|test$/i.test(cfg.storeKey)) {
+            warn('ISBANK_POS_STORE_KEY looks like a placeholder — the bank will reject the hash. Set the real bank-issued store key.');
+        }
+        if (!cfg.callbackBaseUrl || /localhost|127\.0\.0\.1/i.test(cfg.callbackBaseUrl)) {
+            warn('ISBANK_POS_CALLBACK_BASE_URL must be the public HTTPS site origin (not localhost).');
+        }
+    } catch (e) {
+        console.warn('[payments] readiness check skipped:', e.message);
+    }
+})();
+
+// Background sweeper: release rooms held by abandoned card payments. Pending
+// card bookings that were never paid (guest left the bank's page) are cancelled
+// and their inventory restored after PENDING_BOOKING_TTL_MINUTES. Runs in-process
+// on an interval; unref so it never keeps the process alive on its own.
+const { expireStalePendingBookings } = require('./jobs/expireStalePendingBookings');
+const sweepMs = Math.max(60_000, Number(process.env.PENDING_BOOKING_SWEEP_MS || 5 * 60 * 1000));
+const runSweep = () => expireStalePendingBookings().catch((e) => console.error('[cleanup] sweep failed:', e.message));
+setTimeout(runSweep, 30_000).unref?.();           // once shortly after boot
+setInterval(runSweep, sweepMs).unref?.();         // then every sweepMs

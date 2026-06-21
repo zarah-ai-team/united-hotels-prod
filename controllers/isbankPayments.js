@@ -16,6 +16,10 @@
 const crypto = require('crypto');
 const pool = require('../db');
 const pos = require('../utils/isbankPos');
+const { resolveHotelVendorContact } = require('../utils/vendorContact');
+const { sendBookingConfirmationEmail } = require('../utils/emails/bookingConfirmationEmail');
+const { sendVendorBookingNotification } = require('../utils/emails/vendorBookingNotification');
+const { convertToTRY } = require('../utils/fx');
 
 const noStore = (res) => res.setHeader('Cache-Control', 'no-store');
 
@@ -53,7 +57,7 @@ const buildOrderId = (bookingId, userId) => {
 };
 
 const frontendResultUrl = (cfg, status, oid, reason) => {
-  const base = cfg.callbackBaseUrl || '';
+  const base = cfg.frontendUrl || cfg.callbackBaseUrl || '';
   const params = new URLSearchParams({ status, oid: oid || '' });
   if (reason) params.set('reason', reason);
   return `${base}/payment/result?${params.toString()}`;
@@ -72,7 +76,7 @@ const initiatePayment = async (req, res) => {
   }
 
   try {
-    const { bookingId, amount, currency, email, billToName, format } = req.body || {};
+    const { bookingId, amount, currency, email, billToName, format, notify = {} } = req.body || {};
 
     const amountNum = Number(amount);
     if (!amountNum || amountNum <= 0) {
@@ -83,7 +87,49 @@ const initiatePayment = async (req, res) => {
 
     const userId = req.user?.id || null;
     const oid = buildOrderId(bookingId, userId);
-    const finalCurrency = String(currency || cfg.currency).toUpperCase();
+    const requestedCurrency = String(currency || cfg.currency).toUpperCase();
+
+    // The POS settles in its configured currency (TRY). If the booking is
+    // priced in something else, convert at charge time so the bank receives an
+    // amount in a currency it's enabled for. A missing FX rate is a hard stop
+    // (503) — we never charge a guessed amount.
+    let chargeAmount = amountNum;
+    let finalCurrency = requestedCurrency;
+    let originalAmount = null;
+    if (cfg.currency === 'TRY' && requestedCurrency !== 'TRY') {
+      try {
+        chargeAmount = await convertToTRY(amountNum, requestedCurrency);
+        finalCurrency = 'TRY';
+        originalAmount = { amount: amountNum, currency: requestedCurrency };
+      } catch (e) {
+        console.error('[isbank] FX conversion failed:', e.message);
+        return res.status(503).json({ error: 'Currency conversion unavailable', detail: e.message });
+      }
+    }
+
+    // Resolve the vendor/property contact now (we have a DB connection and the
+    // hotel id) and stash everything the callback needs to send the guest +
+    // vendor confirmation emails after the charge succeeds. The callback has no
+    // booking context otherwise, so we carry it in the payment row's metadata.
+    let vendor = { to: null, vendorName: null };
+    try {
+      if (notify.hotelId) vendor = await resolveHotelVendorContact(pool, notify.hotelId);
+    } catch (e) {
+      console.warn('[isbank] vendor resolve at initiate failed:', e.message);
+    }
+
+    const notifyMeta = {
+      guestEmail: notify.guestEmail || email || req.user?.email || null,
+      guestName: notify.guestName || null,
+      guestPhone: notify.guestPhone || null,
+      hotelName: notify.hotelName || vendor.hotelName || null,
+      roomName: notify.roomName || null,
+      checkIn: notify.checkIn || null,
+      checkOut: notify.checkOut || null,
+      nights: notify.nights || null,
+      vendorEmail: vendor.to || null,
+      vendorName: vendor.vendorName || null,
+    };
 
     // Persist the attempt up front so the callback has a row to settle, even
     // if the customer abandons the hosted page.
@@ -93,10 +139,10 @@ const initiatePayment = async (req, res) => {
       [
         userId,
         bookingId || null,
-        amountNum,
+        chargeAmount,
         finalCurrency,
         oid,
-        JSON.stringify({ gateway: 'isbank', billToName: billToName || null }),
+        JSON.stringify({ gateway: 'isbank', billToName: billToName || null, originalAmount, notify: notifyMeta }),
       ]
     );
 
@@ -105,7 +151,7 @@ const initiatePayment = async (req, res) => {
 
     const fields = pos.buildPaymentFormFields({
       oid,
-      amount: amountNum,
+      amount: chargeAmount,
       currency: finalCurrency,
       okUrl,
       failUrl,
@@ -127,6 +173,10 @@ const initiatePayment = async (req, res) => {
       gateUrl: cfg.gateUrl,
       fields,
       formHtml: pos.renderAutoSubmitForm(cfg.gateUrl, fields),
+      // What the card will actually be charged (post-FX), for the UI.
+      chargeAmount,
+      chargeCurrency: finalCurrency,
+      originalAmount,
     });
   } catch (error) {
     console.error('[isbank] initiate failed:', error);
@@ -151,7 +201,7 @@ const handleCallback = async (req, res) => {
   try {
     await ensurePaymentsTable();
     const existing = await pool.query(
-      'SELECT id, amount, currency, status, booking_id FROM payments WHERE transaction_id = $1 LIMIT 1',
+      'SELECT id, amount, currency, status, booking_id, metadata FROM payments WHERE transaction_id = $1 LIMIT 1',
       [oid]
     );
     const payment = existing.rows[0];
@@ -197,11 +247,65 @@ const handleCallback = async (req, res) => {
       [settledStatus, JSON.stringify(meta), oid]
     );
 
-    // Confirm the booking on success (best-effort, schema-tolerant).
-    if (settledStatus === 'paid' && payment.booking_id) {
-      await pool
-        .query(`UPDATE bookings SET status = 'confirmed' WHERE id = $1`, [payment.booking_id])
-        .catch((e) => console.warn('[isbank] booking status update skipped:', e.message));
+    // Confirm the booking + send confirmation emails on success (best-effort,
+    // schema-tolerant). This block runs only on the transition to 'paid' (the
+    // early return above makes repeat callbacks idempotent), so emails fire once.
+    if (settledStatus === 'paid') {
+      if (payment.booking_id) {
+        await pool
+          .query(`UPDATE bookings SET status = 'confirmed' WHERE id = $1`, [payment.booking_id])
+          .catch((e) => console.warn('[isbank] booking status update skipped:', e.message));
+      }
+
+      const n = (payment.metadata && payment.metadata.notify) || {};
+      // Guest confirmation.
+      if (n.guestEmail) {
+        try {
+          await sendBookingConfirmationEmail({
+            to: n.guestEmail,
+            guestName: n.guestName,
+            bookingId: payment.booking_id || oid,
+            hotelName: n.hotelName || 'United Hotels Partner Property',
+            roomName: n.roomName,
+            checkIn: n.checkIn,
+            checkOut: n.checkOut,
+            nights: n.nights,
+            totalAmount: payment.amount,
+            currency: payment.currency,
+            manageUrl: `${cfg.callbackBaseUrl}/portal`,
+          });
+        } catch (e) {
+          console.error('[isbank] guest confirmation email failed:', e.message);
+        }
+      }
+      // Vendor / property notification AND admin/ops notification. The admin is
+      // always notified on a successful booking; sent as separate messages so
+      // vendor and admin don't see each other's address.
+      const adminInbox = process.env.BOOKING_OPS_INBOX || process.env.SUPPORT_INBOX || process.env.EMAIL_FROM || null;
+      const staffRecipients = [...new Set([n.vendorEmail, adminInbox].filter(Boolean))];
+      for (const to of staffRecipients) {
+        try {
+          await sendVendorBookingNotification({
+            to,
+            vendorName: to === n.vendorEmail ? n.vendorName : undefined,
+            guestName: n.guestName,
+            guestEmail: n.guestEmail,
+            guestPhone: n.guestPhone,
+            hotelName: n.hotelName || 'United Hotels Partner Property',
+            roomName: n.roomName,
+            checkIn: n.checkIn,
+            checkOut: n.checkOut,
+            nights: n.nights,
+            totalAmount: payment.amount,
+            currency: payment.currency,
+            bookingId: payment.booking_id || oid,
+            paymentMode: 'card',
+            manageUrl: `${cfg.callbackBaseUrl}/vendor`,
+          });
+        } catch (e) {
+          console.error('[isbank] vendor/admin notification email failed:', e.message);
+        }
+      }
     }
 
     if (settledStatus !== 'paid') {

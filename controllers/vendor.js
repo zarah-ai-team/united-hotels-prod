@@ -98,6 +98,8 @@ const updateRoomPriceBand = async (req, res) => {
       [min, max, id],
     );
 
+    // Bust the public price caches so the new band is reflected on the site now.
+    try { require('./hotels').invalidatePriceCaches(); } catch (_e) { /* non-fatal */ }
     return res.json({ message: 'Price band updated', room: result.rows[0] });
   } catch (error) {
     return res.status(400).json({ error: error.message });

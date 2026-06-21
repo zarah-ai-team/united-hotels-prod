@@ -7,6 +7,7 @@ import { BookingStep1 } from '@/features/booking/BookingStep1';
 import { BookingStep2 } from '@/features/booking/BookingStep2';
 import { BookingStep3 } from '@/features/booking/BookingStep3';
 import { ConfirmationPageNew } from '@/features/booking/ConfirmationPageNew';
+import { PaymentResultPage } from '@/features/booking/PaymentResultPage';
 import { GuestPortal } from '@/features/guest/GuestPortal';
 import { GroupsPage } from '@/features/groups/GroupsPage';
 import { BlogPage } from '@/features/blog/BlogPage';
@@ -104,6 +105,12 @@ export const router = createBrowserRouter([
   {
     path: '/booking/confirmation',
     Component: ConfirmationPageNew,
+    errorElement,
+  },
+  {
+    // İş Bankası redirects the browser here after a card payment attempt.
+    path: '/payment/result',
+    Component: PaymentResultPage,
     errorElement,
   },
   {

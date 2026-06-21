@@ -173,7 +173,20 @@ const sendEmail = async ({ type, to, subject, html, text }) => {
     }
   }
 
-  // Priority 3 — Ethereal (zero-config dev fallback)
+  // Priority 3 — Ethereal (zero-config dev fallback). NEVER in production:
+  // Ethereal delivers to a throwaway inbox, so falling back to it in prod
+  // silently swallows real mail (the guest/vendor never receives anything)
+  // while the call still "succeeds". In production we instead fail loudly so
+  // a credential misconfig is visible in the logs and email_logs table.
+  if (process.env.NODE_ENV === 'production') {
+    const msg =
+      'No working email provider in production. Set RESEND_API_KEY (recommended) ' +
+      'or valid SMTP_USER/SMTP_PASS (Gmail needs a 16-char App Password).';
+    console.error(`[email] ${msg} — NOT delivered:`, { type, to, subject });
+    await logEmail({ type, recipient: to, subject, status: 'failed', errorMessage: msg });
+    return { id: null, skipped: false, error: new Error(msg) };
+  }
+
   try {
     const ethereal = await getEtherealTransporter();
     return await sendViaTransporter(ethereal, 'ethereal', { type, to, subject, html, text });

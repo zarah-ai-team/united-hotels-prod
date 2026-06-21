@@ -28,23 +28,46 @@ const CURRENCY_CODES = {
   GBP: '826',
 };
 
+// Sanitize an env value: trim surrounding whitespace and strip an accidental
+// trailing inline comment (e.g. a line copied verbatim from .env.example like
+// `ISBANK_POS_CLIENT_ID=700704600170   # Mağaza...`). Older dotenv versions do
+// not strip inline comments, which would otherwise glue the comment onto the
+// clientid/store key and silently break every hash. Only ` #` (whitespace then
+// hash) is treated as a comment, so a `#` inside a real secret is preserved.
+const clean = (value, fallback = '') => {
+  if (value == null) return fallback;
+  let s = String(value).trim();
+  const commentAt = s.search(/\s+#/);
+  if (commentAt !== -1) s = s.slice(0, commentAt).trim();
+  return s || fallback;
+};
+
 const config = () => ({
-  enabled: /^(1|true|yes)$/i.test(process.env.ISBANK_POS_ENABLED || ''),
-  clientId: process.env.ISBANK_POS_CLIENT_ID || '',
-  storeKey: process.env.ISBANK_POS_STORE_KEY || '',
-  apiUser: process.env.ISBANK_POS_API_USER || '',
-  apiPassword: process.env.ISBANK_POS_API_PASSWORD || '',
-  storeType: process.env.ISBANK_POS_STORE_TYPE || '3d_pay_hosting',
-  gateUrl: process.env.ISBANK_POS_GATE_URL || 'https://sanalpos.isbank.com.tr/fim/est3Dgate',
-  apiUrl: process.env.ISBANK_POS_API_URL || 'https://sanalpos.isbank.com.tr/fim/api',
-  currency: (process.env.ISBANK_POS_CURRENCY || 'TRY').toUpperCase(),
-  lang: process.env.ISBANK_POS_LANG || 'tr',
-  // Public, HTTPS base the bank redirects back to. Falls back to the site URL.
-  callbackBaseUrl: (
+  enabled: /^(1|true|yes)$/i.test(clean(process.env.ISBANK_POS_ENABLED)),
+  clientId: clean(process.env.ISBANK_POS_CLIENT_ID),
+  storeKey: clean(process.env.ISBANK_POS_STORE_KEY),
+  apiUser: clean(process.env.ISBANK_POS_API_USER),
+  apiPassword: clean(process.env.ISBANK_POS_API_PASSWORD),
+  storeType: clean(process.env.ISBANK_POS_STORE_TYPE, '3d_pay_hosting'),
+  gateUrl: clean(process.env.ISBANK_POS_GATE_URL, 'https://sanalpos.isbank.com.tr/fim/est3Dgate'),
+  apiUrl: clean(process.env.ISBANK_POS_API_URL, 'https://sanalpos.isbank.com.tr/fim/api'),
+  currency: clean(process.env.ISBANK_POS_CURRENCY, 'TRY').toUpperCase(),
+  lang: clean(process.env.ISBANK_POS_LANG, 'tr'),
+  // Public, HTTPS base the bank redirects back to (where /api/.../callback
+  // lives). Falls back to the site URL.
+  callbackBaseUrl: clean(
     process.env.ISBANK_POS_CALLBACK_BASE_URL ||
     process.env.SITE_BASE_URL ||
+    process.env.FRONTEND_URL
+  ).replace(/\/+$/, ''),
+  // Origin that serves the SPA result page (/payment/result). In production
+  // this is the same origin as the callback; locally the API (:5000) and the
+  // frontend (:3000) differ, so this is split out. Falls back to callbackBaseUrl.
+  frontendUrl: clean(
+    process.env.ISBANK_POS_FRONTEND_URL ||
     process.env.FRONTEND_URL ||
-    ''
+    process.env.SITE_BASE_URL ||
+    process.env.ISBANK_POS_CALLBACK_BASE_URL
   ).replace(/\/+$/, ''),
 });
 

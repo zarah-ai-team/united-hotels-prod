@@ -743,6 +743,63 @@ export const bookingService = {
       token
     );
   },
+
+  // Cancel a booking. roomId is optional — the backend derives it from the
+  // booking when omitted — but pass it when known so inventory frees reliably.
+  async cancel(bookingId: number | string, roomId?: number | string | null): Promise<any> {
+    const token = getStoredToken() || undefined;
+    return apiCall(
+      API_ENDPOINTS.BOOKINGS.CANCEL,
+      {
+        method: 'POST',
+        body: JSON.stringify({ bookingid: bookingId, roomid: roomId ?? undefined }),
+      },
+      token
+    );
+  },
+};
+
+// ─────────────────────────────────────────────
+// Payment Service (İş Bankası Sanal POS — 3D Pay Hosting)
+// ─────────────────────────────────────────────
+
+export interface IsbankInitiatePayload {
+  bookingId?: number | string | null;
+  amount: number;
+  currency?: string;
+  // Details the backend stashes so the payment callback can email the guest
+  // and the property after the charge succeeds.
+  notify?: {
+    hotelId?: number | string;
+    guestEmail?: string;
+    guestName?: string;
+    guestPhone?: string;
+    hotelName?: string;
+    roomName?: string;
+    checkIn?: string;
+    checkOut?: string;
+    nights?: number;
+  };
+}
+
+export interface IsbankInitiateResponse {
+  oid: string;
+  gateUrl: string;
+  fields: Record<string, string>;
+  formHtml?: string;
+}
+
+export const paymentService = {
+  // Start a card payment. Returns the signed 3D form to POST to the bank's
+  // hosted page. Throws (status 503) when the gateway isn't configured.
+  async initiateIsbank(payload: IsbankInitiatePayload): Promise<IsbankInitiateResponse> {
+    const token = getStoredToken() || undefined;
+    return apiCall<IsbankInitiateResponse>(
+      '/payments/isbank/initiate',
+      { method: 'POST', body: JSON.stringify(payload) },
+      token
+    );
+  },
 };
 
 // ─────────────────────────────────────────────

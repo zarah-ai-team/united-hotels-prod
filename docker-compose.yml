@@ -1,0 +1,60 @@
+# United Hotels — full stack for server deployment.
+#
+#   docker compose up -d --build
+#
+# - DB is external (Neon) — set DATABASE_URL (and PG_SSL=true) in .env.
+# - Secrets/config come from .env at runtime (env_file). NEXT_PUBLIC_* are
+#   build-time for the frontend, so they're passed as build args below.
+# - Put nginx in front of :3000 (the browser hits the frontend; its BFF proxies
+#   /api to the backend over the internal network). Expose :5000 too if you call
+#   the API directly.
+#
+# IMPORTANT: do NOT set ISBANK_MOCK_GATEWAY here — production must use the real
+# İş Bankası gateway. The mock is also hard-guarded off when NODE_ENV=production.
+
+services:
+  backend:
+    build: .
+    image: unitedhotels-backend
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "5000"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - pricing
+    restart: unless-stopped
+
+  pricing:
+    build: ./pricing-engine-v2
+    image: unitedhotels-pricing
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "5050"
+    ports:
+      - "5050:5050"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./web-next
+      args:
+        NEXT_PUBLIC_API_URL: /api
+        NEXT_PUBLIC_SITE_URL: https://bookunitedhotels.com
+        NEXT_PUBLIC_ISBANK_ENABLED: "true"
+        NEXT_PUBLIC_SUPPORT_WHATSAPP: "905449580798"
+    image: unitedhotels-frontend
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      # The BFF reaches the other services over the compose network by name.
+      BACKEND_URL: http://backend:5000
+      PRICING_URL: http://pricing:5050
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped

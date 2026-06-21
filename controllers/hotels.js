@@ -33,6 +33,15 @@ let basePriceIndexCache = { expiresAt: 0, value: null };
 const PUBLIC_HOTELS_CACHE_TTL_MS = 60 * 1000;
 const publicHotelsCache = new Map(); // key = `${status}|${limit}|${offset}|${includePrices}`
 
+// Drop every price-related cache so an admin/vendor price edit shows up on the
+// public site immediately instead of after the 60s / 5-min TTLs expire. Called
+// by the price-update handlers (admin.js, vendor controller).
+const invalidatePriceCaches = () => {
+  recommendedPricesCache = { expiresAt: 0, payload: null };
+  basePriceIndexCache = { expiresAt: 0, value: null };
+  publicHotelsCache.clear();
+};
+
 const getTableColumns = async (tableName) => {
   if (tableColumnsCache.has(tableName)) {
     return tableColumnsCache.get(tableName);
@@ -2050,5 +2059,6 @@ module.exports = {
   getAdminHotels,
   adminCreateHotel,
   adminUpdateHotel,
-  adminDeleteHotel
+  adminDeleteHotel,
+  invalidatePriceCaches
 };

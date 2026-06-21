@@ -1,0 +1,18 @@
+# Backend image build context — keep it lean and secret-free.
+node_modules
+web-next
+pricing-engine-v2
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
+.claude
+.vscode
+.idea
+Dockerfile
+docker-compose.yml
+.dockerignore
+scripts/test-*.js

@@ -1,5 +1,6 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { toast } from 'sonner';
 import { Navigation } from '@/shared/components/Navigation';
 import { Footer } from '@/shared/components/Footer';
 import { resolveImage, handleImageError } from '@/shared/data/siteConfig';
@@ -13,6 +14,7 @@ import {
 
 interface Booking {
   id: string;
+  roomId?: string | number;
   hotelName: string;
   location: string;
   image: string;
@@ -24,6 +26,9 @@ interface Booking {
   roomPrice: number;
   total: number;
   status: 'upcoming' | 'past' | 'cancelled';
+  // Card payment started but not yet settled — shown in the upcoming tab with
+  // an "Awaiting payment" badge instead of "Confirmed".
+  pending?: boolean;
   rating?: number;
   email?: string;
   phone?: string;
@@ -37,12 +42,15 @@ function mapApiBooking(raw: any): Booking {
     : 1;
 
   const rawStatus = (raw.status || '').toLowerCase();
+  const pending = rawStatus === 'pending' || rawStatus === 'awaiting_payment';
   let status: 'upcoming' | 'past' | 'cancelled' = 'upcoming';
   if (rawStatus === 'cancelled' || rawStatus === 'canceled') status = 'cancelled';
   else if (rawStatus === 'completed' || rawStatus === 'past' || new Date(checkOut) < new Date()) status = 'past';
 
   return {
+    pending,
     id: String(raw.id || raw._id || raw.transactionId || raw.transactionid || ''),
+    roomId: raw.roomId ?? raw.roomid ?? raw.room_id ?? undefined,
     hotelName: raw.hotelName || raw.hotel_name || (raw.hotelId ? `Hotel #${raw.hotelId}` : 'Hotel'),
     location: raw.location || raw.address || '',
     image: raw.image || raw.hotel_image || '',
@@ -67,6 +75,22 @@ export function GuestPortal() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'cancelled'>('upcoming');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  const loadBookings = useCallback(async () => {
+    try {
+      const res = await bookingService.getByUser();
+      setBookings((res.bookings || []).map(mapApiBooking));
+    } catch (err: any) {
+      if (err?.status === 401 || err?.status === 403 || err?.message?.includes('authenticated')) {
+        navigate('/auth?returnUrl=/portal', { replace: true });
+        return;
+      }
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
@@ -74,21 +98,8 @@ export function GuestPortal() {
       navigate('/auth?returnUrl=/portal', { replace: true });
       return;
     }
-
-    bookingService.getByUser()
-      .then((res) => {
-        const mapped = (res.bookings || []).map(mapApiBooking);
-        setBookings(mapped);
-      })
-      .catch((err) => {
-        if (err?.status === 401 || err?.status === 403 || err?.message?.includes('authenticated')) {
-          navigate('/auth?returnUrl=/portal', { replace: true });
-          return;
-        }
-        setBookings([]);
-      })
-      .finally(() => setLoading(false));
-  }, [navigate]);
+    loadBookings();
+  }, [navigate, loadBookings]);
 
   const filteredBookings = bookings.filter(b => b.status === activeTab);
   const upcomingCount = bookings.filter(b => b.status === 'upcoming').length;
@@ -100,11 +111,29 @@ export function GuestPortal() {
     setShowCancelModal(true);
   };
 
-  const handleConfirmCancel = () => {
-    setShowCancelModal(false);
-    setSelectedBooking(null);
-    // Handle cancellation logic
-    alert('Booking cancelled successfully! Refund will be processed within 5-7 business days.');
+  const handleConfirmCancel = async () => {
+    if (!selectedBooking) return;
+    const booking = selectedBooking;
+    setCancelling(true);
+    try {
+      await bookingService.cancel(booking.id, booking.roomId);
+      // Reflect immediately, then refresh from the server for the source of truth.
+      setBookings((prev) =>
+        prev.map((b) => (b.id === booking.id ? { ...b, status: 'cancelled', pending: false } : b))
+      );
+      setShowCancelModal(false);
+      setSelectedBooking(null);
+      toast.success('Booking cancelled', {
+        description: `Your booking at ${booking.hotelName} has been cancelled.`,
+      });
+      loadBookings();
+    } catch (err: any) {
+      toast.error('Could not cancel booking', {
+        description: err?.data?.error || err?.message || 'Please try again in a moment.',
+      });
+    } finally {
+      setCancelling(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -243,18 +272,25 @@ export function GuestPortal() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     
-                    {/* Status Badge */}
+                    {/* Status Badge — pending (card payment not settled) shows a
+                        distinct amber "Awaiting payment" badge. */}
                     <div className="absolute top-3 right-3">
                       <span className={`
                         px-3 py-1.5 rounded-lg font-['Inter:Bold',sans-serif] text-[13px] shadow-lg flex items-center gap-1.5
-                        ${booking.status === 'upcoming' ? 'bg-[#10b981] text-white' : ''}
-                        ${booking.status === 'past' ? 'bg-white text-[#6b7280]' : ''}
+                        ${booking.pending ? 'bg-[#f59e0b] text-white' : ''}
+                        ${!booking.pending && booking.status === 'upcoming' ? 'bg-[#10b981] text-white' : ''}
+                        ${!booking.pending && booking.status === 'past' ? 'bg-white text-[#6b7280]' : ''}
                         ${booking.status === 'cancelled' ? 'bg-[#ef4444] text-white' : ''}
                       `}>
-                        {booking.status === 'upcoming' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                        {booking.status === 'past' && <History className="w-3.5 h-3.5" />}
+                        {booking.pending && <Loader className="w-3.5 h-3.5" />}
+                        {!booking.pending && booking.status === 'upcoming' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        {!booking.pending && booking.status === 'past' && <History className="w-3.5 h-3.5" />}
                         {booking.status === 'cancelled' && <XCircle className="w-3.5 h-3.5" />}
-                        {booking.status === 'upcoming' ? 'Confirmed' : booking.status === 'past' ? 'Completed' : 'Cancelled'}
+                        {booking.status === 'cancelled'
+                          ? 'Cancelled'
+                          : booking.pending
+                            ? 'Awaiting payment'
+                            : booking.status === 'past' ? 'Completed' : 'Confirmed'}
                       </span>
                     </div>
                   </div>
@@ -288,7 +324,7 @@ export function GuestPortal() {
                             ${booking.total}
                           </div>
                           <div className="font-['Inter:Regular',sans-serif] text-[14px] text-[#8c8c8c]">
-                            Total paid
+                            {booking.pending ? 'Total due' : booking.status === 'cancelled' ? 'Total' : 'Total paid'}
                           </div>
                         </div>
                       </div>
@@ -570,17 +606,20 @@ export function GuestPortal() {
             </div>
 
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={() => setShowCancelModal(false)}
-                className="flex-1 px-6 py-4 border-2 border-[#eaeaea] text-[#3b3b3b] rounded-xl hover:border-[#2F80ED] hover:bg-[#2F80ED]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[16px]"
+                disabled={cancelling}
+                className="flex-1 px-6 py-4 border-2 border-[#eaeaea] text-[#3b3b3b] rounded-xl hover:border-[#2F80ED] hover:bg-[#2F80ED]/5 transition-all font-['Inter:SemiBold',sans-serif] text-[16px] disabled:opacity-60"
               >
                 Keep Booking
               </button>
-              <button 
+              <button
                 onClick={handleConfirmCancel}
-                className="flex-1 px-6 py-4 bg-[#ef4444] text-white rounded-xl hover:bg-[#dc2626] transition-all font-['Inter:Bold',sans-serif] text-[16px] shadow-lg"
+                disabled={cancelling}
+                className="flex-1 px-6 py-4 bg-[#ef4444] text-white rounded-xl hover:bg-[#dc2626] transition-all font-['Inter:Bold',sans-serif] text-[16px] shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Yes, Cancel Booking
+                {cancelling && <Loader className="w-4 h-4 animate-spin" />}
+                {cancelling ? 'Cancelling…' : 'Yes, Cancel Booking'}
               </button>
             </div>
           </div>
