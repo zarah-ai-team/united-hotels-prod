@@ -113,6 +113,19 @@ export const API_ENDPOINTS = {
     BOOKINGS: '/vendor/bookings',
   },
 
+  BLOG: {
+    // Public reads
+    PUBLIC_LIST: '/blog/public',
+    PUBLIC_BY_SLUG: (slug: string) => `/blog/public/${encodeURIComponent(slug)}`,
+    // Admin authoring (guarded by the backend)
+    ADMIN_LIST: '/blog/admin',
+    ADMIN_BY_ID: (id: string | number) => `/blog/admin/${id}`,
+    ADMIN_CREATE: '/blog/admin',
+    ADMIN_UPDATE: (id: string | number) => `/blog/admin/${id}`,
+    ADMIN_DELETE: (id: string | number) => `/blog/admin/${id}`,
+    ADMIN_UPLOAD: '/blog/admin/upload',
+  },
+
   TRANSLATE: '/translate',
   LOCALE_DETECT: '/locale/detect',
 

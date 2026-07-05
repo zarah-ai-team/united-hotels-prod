@@ -66,6 +66,30 @@ const fetchHotelEntries = async () => {
   }
 };
 
+const fetchBlogEntries = async () => {
+  try {
+    const result = await pool.query(
+      `SELECT slug, COALESCE(published_at, updated_at, created_at) AS lastmod
+         FROM blog_posts
+        WHERE status = 'published'
+        ORDER BY COALESCE(published_at, created_at) DESC
+        LIMIT 2000`,
+    );
+    return result.rows.map((row) => ({
+      // Posts publish at the site root (no /blog/ prefix).
+      loc: `${siteBase()}/${row.slug}`,
+      lastmod: row.lastmod ? new Date(row.lastmod).toISOString() : null,
+      changefreq: 'monthly',
+      priority: '0.6',
+    }));
+  } catch (err) {
+    // A missing blog_posts table (migration not yet applied) or any query
+    // error must not take down the sitemap — degrade to no blog entries.
+    console.warn('[sitemap] blog fetch failed:', err.message);
+    return [];
+  }
+};
+
 const sitemapXml = async (req, res) => {
   const base = siteBase();
   const staticEntries = STATIC_URLS.map((s) => ({
@@ -73,11 +97,14 @@ const sitemapXml = async (req, res) => {
     changefreq: s.changefreq,
     priority: s.priority,
   }));
-  const hotelEntries = await fetchHotelEntries();
+  const [hotelEntries, blogEntries] = await Promise.all([
+    fetchHotelEntries(),
+    fetchBlogEntries(),
+  ]);
   const xml =
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
     `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-    [...staticEntries, ...hotelEntries].map(buildUrlEntry).join('\n') +
+    [...staticEntries, ...hotelEntries, ...blogEntries].map(buildUrlEntry).join('\n') +
     `\n</urlset>\n`;
   res.set('Content-Type', 'application/xml; charset=utf-8');
   res.set('Cache-Control', 'public, max-age=3600');
@@ -91,6 +118,7 @@ const robotsTxt = (req, res) => {
     `Allow: /\n` +
     `Disallow: /admin\n` +
     `Disallow: /admin/\n` +
+    `Disallow: /blog-admin\n` +
     `Disallow: /vendor\n` +
     `Disallow: /vendor/\n` +
     `Disallow: /auth\n` +

@@ -1,5 +1,5 @@
 import { createElement, type ComponentType } from 'react';
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate, useParams } from 'react-router';
 import HomePage from '@/features/home/HomePage';
 import { ListingPageNew } from '@/features/hotels/ListingPageNew';
 import { HotelDetailPageNew } from '@/features/hotels/HotelDetailPageNew';
@@ -31,6 +31,7 @@ import { VendorLoginPage } from '@/features/vendor/VendorLoginPage';
 import { AdminHotelDetailPage } from '@/features/admin/AdminHotelDetailPage';
 import { AdminEmailLogsPage } from '@/features/admin/AdminEmailLogsPage';
 import { AdminGroupRequestsPage } from '@/features/admin/AdminGroupRequestsPage';
+import { BlogAdminPage } from '@/features/blog-admin/BlogAdminPage';
 import { NotFoundPage } from '@/features/misc/NotFoundPage';
 import { RequireAdmin } from '@/features/admin/components/RequireAdmin';
 import { RequireVendor } from '@/features/admin/components/RequireVendor';
@@ -49,6 +50,13 @@ const vendorGuarded = (Component: ComponentType) =>
 // Attached to every route so users never see the default "Hey developer 👋"
 // fallback — they get our branded glass error screen instead.
 const errorElement = createElement(RouteErrorBoundary);
+
+// Blog posts now live at the site root (/<slug>). Old /blog/<slug> links
+// redirect here so existing/shared URLs keep working.
+function BlogSlugRedirect() {
+  const { slug } = useParams();
+  return createElement(Navigate, { to: `/${slug || ''}`, replace: true });
+}
 
 export const router = createBrowserRouter([
   // User-facing routes
@@ -124,13 +132,15 @@ export const router = createBrowserRouter([
     errorElement,
   },
   {
+    // Blog index / listing stays at /blog.
     path: '/blog',
     Component: BlogPage,
     errorElement,
   },
   {
+    // Backward-compat: old /blog/<slug> permalinks redirect to /<slug>.
     path: '/blog/:slug',
-    Component: BlogArticlePage,
+    Component: BlogSlugRedirect,
     errorElement,
   },
   {
@@ -199,6 +209,14 @@ export const router = createBrowserRouter([
     element: guarded(AdminGroupRequestsPage),
     errorElement,
   },
+  // Standalone Blog Studio — a separate editor used by the content team.
+  // Guarded by the same staff/admin gate but deliberately kept outside the
+  // /admin dashboard (its own URL, its own chrome).
+  {
+    path: '/blog-admin',
+    element: guarded(BlogAdminPage),
+    errorElement,
+  },
   // Vendor portal (separate role — guarded by RequireVendor)
   {
     path: '/vendor/login',
@@ -208,6 +226,16 @@ export const router = createBrowserRouter([
   {
     path: '/vendor',
     element: vendorGuarded(VendorPortalPage),
+    errorElement,
+  },
+  // Root-level blog permalinks: /<slug>. Placed second-to-last so every real
+  // static route above (/, /listing, /groups, /blog, /support, …) and every
+  // multi-segment route wins first — react-router ranks static > dynamic. A
+  // single-segment path that matches no real route is treated as a blog slug;
+  // if no published post exists the page shows its own "not found" state.
+  {
+    path: '/:slug',
+    Component: BlogArticlePage,
     errorElement,
   },
   // Catch-all 404 — must be the LAST route. Anything that didn't match a

@@ -1001,6 +1001,145 @@ export const adminService = {
 };
 
 // ─────────────────────────────────────────────
+// Blog Service (public reads + admin authoring)
+// ─────────────────────────────────────────────
+
+// A single content block in a post body. Discriminated on `type`.
+// `title`/`cover`/`author` are positional blocks — they render the post's own
+// title / cover image / byline wherever the admin places them, so the whole
+// article layout is reorderable.
+export type BlogBlock =
+  | { type: 'title'; text?: string }
+  | { type: 'cover'; url?: string; caption?: string }
+  | { type: 'author' }
+  | { type: 'divider' }
+  | { type: 'heading'; level?: 2 | 3; text: string }
+  | { type: 'paragraph'; text: string }
+  | { type: 'quote'; text: string; label?: string }
+  | { type: 'image'; url: string; caption?: string; alt?: string }
+  | { type: 'list'; items: string[] };
+
+export interface BlogAuthor {
+  name: string;
+  avatar: string;
+  title: string;
+}
+
+export interface BlogPostSummary {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  coverImage: string;
+  author: BlogAuthor;
+  readTime: string;
+  status: 'draft' | 'published';
+  publishedAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface BlogPost extends BlogPostSummary {
+  body: BlogBlock[];
+}
+
+// Payload the editor sends on create/update.
+export interface BlogPostInput {
+  slug?: string;
+  title: string;
+  excerpt?: string;
+  category?: string;
+  coverImage?: string;
+  author?: Partial<BlogAuthor>;
+  readTime?: string;
+  body?: BlogBlock[];
+  status?: 'draft' | 'published';
+}
+
+export const blogService = {
+  // Public: published posts for the /blog index.
+  async listPublic(): Promise<{ posts: BlogPostSummary[]; count: number }> {
+    return apiCall(API_ENDPOINTS.BLOG.PUBLIC_LIST, { method: 'GET' });
+  },
+
+  // Public: a single published post by slug for /blog/:slug.
+  async getBySlug(slug: string): Promise<BlogPost | null> {
+    try {
+      const res = await apiCall<{ post: BlogPost }>(
+        API_ENDPOINTS.BLOG.PUBLIC_BY_SLUG(slug),
+        { method: 'GET' },
+      );
+      return res.post || null;
+    } catch (err: any) {
+      if (err?.status === 404) return null;
+      throw err;
+    }
+  },
+
+  // Admin: every post (drafts included) for the editor list.
+  async listAdmin(): Promise<{ posts: BlogPostSummary[]; count: number }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.BLOG.ADMIN_LIST, { method: 'GET' }, token);
+  },
+
+  async getAdminById(id: string | number): Promise<BlogPost> {
+    const token = getStoredToken() || undefined;
+    const res = await apiCall<{ post: BlogPost }>(
+      API_ENDPOINTS.BLOG.ADMIN_BY_ID(id),
+      { method: 'GET' },
+      token,
+    );
+    return res.post;
+  },
+
+  async create(data: BlogPostInput): Promise<BlogPost> {
+    const token = getStoredToken() || undefined;
+    const res = await apiCall<{ post: BlogPost }>(
+      API_ENDPOINTS.BLOG.ADMIN_CREATE,
+      { method: 'POST', body: JSON.stringify(data) },
+      token,
+    );
+    return res.post;
+  },
+
+  async update(id: string | number, data: BlogPostInput): Promise<BlogPost> {
+    const token = getStoredToken() || undefined;
+    const res = await apiCall<{ post: BlogPost }>(
+      API_ENDPOINTS.BLOG.ADMIN_UPDATE(id),
+      { method: 'PUT', body: JSON.stringify(data) },
+      token,
+    );
+    return res.post;
+  },
+
+  async remove(id: string | number): Promise<{ message: string; id: number }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(API_ENDPOINTS.BLOG.ADMIN_DELETE(id), { method: 'DELETE' }, token);
+  },
+
+  // Upload an image file (multipart). Bypasses the JSON `apiCall` wrapper so the
+  // browser can set the multipart boundary itself. Returns the public URL to
+  // drop into a cover/image field.
+  async uploadImage(file: File): Promise<{ url: string; filename: string; size: number }> {
+    const token = getStoredToken();
+    const form = new FormData();
+    form.append('file', file);
+    const url = joinUrl(API_BASE_URL, API_ENDPOINTS.BLOG.ADMIN_UPLOAD);
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(url, { method: 'POST', body: form, headers });
+    if (!res.ok) {
+      let data: any = null;
+      try { data = await res.json(); } catch { /* not json */ }
+      throw { message: data?.error || `Upload failed (HTTP ${res.status})`, status: res.status, data } as ApiError;
+    }
+    return res.json();
+  },
+};
+
+// ─────────────────────────────────────────────
 // Vendor Service (vendor-only routes)
 // ─────────────────────────────────────────────
 
@@ -1163,6 +1302,7 @@ export default {
   bookings: bookingService,
   admin: adminService,
   vendor: vendorService,
+  blog: blogService,
   getHotels,
   searchHotels,
   getPricing,

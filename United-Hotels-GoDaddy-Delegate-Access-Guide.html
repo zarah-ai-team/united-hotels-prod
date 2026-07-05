@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Enabling Email on the United Hotels Platform — GoDaddy Delegate Access &amp; DNS Setup</title>
+<style>
+  :root{
+    --navy:#1F3A5F; --accent:#2E5496; --grey:#5A6472; --border:#C2CCDA;
+    --subfill:#E8EEF6; --zebra:#F5F8FB; --rule:#2E5496; --headfill:#1F3A5F;
+    --green:#2E7D32; --greenbg:#F3FAF3; --red:#B23A2E;
+  }
+  *{box-sizing:border-box;}
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{
+    font-family:Arial, Helvetica, sans-serif; color:#111; line-height:1.5;
+    margin:0; background:#f0f2f5;
+  }
+  .page{
+    max-width:8.5in; margin:24px auto; background:#fff; padding:1in;
+    box-shadow:0 2px 14px rgba(0,0,0,.12);
+  }
+  h1.title{ font-size:23pt; margin:0 0 4px; color:#111; }
+  .subtitle{ font-size:14pt; font-weight:bold; color:var(--accent); margin:0 0 14px; }
+  .meta{ font-size:10pt; margin:2px 0; }
+  .meta .lbl{ color:var(--grey); }
+  hr.rule{ border:0; border-top:2.5px solid var(--rule); margin:12px 0 16px; }
+  h2{ font-size:15pt; color:var(--navy); border-bottom:1px solid #D3DEEC; padding-bottom:4px; margin:26px 0 10px; }
+  h3{ font-size:12.5pt; color:var(--accent); margin:18px 0 8px; }
+  p{ margin:0 0 10px; }
+  ul, ol{ margin:0 0 12px; padding-left:24px; }
+  li{ margin:0 0 6px; }
+  code, .mono{ font-family:Consolas,"Courier New",monospace; font-size:9.5pt; background:#f2f5f9; padding:1px 4px; border-radius:3px; }
+  .muted{ color:var(--grey); font-size:9.5pt; }
+  a{ color:var(--accent); }
+  table{ border-collapse:collapse; width:100%; margin:10px 0 14px; font-size:10pt; }
+  th{ background:var(--headfill); color:#fff; text-align:left; padding:7px 9px; border:1px solid var(--border); font-size:9.5pt; }
+  td{ padding:7px 9px; border:1px solid var(--border); vertical-align:top; }
+  tr:nth-child(even) td{ background:var(--zebra); }
+  td.lbl{ background:var(--subfill); font-weight:bold; width:28%; }
+  .callout{ border:1px solid var(--border); border-left:5px solid var(--rule); background:#F1F5FB; padding:12px 16px; margin:12px 0 16px; border-radius:2px; }
+  .callout .h{ font-weight:bold; color:var(--navy); margin-bottom:5px; }
+  .rec{ color:var(--green); font-weight:bold; }
+  .need{ color:var(--green); font-weight:bold; }
+  .off{ color:var(--red); font-weight:bold; }
+  .greenrow td{ background:var(--greenbg) !important; }
+  .chk{ list-style:none; padding-left:4px; }
+  .chk li{ padding-left:26px; position:relative; }
+  .chk li:before{ content:"\2610"; position:absolute; left:0; font-size:12pt; color:var(--navy); }
+  footer{ margin-top:26px; border-top:1px solid #D3DEEC; padding-top:8px; color:var(--grey); font-size:9pt; display:flex; justify-content:space-between; }
+  @media print{ body{background:#fff;} .page{box-shadow:none; margin:0; max-width:none; padding:0.8in;} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1 class="title">Enabling Email on the United Hotels Platform</h1>
+  <div class="subtitle">GoDaddy Delegate Access &amp; DNS Setup — Client Guide</div>
+  <div class="meta"><span class="lbl">Prepared for:</span> United Hotels (domain owner / client)</div>
+  <div class="meta"><span class="lbl">Prepared by:</span> [Your Company — Platform Team]</div>
+  <div class="meta"><span class="lbl">Date:</span> 1 July 2026 &nbsp;&nbsp;&nbsp; <span class="lbl">Version:</span> 1.0</div>
+  <hr class="rule" />
+
+  <p><strong>Note:</strong> Throughout this guide, replace <code>yourdomain.com</code> with United Hotels&rsquo; actual registered domain, and replace the bracketed <em>[placeholders]</em> with the specific names, emails, and values we provide.</p>
+
+  <h2>1.&nbsp; Overview</h2>
+  <p>This guide explains how to give our team the access needed to switch on email for the United Hotels platform. The domain is registered with GoDaddy under your account, so enabling platform email (transactional messages such as booking confirmations, password resets, and notifications) requires updating the domain&rsquo;s DNS records.</p>
+  <p>GoDaddy&rsquo;s <strong>Delegate Access</strong> feature lets you grant that permission securely &mdash; without sharing your password, payment details, or account PIN &mdash; and you can change or remove it at any time.</p>
+  <p>There are three parts:</p>
+  <ul>
+    <li><strong>Part A</strong> &mdash; You grant our team delegate access to the domain.</li>
+    <li><strong>Part B</strong> &mdash; You confirm domain (folder) permissions so we can edit DNS records.</li>
+    <li><strong>Part C</strong> &mdash; We add a small set of DNS records that authenticate and enable platform email.</li>
+  </ul>
+  <p>The whole process on your side takes about <strong>5&ndash;10 minutes</strong>.</p>
+
+  <h2>2.&nbsp; Before you begin</h2>
+  <p>Please have the following ready:</p>
+  <ul>
+    <li><strong>Your GoDaddy sign-in</strong> &mdash; the username and password for the account that owns the domain. If two-step verification is enabled, keep your phone or authenticator app nearby.</li>
+    <li><strong>Our delegate details</strong> &mdash; the exact name and email address of the GoDaddy account we want you to invite (provided in the table below).</li>
+    <li><strong>Account owner access</strong> &mdash; only the account owner (or an existing full-access delegate) can invite new delegates.</li>
+  </ul>
+  <div class="callout">
+    <div class="h">Good to know</div>
+    <p style="margin:0 0 6px;">The person you invite must have a GoDaddy account to accept the invitation. If they don&rsquo;t, GoDaddy will prompt them to create one for free.</p>
+    <p style="margin:0;">A pending invitation expires if it isn&rsquo;t accepted within roughly 48&ndash;72 hours, so it&rsquo;s best to send it when our team is ready to act.</p>
+  </div>
+
+  <h2>3.&nbsp; Details to have ready</h2>
+  <p>Fill in / confirm these before you start. We will provide the delegate name and email.</p>
+  <table>
+    <tr><th>Item</th><th>Value</th></tr>
+    <tr><td class="lbl">Domain</td><td><code>yourdomain.com</code> <span class="muted">(United Hotels&rsquo; registered domain)</span></td></tr>
+    <tr><td class="lbl">Delegate name</td><td>[Name we provide]</td></tr>
+    <tr><td class="lbl">Delegate GoDaddy email</td><td>[email@ourcompany.com &mdash; we provide]</td></tr>
+    <tr><td class="lbl">Access level to grant</td><td><strong>Domains Only</strong> <span class="muted">(recommended) &mdash; see Section 5</span></td></tr>
+    <tr><td class="lbl">Domain permission</td><td>Management Access = ON &nbsp;&bull;&nbsp; Transfer Access = OFF</td></tr>
+  </table>
+
+  <h2>4.&nbsp; Part A &mdash; Grant delegate access</h2>
+  <p>Follow these steps in your GoDaddy account:</p>
+  <ol>
+    <li><strong>Sign in</strong> to your GoDaddy account at <a href="https://account.godaddy.com">account.godaddy.com</a>.</li>
+    <li>Open the <strong>Delegate Access</strong> page: go directly to <a href="https://account.godaddy.com/access">account.godaddy.com/access</a>, or select your <strong>profile / name</strong> (top-right) &rarr; <strong>Account Settings</strong> &rarr; <strong>Delegate Access</strong>.</li>
+    <li>In the <em>&ldquo;People who can access my account&rdquo;</em> section, select <strong>Invite to Access</strong>.</li>
+    <li>Enter the <strong>Name</strong> and <strong>Email address</strong> exactly as we provided. The email must match our team member&rsquo;s GoDaddy account.</li>
+    <li>Choose the <strong>access level</strong> &mdash; select <strong>Domains Only</strong> (recommended) or <strong>Products &amp; Domains</strong>. See Section 5 for guidance.</li>
+    <li>Select <strong>Invite</strong>. GoDaddy emails an invitation to our team, who will accept it to activate access.</li>
+  </ol>
+
+  <h2>5.&nbsp; Choosing the right access level</h2>
+  <p>When you invite a delegate, GoDaddy asks you to pick one access level. For enabling email, DNS access is all we need.</p>
+  <table>
+    <tr><th style="width:20%;">Access level</th><th>What the delegate can do</th><th style="width:26%;">Use for United Hotels?</th></tr>
+    <tr class="greenrow"><td><strong>Domains Only</strong></td><td>Manage and/or transfer domains only &mdash; DNS records, nameservers, forwarding. No access to other products.</td><td><span class="rec">Recommended</span> &mdash; least privilege; sufficient to enable email.</td></tr>
+    <tr><td><strong>Products &amp; Domains</strong></td><td>Everything above, plus access to product control panels (e.g., hosting). Cannot make purchases.</td><td>Optional &mdash; only if we will also manage hosting or other GoDaddy products for you.</td></tr>
+    <tr><td><strong>Products, Domains, &amp; Purchase</strong></td><td>Everything above, plus the ability to buy/renew using your stored payment method.</td><td>Not needed &mdash; grants more than DNS work requires.</td></tr>
+    <tr><td><strong>Accounts Connection Only</strong></td><td>Stays connected for future work, but cannot currently access or purchase products.</td><td>Not needed for this task.</td></tr>
+  </table>
+  <p>Whichever level you choose, a delegate <strong>can never</strong> do the following &mdash; so your account stays protected:</p>
+  <ul>
+    <li>View or change your password or Support PIN.</li>
+    <li>View or add payment methods, or see your order history.</li>
+    <li>Invite other people to access your account.</li>
+    <li>Accept an incoming domain transfer, or upgrade products.</li>
+  </ul>
+
+  <h2>6.&nbsp; Part B &mdash; Confirm domain permissions (so DNS can be edited)</h2>
+  <p>Delegates are granted domain <strong>Management Access</strong> by default, which is what allows DNS records to be edited. Use these steps to review or restrict which domains we can manage &mdash; recommended if your account holds more than one domain.</p>
+  <ol>
+    <li>Sign in to your GoDaddy <a href="https://dcc.godaddy.com/control/portfolio">Domain Portfolio</a>.</li>
+    <li>Select the <strong>Folders</strong> icon above your domain list, choose the folder that contains <code>yourdomain.com</code> (or <strong>All Domains</strong>), then select <strong>Edit Folder</strong>.</li>
+    <li>Set <strong>Management Access</strong> to <strong>ON</strong> (required to edit DNS). Leave <strong>Transfer Access</strong> <strong>OFF</strong> &mdash; we don&rsquo;t need to transfer, delete, or sell domains.</li>
+    <li>Select <strong>Save</strong>.</li>
+  </ol>
+  <table>
+    <tr><th style="width:28%;">Permission</th><th>What it allows (and whether we need it)</th></tr>
+    <tr class="greenrow"><td><strong>Management Access</strong> <span class="need">(needed)</span></td><td>Edit DNS records, nameservers, hostnames and forwarding; manage subdomains; lock/unlock; auto-renew on/off; update contact info.</td></tr>
+    <tr><td><strong>Transfer Access</strong> <span class="off">(leave off)</span></td><td>Initiate domain transfers to another registrar or account, delete domains, or list a domain for sale. Not required for email.</td></tr>
+  </table>
+
+  <h2>7.&nbsp; What happens after you send the invite</h2>
+  <ul>
+    <li><strong>Our team accepts</strong> the emailed invitation. Your account then appears for us under <em>&ldquo;Accounts I can access.&rdquo;</em></li>
+    <li><strong>We add the DNS records</strong> listed in Part C using the exact values issued by the email provider for United Hotels&rsquo; domain.</li>
+    <li><strong>Verification &amp; propagation</strong> &mdash; DNS changes usually take effect within minutes but can take up to <strong>48 hours</strong> to fully propagate. We verify the domain with the provider before going live.</li>
+    <li><strong>We confirm</strong> back to you once platform email is authenticated and fully enabled.</li>
+  </ul>
+
+  <h2>8.&nbsp; Part C &mdash; DNS records we add to enable email</h2>
+  <p>United Hotels&rsquo; platform sends email through a transactional email service (for example <em>AWS SES, SendGrid, Mailgun, or Postmark</em>). To authenticate that mail and keep it out of spam, we add the record types below. <strong>The exact hosts and values are generated in the provider&rsquo;s dashboard</strong> &mdash; the examples here are illustrative.</p>
+  <table>
+    <tr><th style="width:14%;">Type</th><th style="width:22%;">Host / Name (example)</th><th>Example value</th><th style="width:27%;">Purpose</th></tr>
+    <tr><td><strong>TXT</strong></td><td><code>_amazonses</code></td><td><code>(provider-issued token)</code></td><td>Domain verification &mdash; proves to the provider that we control the domain.</td></tr>
+    <tr><td><strong>CNAME &times;3</strong></td><td><code>xxxx._domainkey</code></td><td><code>xxxx.dkim.amazonses.com</code></td><td>DKIM &mdash; digitally signs outgoing mail so it can&rsquo;t be spoofed.</td></tr>
+    <tr><td><strong>TXT</strong></td><td><code>@</code> <span class="muted">(root)</span></td><td><code>v=spf1 include:amazonses.com ~all</code></td><td>SPF &mdash; authorises the provider to send mail for your domain.</td></tr>
+    <tr><td><strong>MX</strong></td><td><code>send</code> <span class="muted">(subdomain)</span></td><td><code>feedback-smtp.us-east-1.amazonses.com</code> <span class="muted">(priority 10)</span></td><td>Custom &ldquo;MAIL FROM&rdquo; &mdash; routes bounces and complaints correctly.</td></tr>
+    <tr><td><strong>TXT</strong></td><td><code>_dmarc</code></td><td><code>v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com</code></td><td>DMARC &mdash; sets policy for unauthenticated mail and enables reports.</td></tr>
+    <tr><td><strong>CNAME</strong> <span class="muted">(optional)</span></td><td><code>email</code></td><td><code>(provider tracking host)</code></td><td>Link/open tracking for outbound email (if used).</td></tr>
+  </table>
+  <div class="callout">
+    <div class="h">Entering records in GoDaddy &mdash; two tips</div>
+    <p style="margin:0 0 6px;">The <strong>Host / Name</strong> field is relative to your domain. For a record on the root, enter <code>@</code>; for <code>send.yourdomain.com</code> enter only <code>send</code> &mdash; GoDaddy adds the domain automatically.</p>
+    <p style="margin:0;">Copy each value <strong>exactly</strong> from the provider &mdash; no extra spaces or trailing dots. SendGrid, Mailgun and Postmark use their own hosts (e.g. <code>em1234</code>, <code>k1._domainkey</code>), which we&rsquo;ll supply.</p>
+  </div>
+
+  <h2>9.&nbsp; Security &amp; privacy</h2>
+  <ul>
+    <li><strong>No password sharing.</strong> Delegate access never exposes your password, Support PIN, or payment methods.</li>
+    <li><strong>Least privilege.</strong> We request only Domains Only access with Management Access &mdash; enough to manage DNS and nothing more.</li>
+    <li><strong>You stay the owner.</strong> You retain full control and can review or revoke access at any time.</li>
+    <li><strong>Extra protection.</strong> We recommend enabling two-step verification on your GoDaddy account if it isn&rsquo;t already on.</li>
+  </ul>
+
+  <h2>10.&nbsp; Managing or revoking access later</h2>
+  <p>You can change our access level or remove it entirely at any time: go to <a href="https://account.godaddy.com/access">account.godaddy.com/access</a>, find our team under <em>&ldquo;People who can access my account,&rdquo;</em> and select the option to change the access level or delete the delegate. Removing access does not affect DNS records already in place.</p>
+
+  <h2>11.&nbsp; Quick checklist</h2>
+  <ul class="chk">
+    <li>Signed in to the GoDaddy account that owns the domain.</li>
+    <li>Opened Delegate Access and selected &ldquo;Invite to Access.&rdquo;</li>
+    <li>Invited <em>[our name / email]</em> with <strong>Domains Only</strong> (or Products &amp; Domains).</li>
+    <li>Set folder Management Access = ON and Transfer Access = OFF.</li>
+    <li>Confirmed our team accepted the invitation.</li>
+    <li>We add and verify the DNS records (Part C).</li>
+    <li>Platform email confirmed live.</li>
+  </ul>
+
+  <h2>12.&nbsp; References &amp; help</h2>
+  <p>Official GoDaddy documentation:</p>
+  <ul>
+    <li>Invite a delegate to access my GoDaddy account &mdash; <a href="https://www.godaddy.com/help/invite-a-delegate-to-access-my-godaddy-account-12376">godaddy.com/help/invite-a-delegate-to-access-my-godaddy-account-12376</a></li>
+    <li>Delegate access: Levels of permission &mdash; <a href="https://www.godaddy.com/help/delegate-access-levels-of-permission-12374">godaddy.com/help/delegate-access-levels-of-permission-12374</a></li>
+    <li>Grant delegate access to domains &mdash; <a href="https://www.godaddy.com/help/grant-delegate-access-to-domains-32180">godaddy.com/help/grant-delegate-access-to-domains-32180</a></li>
+    <li>What is delegate access? &mdash; <a href="https://www.godaddy.com/help/what-is-delegate-access-12378">godaddy.com/help/what-is-delegate-access-12378</a></li>
+  </ul>
+  <p class="muted">Questions about any step? Contact us at <em>[your support email]</em> and we&rsquo;ll walk through it with you.</p>
+
+  <footer>
+    <span>Confidential &mdash; prepared for United Hotels</span>
+    <span>United Hotels &mdash; Email Enablement Guide</span>
+  </footer>
+
+</div>
+</body>
+</html>
