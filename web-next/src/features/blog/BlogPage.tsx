@@ -1,8 +1,28 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { MapPin, Calendar, Clock, ArrowRight, Search } from "lucide-react";
+import { Calendar, Clock, ArrowRight, Search } from "lucide-react";
 import { Navigation } from "@/shared/components/Navigation";
 import { useSEO, breadcrumbLd } from "@/shared/hooks/useSEO";
+import { blogService, type BlogPostSummary } from "@/shared/api/services";
+
+// Format an ISO date into the short "Feb 28, 2025" label the cards use.
+const formatDate = (iso: string | null): string => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
+// Map an API post summary onto the card's props.
+const toCard = (p: BlogPostSummary): BlogCardProps => ({
+  image: p.coverImage,
+  category: p.category || "Travel",
+  title: p.title,
+  excerpt: p.excerpt,
+  date: formatDate(p.publishedAt || p.updatedAt || p.createdAt),
+  readTime: p.readTime || "",
+  slug: p.slug,
+});
 
 // Blog Article Card
 interface BlogCardProps {
@@ -17,7 +37,7 @@ interface BlogCardProps {
 
 function BlogCard({ image, category, title, excerpt, date, readTime, slug }: BlogCardProps) {
   return (
-    <Link to={`/blog/${slug}`} className="group">
+    <Link to={`/${slug}`} className="group">
       <article className="bg-white rounded-2xl overflow-hidden border border-[#e5e7eb] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
         {/* Image */}
         <div className="relative h-64 overflow-hidden">
@@ -82,10 +102,31 @@ export function BlogPage() {
   });
 
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  // null until the first load resolves; on API error/empty we keep the
+  // built-in fallback list so the page is never blank.
+  const [posts, setPosts] = useState<BlogCardProps[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    blogService
+      .listPublic()
+      .then((res) => {
+        if (cancelled) return;
+        const cards = (res.posts || []).map(toCard);
+        if (cards.length) setPosts(cards);
+      })
+      .catch(() => {
+        // Backend/table not ready — fall back to the built-in articles below.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const categories = ["All", "Neighborhoods", "Travel Tips", "Budget Travel", "Food & Dining", "Culture"];
 
-  const articles: BlogCardProps[] = [
+  const fallbackArticles: BlogCardProps[] = [
     {
       image: "https://images.unsplash.com/photo-1719147145383-9cbd4b382525?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpc3RhbmJ1bCUyMHRyYXZlbCUyMGd1aWRlJTIwYmx1ZSUyMG1vc3F1ZXxlbnwxfHx8fDE3NzI3MDM2MDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
       category: "Travel Tips",
@@ -142,9 +183,20 @@ export function BlogPage() {
     }
   ];
 
-  const filteredArticles = selectedCategory === "All" 
-    ? articles 
-    : articles.filter(article => article.category === selectedCategory);
+  const articles = posts ?? fallbackArticles;
+
+  const filteredArticles = useMemo(() => {
+    const needle = searchTerm.trim().toLowerCase();
+    return articles.filter((article) => {
+      const matchesCategory =
+        selectedCategory === "All" || article.category === selectedCategory;
+      const matchesSearch =
+        !needle ||
+        article.title.toLowerCase().includes(needle) ||
+        article.excerpt.toLowerCase().includes(needle);
+      return matchesCategory && matchesSearch;
+    });
+  }, [articles, selectedCategory, searchTerm]);
 
   return (
     <div className="bg-[#fafafa] min-h-screen">
@@ -166,6 +218,8 @@ export function BlogPage() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8c8c8c]" />
               <input
                 type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search travel guides..."
                 className="w-full pl-12 pr-4 py-4 border border-[#eaeaea] rounded-xl font-['Inter:Regular',sans-serif] text-[16px] focus:outline-none focus:border-[#2F80ED] focus:ring-2 focus:ring-[#2F80ED]/20 transition-all"
               />

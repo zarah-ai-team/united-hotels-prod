@@ -12,7 +12,13 @@
       "Bash(sed -n '1,140p' shared/api/services.ts)",
       "Bash(sed -n '1,60p' shared/lib/amenities.ts)",
       "Bash(cat ../next.config.mjs)",
-      "Bash(npm start *)"
+      "Bash(npm start *)",
+      "Bash(git check-ignore *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "PowerShell($p = \\(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess | Select-Object -Unique; foreach \\($id in $p\\) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }; Start-Sleep -Seconds 2; if \\(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\\) { \"still listening\" } else { \"port 3000 free\" })",
+      "Bash(python -c \"import sys,json; print\\(json.load\\(sys.stdin\\)['token']\\)\")",
+      "Bash(awk '/async getByUser/,/^  },/' web-next/src/shared/api/services.ts)"
     ]
   }
 }

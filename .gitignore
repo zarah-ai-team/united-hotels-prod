@@ -3,5 +3,10 @@ dist/
 build/
 .env
 .env.local
+.env.production
+.env.*.local
 *.log
 .DS_Store
+
+# User-uploaded blog images (served from disk; keep out of git)
+uploads/
