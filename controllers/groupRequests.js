@@ -114,10 +114,10 @@ const submitGroupRequest = async (req, res) => {
     // Acknowledge to the requester so they know it landed (best-effort).
     const ackHtml = renderEmail({
       title: 'Group request received',
-      preview: 'Thanks — our group desk will be in touch shortly.',
+      preview: 'Thanks — we usually respond with an offer within 2-3 hours.',
       body: `
         ${heading(`Thanks, ${escapeHtml(name)}!`)}
-        ${paragraph('We&rsquo;ve received your group request. Our team will get back to you shortly with options and pricing.')}
+        ${paragraph('We&rsquo;ve received your group request. We usually respond with an offer &mdash; hotel options and pricing &mdash; within 2-3 hours.')}
         ${paragraph(`<strong>Destination:</strong> ${escapeHtml(destination || '—')}`)}
         ${paragraph(`<strong>Dates:</strong> ${escapeHtml(dates || '—')}`)}
         ${paragraph(`<strong>Group size:</strong> ${escapeHtml(groupSize || '—')}`)}

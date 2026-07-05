@@ -63,7 +63,7 @@ function GroupsHero() {
         throw new Error(data?.message || "Could not send your request");
       }
       toast.success(t("Group request sent"), {
-        description: t("Our group desk will reply on WhatsApp or email within 24 hours."),
+        description: t("We usually respond with an offer within 2-3 hours, on WhatsApp or email."),
       });
       setForm({
         name: "",
@@ -104,7 +104,7 @@ function GroupsHero() {
             <ul className="space-y-2 mb-2">
               {[
                 "Direct hotel agreements across 8 Turkish cities",
-                "Dedicated group desk — replies within 24 hours",
+                "Dedicated group desk — offers usually within 2-3 hours",
                 "Single point of contact from quote to checkout",
               ].map((item) => (
                 <li
@@ -492,7 +492,7 @@ function FinalCTASection() {
             {t("Get a tailored group offer.")}
           </h2>
           <p className="font-['Inter:Regular',sans-serif] text-[15px] md:text-[16px] leading-[1.55] text-white/75 mb-8 max-w-[520px] mx-auto">
-            {t("Send us your group details — we'll come back with hotel options and pricing within 24 hours.")}
+            {t("Send us your group details — we usually respond with an offer within 2-3 hours.")}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -521,7 +521,7 @@ function FinalCTASection() {
           {/* Trust strip */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-8 pt-6 border-t border-white/10">
             {[
-              "24h response SLA",
+              "Offers usually in 2-3 hours",
               "Direct hotel rates",
               "One single invoice",
             ].map((label) => (
@@ -537,7 +537,7 @@ function FinalCTASection() {
         <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[#6B7280] dark:text-white/70 font-['Inter:Regular',sans-serif] text-[13px]">
           <span className="inline-flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#2F80ED]" strokeWidth={2} />
-            {t("Avg. response: under 2 hours during business hours")}
+            {t("Typical group offer: within 2-3 hours")}
           </span>
           <span className="inline-flex items-center gap-2">
             <Building2 className="w-4 h-4 text-[#2F80ED]" strokeWidth={2} />
