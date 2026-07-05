@@ -10,7 +10,7 @@ import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
 import { LocaleSuggestionModal } from '@/shared/components/LocaleSuggestionModal';
 import { router } from '@/spa/routes';
 import { Toaster } from 'sonner';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { suppressRechartsWarnings } from '@/shared/lib/suppressRechartsWarnings';
 
 export default function App() {
@@ -25,7 +25,13 @@ export default function App() {
         <AuthProvider>
           <BookingProvider>
             <ErrorBoundary label="root">
-              <RouterProvider router={router} />
+              {/* Suspense catches the code-split (React.lazy) route chunks.
+                  Eager landing pages never suspend; lazy routes (admin, booking,
+                  auth, …) briefly fall back to this spacer while their chunk
+                  loads. minHeight avoids a layout jump. */}
+              <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
+                <RouterProvider router={router} />
+              </Suspense>
             </ErrorBoundary>
             <Toaster position="top-right" richColors />
             {/* Suggests a region/currency switch when IP detection finds

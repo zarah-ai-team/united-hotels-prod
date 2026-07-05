@@ -35,8 +35,23 @@ async function main() {
     console.log(`   - [${p.id}] booking=${p.booking_id} · ${p.amount} · ${p.status}`)
   );
 
+  // Active (non-cancelled) bookings held room inventory by decrementing
+  // rooms.available_rooms. A plain DELETE never restores that, so this script
+  // would leave those rooms wrongly under-available. With every booking gone,
+  // every room should be fully available again — so we reset the counter to
+  // total_rooms and clear the (now-stale) currentbookings ledger.
+  const roomsToReset = await pool
+    .query(`SELECT COUNT(*)::int AS n FROM rooms WHERE total_rooms IS NOT NULL AND available_rooms IS DISTINCT FROM total_rooms`)
+    .catch(() => ({ rows: [{ n: 0 }] }));
+  console.log(`\nRooms to reset to full availability: ${roomsToReset.rows[0].n}`);
+
+  const emailLogs = await pool
+    .query('SELECT COUNT(*)::int AS n FROM email_logs')
+    .catch(() => ({ rows: [{ n: 0 }] }));
+  console.log(`Email logs to clear: ${emailLogs.rows[0].n}`);
+
   if (!CONFIRM) {
-    console.log('\nNothing deleted (dry run). Re-run with --confirm to apply.');
+    console.log('\nNothing changed (dry run). Re-run with --confirm to apply.');
     return;
   }
 
@@ -45,8 +60,20 @@ async function main() {
     await client.query('BEGIN');
     const delPayments = await client.query('DELETE FROM payments');
     const delBookings = await client.query('DELETE FROM bookings');
+    const resetAvail = await client.query(
+      `UPDATE rooms SET available_rooms = total_rooms, is_available = true
+         WHERE total_rooms IS NOT NULL AND available_rooms IS DISTINCT FROM total_rooms`
+    );
+    const clearLedger = await client.query(
+      `UPDATE rooms SET currentbookings = '{}'::json[]
+         WHERE currentbookings IS NOT NULL AND COALESCE(array_length(currentbookings, 1), 0) > 0`
+    ).catch((e) => { console.warn('   (currentbookings clear skipped:', e.message + ')'); return { rowCount: 0 }; });
+    const delEmailLogs = await client.query('DELETE FROM email_logs')
+      .catch((e) => { console.warn('   (email_logs clear skipped:', e.message + ')'); return { rowCount: 0 }; });
     await client.query('COMMIT');
     console.log(`\n✓ Deleted ${delPayments.rowCount} payment(s) and ${delBookings.rowCount} booking(s).`);
+    console.log(`✓ Reset availability on ${resetAvail.rowCount} room(s); cleared booking ledger on ${clearLedger.rowCount} room(s).`);
+    console.log(`✓ Cleared ${delEmailLogs.rowCount} email log(s).`);
   } catch (e) {
     await client.query('ROLLBACK');
     throw e;

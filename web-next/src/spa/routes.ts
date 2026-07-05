@@ -1,41 +1,53 @@
-import { createElement, type ComponentType } from 'react';
+import { createElement, lazy, type ComponentType } from 'react';
 import { createBrowserRouter, Navigate, useParams } from 'react-router';
+
+// Eager: the SEO-critical pages a visitor is most likely to land on directly.
+// These stay in the main bundle so first paint isn't gated on a second chunk.
 import HomePage from '@/features/home/HomePage';
 import { ListingPageNew } from '@/features/hotels/ListingPageNew';
 import { HotelDetailPageNew } from '@/features/hotels/HotelDetailPageNew';
-import { BookingStep1 } from '@/features/booking/BookingStep1';
-import { BookingStep2 } from '@/features/booking/BookingStep2';
-import { BookingStep3 } from '@/features/booking/BookingStep3';
-import { ConfirmationPageNew } from '@/features/booking/ConfirmationPageNew';
-import { PaymentResultPage } from '@/features/booking/PaymentResultPage';
-import { GuestPortal } from '@/features/guest/GuestPortal';
-import { GroupsPage } from '@/features/groups/GroupsPage';
-import { BlogPage } from '@/features/blog/BlogPage';
 import { BlogArticlePage } from '@/features/blog/BlogArticlePage';
-import { SupportPage } from '@/features/support/SupportPage';
-import { PrivacyPolicyPage } from '@/features/support/PrivacyPolicyPage';
-import { TermsOfServicePage } from '@/features/support/TermsOfServicePage';
-import { AuthPage } from '@/features/auth/AuthPage';
-import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage';
-import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
-import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
-import { AdminLoginPage } from '@/features/admin/AdminLoginPage';
-import { AdminDashboardPage } from '@/features/admin/AdminDashboardPage';
-import { AdminBookingsPage } from '@/features/admin/AdminBookingsPage';
-import { AdminHotelsPage } from '@/features/admin/AdminHotelsPage';
-import { AdminAnalyticsPage } from '@/features/admin/AdminAnalyticsPage';
-import { AdminSettingsPage } from '@/features/admin/AdminSettingsPage';
-import { AdminUsersPage } from '@/features/admin/AdminUsersPage';
-import { VendorPortalPage } from '@/features/vendor/VendorPortalPage';
-import { VendorLoginPage } from '@/features/vendor/VendorLoginPage';
-import { AdminHotelDetailPage } from '@/features/admin/AdminHotelDetailPage';
-import { AdminEmailLogsPage } from '@/features/admin/AdminEmailLogsPage';
-import { AdminGroupRequestsPage } from '@/features/admin/AdminGroupRequestsPage';
-import { BlogAdminPage } from '@/features/blog-admin/BlogAdminPage';
 import { NotFoundPage } from '@/features/misc/NotFoundPage';
+// Guards + error boundary are tiny and needed everywhere — keep them eager.
 import { RequireAdmin } from '@/features/admin/components/RequireAdmin';
 import { RequireVendor } from '@/features/admin/components/RequireVendor';
 import { RouteErrorBoundary } from '@/shared/components/ErrorBoundary';
+
+// Everything else is code-split so public visitors never download the booking
+// flow, auth, the admin dashboards (which pull in recharts), the vendor portal
+// or the blog editor. React.lazy + the <Suspense> boundary in App.tsx resolve
+// these on demand. Helper keeps the named-export lazy imports tidy.
+const page = (importer: () => Promise<any>, name: string): ComponentType =>
+  lazy(() => importer().then((m) => ({ default: m[name] }))) as unknown as ComponentType;
+
+const BookingStep1 = page(() => import('@/features/booking/BookingStep1'), 'BookingStep1');
+const BookingStep2 = page(() => import('@/features/booking/BookingStep2'), 'BookingStep2');
+const BookingStep3 = page(() => import('@/features/booking/BookingStep3'), 'BookingStep3');
+const ConfirmationPageNew = page(() => import('@/features/booking/ConfirmationPageNew'), 'ConfirmationPageNew');
+const PaymentResultPage = page(() => import('@/features/booking/PaymentResultPage'), 'PaymentResultPage');
+const GuestPortal = page(() => import('@/features/guest/GuestPortal'), 'GuestPortal');
+const GroupsPage = page(() => import('@/features/groups/GroupsPage'), 'GroupsPage');
+const BlogPage = page(() => import('@/features/blog/BlogPage'), 'BlogPage');
+const SupportPage = page(() => import('@/features/support/SupportPage'), 'SupportPage');
+const PrivacyPolicyPage = page(() => import('@/features/support/PrivacyPolicyPage'), 'PrivacyPolicyPage');
+const TermsOfServicePage = page(() => import('@/features/support/TermsOfServicePage'), 'TermsOfServicePage');
+const AuthPage = page(() => import('@/features/auth/AuthPage'), 'AuthPage');
+const VerifyEmailPage = page(() => import('@/features/auth/VerifyEmailPage'), 'VerifyEmailPage');
+const ForgotPasswordPage = page(() => import('@/features/auth/ForgotPasswordPage'), 'ForgotPasswordPage');
+const ResetPasswordPage = page(() => import('@/features/auth/ResetPasswordPage'), 'ResetPasswordPage');
+const AdminLoginPage = page(() => import('@/features/admin/AdminLoginPage'), 'AdminLoginPage');
+const AdminDashboardPage = page(() => import('@/features/admin/AdminDashboardPage'), 'AdminDashboardPage');
+const AdminBookingsPage = page(() => import('@/features/admin/AdminBookingsPage'), 'AdminBookingsPage');
+const AdminHotelsPage = page(() => import('@/features/admin/AdminHotelsPage'), 'AdminHotelsPage');
+const AdminAnalyticsPage = page(() => import('@/features/admin/AdminAnalyticsPage'), 'AdminAnalyticsPage');
+const AdminSettingsPage = page(() => import('@/features/admin/AdminSettingsPage'), 'AdminSettingsPage');
+const AdminUsersPage = page(() => import('@/features/admin/AdminUsersPage'), 'AdminUsersPage');
+const AdminHotelDetailPage = page(() => import('@/features/admin/AdminHotelDetailPage'), 'AdminHotelDetailPage');
+const AdminEmailLogsPage = page(() => import('@/features/admin/AdminEmailLogsPage'), 'AdminEmailLogsPage');
+const AdminGroupRequestsPage = page(() => import('@/features/admin/AdminGroupRequestsPage'), 'AdminGroupRequestsPage');
+const VendorPortalPage = page(() => import('@/features/vendor/VendorPortalPage'), 'VendorPortalPage');
+const VendorLoginPage = page(() => import('@/features/vendor/VendorLoginPage'), 'VendorLoginPage');
+const BlogAdminPage = page(() => import('@/features/blog-admin/BlogAdminPage'), 'BlogAdminPage');
 
 // Wrap an admin page in the RequireAdmin guard. Using a render-element route
 // (`element:`) instead of `Component:` lets us inject the wrapper without
@@ -68,6 +80,14 @@ export const router = createBrowserRouter([
   {
     path: '/listing',
     Component: ListingPageNew,
+    errorElement,
+  },
+  {
+    // /hotels is a natural URL people type for the listing — send them to the
+    // canonical /listing (also stops it falling through to the /:slug blog
+    // lookup and showing "Article not found").
+    path: '/hotels',
+    element: createElement(Navigate, { to: '/listing', replace: true }),
     errorElement,
   },
   {

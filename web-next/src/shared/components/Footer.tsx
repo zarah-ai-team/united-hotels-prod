@@ -6,8 +6,8 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 // Email obfuscation. We never emit the literal address into the rendered
 // HTML — instead we store base64 + reassemble on click. Plain mailto: links
 // get harvested by spam crawlers; this stops the simple ones cold.
-const SUPPORT_EMAIL_USER = "hello";
-const SUPPORT_EMAIL_DOMAIN = "bookunitedhotels.com";
+const SUPPORT_EMAIL_USER = "info";
+const SUPPORT_EMAIL_DOMAIN = "united-tourism.com";
 const handleObfuscatedMail = (e: React.MouseEvent<HTMLAnchorElement>) => {
   e.preventDefault();
   window.location.href = `mailto:${SUPPORT_EMAIL_USER}@${SUPPORT_EMAIL_DOMAIN}`;

@@ -688,8 +688,10 @@ export default function HomePage() {
   useScrollProgress();
   useSEO({
     title: 'Book United Hotels | Trusted hotel stays across Turkey',
+    // Kept ≤160 chars (was 176) so search engines show it in full — see the
+    // SEO audit's "reduce meta description length" recommendation.
     description:
-      'Verified hotels across Istanbul and Turkey with transparent pricing and local support. Direct rates for individual travellers and groups — book online or request a group quote.',
+      'Verified hotels across Istanbul & Turkey at direct rates — transparent pricing and real local support, for individual travellers and groups. Book online.',
     canonical: '/',
     ogType: 'website',
     jsonLd: [

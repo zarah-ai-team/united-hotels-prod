@@ -118,7 +118,7 @@ export function AdminLoginPage() {
                 type="email"
                 required
                 autoComplete="email"
-                placeholder="admin@unitedhotels.com"
+                placeholder="info@united-tourism.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-[#eaeaea] px-4 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/30 focus:border-[#2F80ED]"

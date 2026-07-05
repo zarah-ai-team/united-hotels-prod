@@ -235,10 +235,10 @@ export function SupportPage() {
                 We'll respond within 24 hours
               </p>
               <p className="font-['Inter:Bold',sans-serif] text-[16px] md:text-[18px] text-[#3b3b3b] mb-4 md:mb-5 break-all">
-                hello@unitedhotels.com
+                info@united-tourism.com
               </p>
               <a
-                href="mailto:hello@unitedhotels.com"
+                href="mailto:info@united-tourism.com"
                 className="inline-block bg-[#2F80ED] text-white px-5 md:px-6 py-2.5 md:py-3 rounded-lg hover:bg-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px] md:text-[15px]"
               >
                 Send Email

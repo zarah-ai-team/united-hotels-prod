@@ -106,7 +106,7 @@ export function VendorLoginPage() {
                 type="email"
                 required
                 autoComplete="email"
-                placeholder="vendor@unitedhotels.com"
+                placeholder="info@united-tourism.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-[#eaeaea] px-4 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/30 focus:border-[#14B8A6]"

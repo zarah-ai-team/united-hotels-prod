@@ -25,9 +25,15 @@ const sendMail = async (email, output, subject) => {
     })
 
 
+    // Blind-copy the business archive inbox on auth mails too, matching the
+    // main transactional client (utils/emails/client.js).
+    const archive = (process.env.EMAIL_ARCHIVE_BCC ?? 'info@united-tourism.com').trim() || null;
+    const bcc = archive && archive.toLowerCase() !== String(email).toLowerCase() ? archive : undefined;
+
     let info = await transporter.sendMail({
         from: process.env.MAIL_FROM || `"United Hotels" ${smtpUser}`, // sender address
         to: email, // list of receivers
+        bcc, // business archive copy
         subject: subject, // Subject line
         text: "Welcome to United Hotels", // plain text body
         html: output, // html body

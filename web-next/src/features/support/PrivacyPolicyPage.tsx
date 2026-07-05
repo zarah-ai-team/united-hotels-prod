@@ -116,10 +116,10 @@ export function PrivacyPolicyPage() {
               <p className="font-['Inter:Regular',sans-serif] text-[14px] md:text-[15px] text-[#6b7280] leading-[22px] md:leading-[24px]">
                 Reach our team at{" "}
                 <a
-                  href="mailto:hello@unitedhotels.com"
+                  href="mailto:info@united-tourism.com"
                   className="text-[#2F80ED] hover:underline break-all"
                 >
-                  hello@unitedhotels.com
+                  info@united-tourism.com
                 </a>{" "}
                 and we'll be happy to help.
               </p>

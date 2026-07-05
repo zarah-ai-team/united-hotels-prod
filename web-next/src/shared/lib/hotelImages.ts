@@ -108,6 +108,27 @@ export function pickHotelImage(hotel: HotelImageInput): string {
   return readApiImage(hotel) || picsumImage(hotel, 1);
 }
 
+// ── Responsive images ────────────────────────────────────────────────────────
+// The backend serves one 1200×900 ImageKit render per hotel. On a card that is
+// only ~300–400px wide (and much smaller on mobile) that's ~4× more pixels than
+// needed. ImageKit resizes on the fly via the `tr=w-…` query param, so we build
+// a srcset of smaller widths and let the browser pick — big LCP / bytes win,
+// and clears the audit's "serve properly sized images" flag. Non-ImageKit URLs
+// (e.g. the Picsum fallback) return undefined and just use the plain `src`.
+const IK_SRCSET_WIDTHS = [320, 480, 640, 900, 1200];
+
+function imagekitAtWidth(url: string, w: number): string {
+  const h = Math.round((w * 3) / 4); // preserve the 4:3 crop the cards use
+  const tr = `tr=w-${w},h-${h},q-70,fo-auto,c-maintain_ratio`;
+  if (/[?&]tr=/.test(url)) return url.replace(/tr=[^&]*/, tr);
+  return url + (url.includes("?") ? "&" : "?") + tr;
+}
+
+export function hotelImageSrcSet(url: string | null | undefined): string | undefined {
+  if (!url || !url.includes("ik.imagekit.io")) return undefined;
+  return IK_SRCSET_WIDTHS.map((w) => `${imagekitAtWidth(url, w)} ${w}w`).join(", ");
+}
+
 // Kept for API compatibility; with no local pool the only source is the API.
 export function pickLocalFallback(hotel: HotelImageInput): string {
   return readApiImage(hotel) || picsumImage(hotel, 1);

@@ -9,7 +9,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import { useScrollProgress } from "@/shared/hooks/useScrollProgress";
 import { useSEO, breadcrumbLd } from "@/shared/hooks/useSEO";
 import { extractAmenityNames, capitalizeAmenity } from "@/shared/lib/amenities";
-import { pickHotelImage, makeImageFallback } from "@/shared/lib/hotelImages";
+import { pickHotelImage, makeImageFallback, hotelImageSrcSet } from "@/shared/lib/hotelImages";
 import {
   ArrowRight,
   ChevronLeft,
@@ -96,9 +96,13 @@ interface ListingCardProps {
   // the card (image, name, location, amenities) is already populated from static
   // data; only the price slot shows a shimmer until prices arrive.
   pricingLoading: boolean;
+  // Above-the-fold cards load their image eagerly with high priority — the LCP
+  // element on this page is the first card's photo, so lazy-loading it tanked
+  // the Largest Contentful Paint score.
+  eager?: boolean;
 }
 
-function ListingCard({ hotel, language, t, pricingLoading }: ListingCardProps) {
+function ListingCard({ hotel, language, t, pricingLoading, eager = false }: ListingCardProps) {
   const hasDiscount = hotel.discountPercent > 0;
   const showOldPrice = hotel.basePrice && hotel.basePrice > hotel.directPrice;
   const hasPrice = Number.isFinite(hotel.directPrice) && hotel.directPrice > 0;
@@ -114,8 +118,12 @@ function ListingCard({ hotel, language, t, pricingLoading }: ListingCardProps) {
       <div className="relative overflow-hidden aspect-[16/11] sm:aspect-[4/3]">
         <img
           src={hotel.image}
+          srcSet={hotelImageSrcSet(hotel.image)}
+          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
           alt={hotel.name}
-          loading="lazy"
+          loading={eager ? "eager" : "lazy"}
+          fetchPriority={eager ? "high" : "auto"}
+          decoding="async"
           onError={makeImageFallback({ id: hotel.id, name: hotel.name })}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.07]"
         />
@@ -312,11 +320,56 @@ export function ListingPageNew() {
   useEffect(() => {
     let active = true;
 
+    // Merge a pricing-engine payload into a hotel list and repaint the cards.
+    const applyPricing = (list: PublicHotel[], payload: any) => {
+      const byId = new Map<string, any[]>();
+      if (payload && Array.isArray(payload.hotels)) {
+        for (const item of payload.hotels) {
+          byId.set(String(item.hotelId), item.recommendedPrices || []);
+        }
+      }
+      const merged = list.map((hotel) => ({
+        ...hotel,
+        recommendedPrices: byId.get(String(hotel.id)) || hotel.recommendedPrices || [],
+      }));
+      setHotels(merged.map((hotel) => mapHotel(hotel)));
+    };
+
     const loadHotels = async () => {
+      const params = new URLSearchParams(location.search);
+      const checkInDate = params.get("checkInDate") || params.get("checkin") || null;
+      const checkOutDate = params.get("checkOutDate") || params.get("checkout") || null;
+      const hasDates = Boolean(checkInDate || checkOutDate);
+      const seed = readSeedHotels();
+
       try {
-        setLoading(true);
         setError(null);
 
+        // ── Fast path: the /listing server route already injected fresh cards
+        // WITH cached recommended prices (see app/listing/page.tsx, ISR hourly).
+        // Render them as-is and skip the redundant full re-fetch + forced live
+        // price refresh that used to run ~6s on every load. Only touch the
+        // pricing engine when the user picked specific stay dates.
+        if (seed) {
+          setLoading(false);
+          if (!hasDates) {
+            setPricingLoading(false);
+            return;
+          }
+          setPricingLoading(true);
+          const payload = await hotelService
+            .getAllRecommended("active", false, checkInDate, checkOutDate)
+            .catch(() => null);
+          if (!active) return;
+          if (payload) applyPricing(seed, payload);
+          setPricingLoading(false);
+          return;
+        }
+
+        // ── In-SPA navigation (no seed): fetch the list, painting after the
+        // first batch so cards appear after one round-trip, then fill prices
+        // from cache. No forced live refresh — the detail page does that.
+        setLoading(true);
         const allHotels: PublicHotel[] = [];
 
         const firstResponse = await hotelService.getPublicHotels({
@@ -326,8 +379,12 @@ export function ListingPageNew() {
           limit: FETCH_BATCH_SIZE,
           offset: 0,
         });
-
+        if (!active) return;
         allHotels.push(...(firstResponse.hotels || []));
+
+        setHotels(allHotels.map((hotel) => mapHotel(hotel)));
+        setLoading(false);
+        setPricingLoading(true);
 
         const totalCount = Number(firstResponse.count || allHotels.length);
         for (let offset = allHotels.length; offset < totalCount; offset += FETCH_BATCH_SIZE) {
@@ -338,48 +395,16 @@ export function ListingPageNew() {
             limit: FETCH_BATCH_SIZE,
             offset,
           });
+          if (!active) return;
           allHotels.push(...(nextResponse.hotels || []));
+          setHotels(allHotels.map((hotel) => mapHotel(hotel)));
         }
 
-        if (!active) return;
-
-        // Stage 1 — render the grid immediately from static hotel data (image,
-        // name, location, amenities, rating). The slow recommended-price fetch
-        // below must not block the cards from appearing.
-        setHotels(allHotels.map((hotel) => mapHotel(hotel)));
-        setLoading(false);
-        setPricingLoading(true);
-
-        // Stage 2 — fetch LIVE/recommended prices (the heavy OTA-anchor step)
-        // and merge them into the already-visible cards once they arrive.
-        // Forward the user's selected dates so the v2 engine fetches LIVE OTA
-        // anchors for that stay window; without dates it falls back to the
-        // analytical formula.
-        const params = new URLSearchParams(location.search);
-        const checkInDate = params.get("checkInDate") || params.get("checkin") || null;
-        const checkOutDate = params.get("checkOutDate") || params.get("checkout") || null;
-        const pricingPayload = await hotelService
-          .getAllRecommended("active", true, checkInDate, checkOutDate)
+        const payload = await hotelService
+          .getAllRecommended("active", false, checkInDate, checkOutDate)
           .catch(() => null);
-
         if (!active) return;
-
-        const recommendedByHotelId = new Map<string, any[]>();
-        if (pricingPayload && Array.isArray(pricingPayload.hotels)) {
-          for (const item of pricingPayload.hotels) {
-            recommendedByHotelId.set(String(item.hotelId), item.recommendedPrices || []);
-          }
-        }
-
-        const mergedHotels = allHotels.map((hotel) => ({
-          ...hotel,
-          recommendedPrices:
-            recommendedByHotelId.get(String(hotel.id)) ||
-            hotel.recommendedPrices ||
-            [],
-        }));
-
-        setHotels(mergedHotels.map((hotel) => mapHotel(hotel)));
+        if (payload) applyPricing(allHotels, payload);
         setPricingLoading(false);
       } catch (e: any) {
         if (!active) return;
@@ -516,8 +541,8 @@ export function ListingPageNew() {
           {!loading && !error && filteredHotels.length > 0 && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
-                {paginatedHotels.map((hotel) => (
-                  <ListingCard key={hotel.id} hotel={hotel} language={language} t={t} pricingLoading={pricingLoading} />
+                {paginatedHotels.map((hotel, i) => (
+                  <ListingCard key={hotel.id} hotel={hotel} language={language} t={t} pricingLoading={pricingLoading} eager={i < 4} />
                 ))}
               </div>
 

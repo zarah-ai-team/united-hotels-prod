@@ -568,7 +568,7 @@ function HotelContactCard({ contactName, contactPhone, email }: HotelContactCard
   const waNumber = contactPhone ? String(contactPhone).replace(/[^\d+]/g, "").replace(/^\+/, "") : "";
   const waLink = waNumber ? `https://wa.me/${waNumber}` : null;
   const supportNumber = "+90 544 958 07 98";
-  const supportEmail = "support@unitedhotels.com";
+  const supportEmail = "info@united-tourism.com";
 
   type Row = {
     icon: React.ReactNode;

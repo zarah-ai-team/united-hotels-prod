@@ -17,6 +17,17 @@ const pool = require('../../db');
 
 const FROM_DEFAULT = 'United Hotels <onboarding@resend.dev>';
 
+// Business inbox that receives a blind copy of EVERY outgoing email (booking,
+// cancellation, vendor notice, welcome, password reset, support, group). Driven
+// by EMAIL_ARCHIVE_BCC; defaults to the company address. Set the env var to ''
+// to disable the archive copy.
+const DEFAULT_ARCHIVE_BCC = 'info@united-tourism.com';
+const archiveBcc = () => {
+  const raw = process.env.EMAIL_ARCHIVE_BCC;
+  const value = (raw === undefined ? DEFAULT_ARCHIVE_BCC : raw).trim();
+  return value || null;
+};
+
 let cachedResendClient = null;
 let cachedSmtpTransporter = null;
 let etherealReadyPromise = null;
@@ -105,9 +116,12 @@ const logEmail = async ({ type, recipient, subject, status, providerId, errorMes
   }
 };
 
-const sendViaResend = async ({ type, to, subject, html, text }) => {
+const sendViaResend = async ({ type, to, subject, html, text, bcc }) => {
   const client = getResendClient();
-  const { data, error } = await client.emails.send({ from: fromAddress(), to, subject, html, text });
+  const { data, error } = await client.emails.send({
+    from: fromAddress(), to, subject, html, text,
+    ...(bcc ? { bcc } : {}),
+  });
   if (error) {
     await logEmail({
       type, recipient: to, subject, status: 'failed',
@@ -119,8 +133,11 @@ const sendViaResend = async ({ type, to, subject, html, text }) => {
   return { id: data?.id || null, skipped: false, provider: 'resend' };
 };
 
-const sendViaTransporter = async (transporter, providerName, { type, to, subject, html, text }) => {
-  const info = await transporter.sendMail({ from: fromAddress(), to, subject, html, text });
+const sendViaTransporter = async (transporter, providerName, { type, to, subject, html, text, bcc }) => {
+  const info = await transporter.sendMail({
+    from: fromAddress(), to, subject, html, text,
+    ...(bcc ? { bcc } : {}),
+  });
   const previewUrl = nodemailer.getTestMessageUrl(info) || null;
   if (previewUrl) {
     console.log(`[email] sent ${type || ''} → ${to} via ${providerName}\n          preview: ${previewUrl}`);
@@ -150,10 +167,15 @@ const sendEmail = async ({ type, to, subject, html, text }) => {
     return { id: null, skipped: true };
   }
 
+  // Blind-copy the business archive inbox on every send. Skip when the primary
+  // recipient already IS the archive address to avoid a duplicate copy.
+  const archive = archiveBcc();
+  const bcc = archive && archive.toLowerCase() !== String(to).toLowerCase() ? archive : null;
+
   // Priority 1 — Resend
   if (getResendClient()) {
     try {
-      return await sendViaResend({ type, to, subject, html, text });
+      return await sendViaResend({ type, to, subject, html, text, bcc });
     } catch (err) {
       console.error('[email] Resend send threw:', err.message);
       await logEmail({ type, recipient: to, subject, status: 'failed', errorMessage: err?.message });
@@ -165,7 +187,7 @@ const sendEmail = async ({ type, to, subject, html, text }) => {
   const smtp = getSmtpTransporter();
   if (smtp) {
     try {
-      return await sendViaTransporter(smtp, 'smtp', { type, to, subject, html, text });
+      return await sendViaTransporter(smtp, 'smtp', { type, to, subject, html, text, bcc });
     } catch (err) {
       console.error('[email] SMTP send failed:', err.message);
       await logEmail({ type, recipient: to, subject, status: 'failed', errorMessage: err?.message });
@@ -189,7 +211,7 @@ const sendEmail = async ({ type, to, subject, html, text }) => {
 
   try {
     const ethereal = await getEtherealTransporter();
-    return await sendViaTransporter(ethereal, 'ethereal', { type, to, subject, html, text });
+    return await sendViaTransporter(ethereal, 'ethereal', { type, to, subject, html, text, bcc });
   } catch (err) {
     console.error('[email] Ethereal send failed:', err.message);
     await logEmail({ type, recipient: to, subject, status: 'failed', errorMessage: err?.message });

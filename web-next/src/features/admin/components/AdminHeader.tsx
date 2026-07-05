@@ -127,7 +127,7 @@ export function AdminHeader({ title, breadcrumb }: AdminHeaderProps) {
                   <p className="font-semibold text-[12.5px] text-[#3B3B3B] dark:text-white truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Admin User
                   </p>
-                  <p className="text-[10.5px] text-[#9aa0a6] dark:text-white/50 truncate">admin@unitedhotels.com</p>
+                  <p className="text-[10.5px] text-[#9aa0a6] dark:text-white/50 truncate">info@united-tourism.com</p>
                 </div>
                 <Link
                   to="/"
