@@ -4,7 +4,8 @@ import {
   PenSquare, Plus, Trash2, ArrowUp, ArrowDown, Loader2, Eye, Save,
   Send, FileText, Image as ImageIcon, Quote, List as ListIcon, Heading,
   LogOut, ExternalLink, AlertCircle, CheckCircle2, X, Upload,
-  Type, User, Minus,
+  Type, User, Minus, Bold, Italic, Link as LinkIcon, GripVertical,
+  Table as TableIcon, Underline, Palette, AlignLeft, AlignCenter, AlignRight,
 } from "lucide-react";
 import { useAuth } from "@/shared/context/AuthContext";
 import {
@@ -12,6 +13,9 @@ import {
   type BlogBlock,
   type BlogPost,
   type BlogPostSummary,
+  type BlockAlign,
+  type ListStyle,
+  type TableVariant,
 } from "@/shared/api/services";
 import { BlogBlocks } from "@/features/blog/components/BlogBlocks";
 
@@ -84,6 +88,8 @@ const newBlock = (type: BlogBlock["type"]): BlogBlock => {
       return { type: "image", url: "", caption: "", alt: "" };
     case "list":
       return { type: "list", items: [""] };
+    case "table":
+      return { type: "table", headers: ["Column 1", "Column 2"], rows: [["", ""], ["", ""]] };
     default:
       return { type: "paragraph", text: "" };
   }
@@ -104,6 +110,7 @@ const BLOCK_LABELS: Record<string, string> = {
   quote: "Tip",
   image: "Image",
   list: "List",
+  table: "Table",
 };
 
 export function BlogAdminPage() {
@@ -114,6 +121,9 @@ export function BlogAdminPage() {
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [banner, setBanner] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  // Drag-to-reorder blocks: index being dragged + the drop target being hovered.
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const isEditing = form.id != null;
 
@@ -212,6 +222,20 @@ export function BlogAdminPage() {
     const next = [...form.body];
     [next[index], next[target]] = [next[target], next[index]];
     set("body", next);
+  };
+
+  // Drop the currently-dragged block at `target`, shifting the rest.
+  const dropBlock = (target: number) => {
+    const from = dragIndex;
+    setDragIndex(null);
+    setDragOverIndex(null);
+    if (from === null || from === target) return;
+    setForm((f) => {
+      const next = [...f.body];
+      const [moved] = next.splice(from, 1);
+      next.splice(target, 0, moved);
+      return { ...f, body: next };
+    });
   };
 
   // ── Save ─────────────────────────────────────────────────────────────────
@@ -482,7 +506,7 @@ export function BlogAdminPage() {
                 {/* Meta row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={labelCls}>Category</label>
+                    <label className={labelCls}>Category <span className="font-normal text-[#9aa1ac]">(optional)</span></label>
                     <input
                       className={inputCls}
                       value={form.category}
@@ -491,7 +515,7 @@ export function BlogAdminPage() {
                     />
                   </div>
                   <div>
-                    <label className={labelCls}>Read time</label>
+                    <label className={labelCls}>Read time <span className="font-normal text-[#9aa1ac]">(optional)</span></label>
                     <input
                       className={inputCls}
                       value={form.readTime}
@@ -576,23 +600,44 @@ export function BlogAdminPage() {
                   <div className="mb-3">
                     <label className="text-[13px] font-semibold text-[#374151]">Article layout</label>
                     <p className="text-[11.5px] text-[#9aa1ac] mt-0.5">
-                      The whole article is built from these blocks — drag order with ↑ ↓, or delete any of them.
-                      Title, Cover and Byline pull from the fields above; the rest is your content.
+                      Drag the ⠿ handle (or use ↑ ↓) to reorder any section. Text blocks
+                      support <strong>bold</strong>, <em>italic</em> and links; images can crop or fit.
+                      Title, Cover and Byline pull from the fields above.
                     </p>
                   </div>
 
                   <div className="space-y-3">
                     {form.body.map((block, i) => (
-                      <BlockEditor
+                      <div
                         key={i}
-                        block={block}
-                        index={i}
-                        total={form.body.length}
-                        onChange={(patch) => updateBlock(i, patch)}
-                        onMove={(dir) => moveBlock(i, dir)}
-                        onRemove={() => removeBlock(i)}
-                        onError={(text) => setBanner({ kind: "err", text })}
-                      />
+                        onDragOver={(e) => {
+                          if (dragIndex !== null) {
+                            e.preventDefault();
+                            setDragOverIndex(i);
+                          }
+                        }}
+                        onDrop={() => dropBlock(i)}
+                        className={`rounded-xl transition ${
+                          dragOverIndex === i && dragIndex !== null && dragIndex !== i
+                            ? "ring-2 ring-[#2F80ED] ring-offset-2"
+                            : ""
+                        } ${dragIndex === i ? "opacity-40" : ""}`}
+                      >
+                        <BlockEditor
+                          block={block}
+                          index={i}
+                          total={form.body.length}
+                          onChange={(patch) => updateBlock(i, patch)}
+                          onMove={(dir) => moveBlock(i, dir)}
+                          onRemove={() => removeBlock(i)}
+                          onError={(text) => setBanner({ kind: "err", text })}
+                          onDragStart={() => setDragIndex(i)}
+                          onDragEnd={() => {
+                            setDragIndex(null);
+                            setDragOverIndex(null);
+                          }}
+                        />
+                      </div>
                     ))}
                   </div>
 
@@ -607,6 +652,7 @@ export function BlogAdminPage() {
                     <AddBtn icon={<ImageIcon className="w-3.5 h-3.5" />} label="Image" onClick={() => addBlock("image")} />
                     <AddBtn icon={<Quote className="w-3.5 h-3.5" />} label="Tip" onClick={() => addBlock("quote")} />
                     <AddBtn icon={<ListIcon className="w-3.5 h-3.5" />} label="List" onClick={() => addBlock("list")} />
+                    <AddBtn icon={<TableIcon className="w-3.5 h-3.5" />} label="Table" onClick={() => addBlock("table")} />
                     <AddBtn icon={<Minus className="w-3.5 h-3.5" />} label="Divider" onClick={() => addBlock("divider")} />
                   </div>
                 </div>
@@ -634,6 +680,191 @@ function AddBtn({ icon, label, onClick }: { icon: ReactNode; label: string; onCl
       {icon}
       {label}
     </button>
+  );
+}
+
+// A tidy row of preset text colours — one click applies instantly, no OS
+// dialog. The last swatch opens the native picker for anything custom.
+const PRESET_COLORS = ["#E11D48", "#EA580C", "#CA8A04", "#16A34A", "#2F80ED", "#7C3AED", "#0F172A"];
+
+// Inline-formatting toolbar for a textarea. Wraps the current selection in the
+// Markdown the public renderer understands: **bold**, *italic*, __underline__,
+// [text](url), {c:#hex}coloured{/c}.
+//
+// Smoothness comes from never losing the selection: every button preventDefaults
+// its mousedown, so the textarea keeps focus and the range stays live and
+// visible while the mark is applied. The one control that must take focus (the
+// native colour input) grabs the range on pointer-down first, so its colour
+// still lands on the right text.
+function FormatToolbar({
+  taRef,
+  value,
+  onChange,
+  noMargin,
+}: {
+  taRef: React.RefObject<HTMLTextAreaElement>;
+  value: string;
+  onChange: (v: string) => void;
+  noMargin?: boolean;
+}) {
+  const saved = useRef<{ s: number; e: number }>({ s: 0, e: 0 });
+  const grab = () => {
+    const ta = taRef.current;
+    if (ta) saved.current = { s: ta.selectionStart ?? value.length, e: ta.selectionEnd ?? value.length };
+  };
+  // Live range if the textarea still holds focus (button path), else the range
+  // we grabbed before focus left (colour-dialog path).
+  const range = () => {
+    const ta = taRef.current;
+    if (ta && document.activeElement === ta) {
+      return { s: ta.selectionStart ?? value.length, e: ta.selectionEnd ?? value.length };
+    }
+    return saved.current;
+  };
+  const reselect = (start: number, len: number) => {
+    const ta = taRef.current;
+    requestAnimationFrame(() => {
+      ta?.focus();
+      ta?.setSelectionRange(start, start + len);
+    });
+  };
+
+  const wrap = (before: string, after: string) => {
+    const { s, e } = range();
+    const inner = value.slice(s, e) || "text";
+    onChange(value.slice(0, s) + before + inner + after + value.slice(e));
+    reselect(s + before.length, inner.length);
+  };
+  const insertLink = () => {
+    const { s, e } = range();
+    const inner = value.slice(s, e) || "link text";
+    const url = window.prompt("Link URL", "https://");
+    if (!url) {
+      taRef.current?.focus();
+      return;
+    }
+    onChange(value.slice(0, s) + `[${inner}](${url})` + value.slice(e));
+    reselect(s + 1, inner.length);
+  };
+  const applyColor = (color: string) => {
+    const { s, e } = range();
+    const inner = value.slice(s, e) || "text";
+    const open = `{c:${color}}`;
+    onChange(value.slice(0, s) + open + inner + `{/c}` + value.slice(e));
+    reselect(s + open.length, inner.length);
+  };
+
+  return (
+    <div
+      className={`flex flex-wrap items-center gap-0.5 rounded-lg border border-[#e6e8ec] bg-[#fafbfc] px-1.5 py-1 ${
+        noMargin ? "" : "mb-2"
+      }`}
+    >
+      <FmtBtn onClick={() => wrap("**", "**")} title="Bold"><Bold className="w-3.5 h-3.5" /></FmtBtn>
+      <FmtBtn onClick={() => wrap("*", "*")} title="Italic"><Italic className="w-3.5 h-3.5" /></FmtBtn>
+      <FmtBtn onClick={() => wrap("__", "__")} title="Underline"><Underline className="w-3.5 h-3.5" /></FmtBtn>
+      <ToolDivider />
+      <FmtBtn onClick={insertLink} title="Insert link"><LinkIcon className="w-3.5 h-3.5" /></FmtBtn>
+      <ToolDivider />
+      <div className="flex items-center gap-1 px-0.5">
+        {PRESET_COLORS.map((c) => (
+          <button
+            key={c}
+            type="button"
+            title={`Colour ${c}`}
+            aria-label={`Apply colour ${c}`}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applyColor(c)}
+            className="w-[15px] h-[15px] rounded-full border border-black/10 hover:scale-125 hover:shadow-sm transition-transform"
+            style={{ backgroundColor: c }}
+          />
+        ))}
+        {/* Custom colour — native picker. Grab the range on pointer-down, before
+            the OS dialog takes focus, so the mark still lands on the selection. */}
+        <label
+          title="Custom colour"
+          onMouseDown={grab}
+          className="relative inline-flex items-center justify-center w-7 h-7 rounded-md text-[#6b7280] hover:bg-white hover:text-[#1f2937] hover:shadow-sm cursor-pointer transition"
+        >
+          <Palette className="w-3.5 h-3.5" />
+          <input
+            type="color"
+            onClick={grab}
+            onChange={(e) => applyColor(e.target.value)}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            aria-label="Custom text colour"
+          />
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function ToolDivider() {
+  return <span className="w-px h-5 bg-[#e6e8ec] mx-0.5" aria-hidden="true" />;
+}
+
+function FmtBtn({ children, onClick, title }: { children: ReactNode; onClick: () => void; title: string }) {
+  return (
+    <button
+      type="button"
+      // Keep the textarea focused so the selection survives the click.
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      title={title}
+      className="inline-flex items-center justify-center w-7 h-7 rounded-md text-[#6b7280] hover:bg-white hover:text-[#1f2937] hover:shadow-sm transition"
+    >
+      {children}
+    </button>
+  );
+}
+
+// Text alignment control for paragraph / heading blocks (text structuring).
+function AlignToggle({
+  value,
+  onChange,
+}: {
+  value?: "left" | "center" | "right";
+  onChange: (v: "left" | "center" | "right") => void;
+}) {
+  const cur = value || "left";
+  const btn = (a: "left" | "center" | "right") =>
+    `p-1.5 rounded transition ${cur === a ? "bg-[#2F80ED] text-white" : "text-[#6b7280] hover:bg-[#eef0f3]"}`;
+  return (
+    <div className="inline-flex items-center gap-0.5 rounded-md border border-[#e2e5ea] p-0.5">
+      <button type="button" onClick={() => onChange("left")} className={btn("left")} title="Align left"><AlignLeft className="w-3.5 h-3.5" /></button>
+      <button type="button" onClick={() => onChange("center")} className={btn("center")} title="Align center"><AlignCenter className="w-3.5 h-3.5" /></button>
+      <button type="button" onClick={() => onChange("right")} className={btn("right")} title="Align right"><AlignRight className="w-3.5 h-3.5" /></button>
+    </div>
+  );
+}
+
+// Image display mode: Crop (object-cover — fills, may crop) vs Fit
+// (object-contain — the whole image shows, letterboxed).
+function FitToggle({
+  value,
+  onChange,
+}: {
+  value?: "cover" | "contain";
+  onChange: (v: "cover" | "contain") => void;
+}) {
+  const isCover = value !== "contain";
+  const btn = (active: boolean) =>
+    `px-2.5 py-1 text-[12px] font-medium transition ${
+      active ? "bg-[#2F80ED] text-white" : "bg-white text-[#6b7280] hover:bg-[#f5f6f8]"
+    }`;
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[11.5px] text-[#9aa1ac]">Display:</span>
+      <div className="inline-flex rounded-md border border-[#e2e5ea] overflow-hidden">
+        <button type="button" onClick={() => onChange("cover")} className={btn(isCover)} title="Crop to fill the frame">
+          Crop
+        </button>
+        <button type="button" onClick={() => onChange("contain")} className={btn(!isCover)} title="Fit the whole image">
+          Fit
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -688,6 +919,8 @@ function BlockEditor({
   onMove,
   onRemove,
   onError,
+  onDragStart,
+  onDragEnd,
 }: {
   block: BlogBlock;
   index: number;
@@ -696,16 +929,32 @@ function BlockEditor({
   onMove: (dir: -1 | 1) => void;
   onRemove: () => void;
   onError: (msg: string) => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
 }) {
   const fieldCls =
     "w-full rounded-md border border-[#e2e5ea] px-3 py-2 text-[14px] text-[#1f2937] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/30 focus:border-[#2F80ED] transition";
+  // Shared by the paragraph/quote textarea so the formatting toolbar can wrap
+  // the current selection. Only one text block renders per BlockEditor.
+  const taRef = useRef<HTMLTextAreaElement>(null);
 
   return (
     <div className="rounded-xl border border-[#e8eaee] bg-[#fbfcfd] p-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-[#9aa1ac]">
-          {BLOCK_LABELS[block.type] || block.type}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span
+            draggable
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            title="Drag to reorder"
+            className="cursor-grab active:cursor-grabbing text-[#c3c8d0] hover:text-[#6b7280] -ml-0.5"
+          >
+            <GripVertical className="w-4 h-4" />
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-[#9aa1ac]">
+            {BLOCK_LABELS[block.type] || block.type}
+          </span>
+        </div>
         <div className="flex items-center gap-1">
           <IconBtn disabled={index === 0} onClick={() => onMove(-1)} title="Move up">
             <ArrowUp className="w-3.5 h-3.5" />
@@ -748,9 +997,16 @@ function BlockEditor({
             onChange={(e) => onChange({ caption: e.target.value })}
             placeholder="Caption (optional)"
           />
+          <FitToggle value={block.fit} onChange={(fit) => onChange({ fit })} />
           {block.url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={block.url} alt="" className="h-32 w-full object-cover rounded-md border border-[#e8eaee]" />
+            <img
+              src={block.url}
+              alt=""
+              className={`h-32 w-full rounded-md border border-[#e8eaee] ${
+                block.fit === "contain" ? "object-contain bg-[#f1f5f9]" : "object-cover"
+              }`}
+            />
           ) : (
             <p className="text-[11.5px] text-[#9aa1ac]">Full-width hero image. Uses the “Cover image” set above unless you override it here.</p>
           )}
@@ -768,31 +1024,44 @@ function BlockEditor({
       )}
 
       {block.type === "heading" && (
-        <div className="flex gap-2">
-          <select
-            className="rounded-md border border-[#e2e5ea] px-2 py-2 text-[13px] text-[#374151] focus:outline-none"
-            value={block.level ?? 2}
-            onChange={(e) => onChange({ level: Number(e.target.value) as 2 | 3 })}
-          >
-            <option value={2}>H2</option>
-            <option value={3}>H3</option>
-          </select>
-          <input
-            className={fieldCls}
-            value={block.text}
-            onChange={(e) => onChange({ text: e.target.value })}
-            placeholder="Section heading"
-          />
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <select
+              className="rounded-md border border-[#e2e5ea] px-2 py-2 text-[13px] text-[#374151] focus:outline-none"
+              value={block.level ?? 2}
+              onChange={(e) => onChange({ level: Number(e.target.value) as 2 | 3 })}
+            >
+              <option value={2}>H2</option>
+              <option value={3}>H3</option>
+            </select>
+            <input
+              className={fieldCls}
+              value={block.text}
+              onChange={(e) => onChange({ text: e.target.value })}
+              placeholder="Section heading"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11.5px] text-[#9aa1ac]">Align:</span>
+            <AlignToggle value={block.align} onChange={(align) => onChange({ align })} />
+          </div>
         </div>
       )}
 
       {block.type === "paragraph" && (
-        <textarea
-          className={`${fieldCls} min-h-[80px] resize-y`}
-          value={block.text}
-          onChange={(e) => onChange({ text: e.target.value })}
-          placeholder="Write a paragraph…"
-        />
+        <div>
+          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+            <FormatToolbar taRef={taRef} value={block.text} onChange={(v) => onChange({ text: v })} noMargin />
+            <AlignToggle value={block.align} onChange={(align) => onChange({ align })} />
+          </div>
+          <textarea
+            ref={taRef}
+            className={`${fieldCls} min-h-[80px] resize-y`}
+            value={block.text}
+            onChange={(e) => onChange({ text: e.target.value })}
+            placeholder="Write a paragraph… (select text, then Bold / Italic / Underline / Colour / Link)"
+          />
+        </div>
       )}
 
       {block.type === "quote" && (
@@ -803,12 +1072,31 @@ function BlockEditor({
             onChange={(e) => onChange({ label: e.target.value })}
             placeholder="Label (e.g. Local Tip) — optional"
           />
-          <textarea
-            className={`${fieldCls} min-h-[60px] resize-y`}
-            value={block.text}
-            onChange={(e) => onChange({ text: e.target.value })}
-            placeholder="Callout / tip text"
-          />
+          <div>
+            <FormatToolbar taRef={taRef} value={block.text} onChange={(v) => onChange({ text: v })} />
+            <textarea
+              ref={taRef}
+              className={`${fieldCls} min-h-[60px] resize-y`}
+              value={block.text}
+              onChange={(e) => onChange({ text: e.target.value })}
+              placeholder="Callout / tip text"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11.5px] text-[#9aa1ac]">Background:</span>
+            <input
+              type="color"
+              value={block.bg || "#f0fdf4"}
+              onChange={(e) => onChange({ bg: e.target.value })}
+              className="w-7 h-7 p-0.5 rounded-md border border-[#e2e5ea] bg-white cursor-pointer"
+              title="Tip background colour"
+            />
+            {block.bg ? (
+              <button type="button" onClick={() => onChange({ bg: undefined })} className="text-[11px] text-[#6b7280] hover:underline">
+                reset
+              </button>
+            ) : null}
+          </div>
         </div>
       )}
 
@@ -829,32 +1117,92 @@ function BlockEditor({
             onChange={(e) => onChange({ caption: e.target.value })}
             placeholder="Caption (optional)"
           />
+          <FitToggle value={block.fit} onChange={(fit) => onChange({ fit })} />
           {block.url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={block.url}
               alt={block.caption || ""}
-              className="h-32 w-full object-cover rounded-md border border-[#e8eaee]"
+              className={`h-32 w-full rounded-md border border-[#e8eaee] ${
+                block.fit === "contain" ? "object-contain bg-[#f1f5f9]" : "object-cover"
+              }`}
             />
           ) : null}
         </div>
       )}
 
       {block.type === "list" && (
-        <ListBlockEditor items={block.items} onChange={(items) => onChange({ items })} />
+        <ListBlockEditor
+          items={block.items}
+          style={block.style}
+          onChange={(items) => onChange({ items })}
+          onStyleChange={(style) => onChange({ style })}
+        />
+      )}
+
+      {block.type === "table" && (
+        <TableBlockEditor
+          headers={block.headers}
+          rows={block.rows}
+          variant={block.variant}
+          align={block.align}
+          onChange={(patch) => onChange(patch)}
+        />
       )}
     </div>
   );
 }
 
-function ListBlockEditor({ items, onChange }: { items: string[]; onChange: (items: string[]) => void }) {
+const LIST_STYLE_OPTIONS: { value: ListStyle; label: string }[] = [
+  { value: "bullet", label: "• Bullet" },
+  { value: "number", label: "1. Numbered" },
+  { value: "dash", label: "– Dash" },
+  { value: "check", label: "✓ Check" },
+];
+
+function listMarker(style: ListStyle | undefined, i: number): string {
+  switch (style) {
+    case "number":
+      return `${i + 1}.`;
+    case "dash":
+      return "–";
+    case "check":
+      return "✓";
+    default:
+      return "•";
+  }
+}
+
+function ListBlockEditor({
+  items,
+  style,
+  onChange,
+  onStyleChange,
+}: {
+  items: string[];
+  style?: ListStyle;
+  onChange: (items: string[]) => void;
+  onStyleChange: (style: ListStyle) => void;
+}) {
   const fieldCls =
     "flex-1 rounded-md border border-[#e2e5ea] px-3 py-2 text-[14px] text-[#1f2937] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/30 focus:border-[#2F80ED] transition";
   return (
     <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <span className="text-[11.5px] text-[#9aa1ac]">Bullet style:</span>
+        <select
+          className="rounded-md border border-[#e2e5ea] px-2 py-1.5 text-[12.5px] text-[#374151] focus:outline-none"
+          value={style ?? "bullet"}
+          onChange={(e) => onStyleChange(e.target.value as ListStyle)}
+        >
+          {LIST_STYLE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
       {items.map((item, i) => (
         <div key={i} className="flex items-center gap-2">
-          <span className="text-[#2F80ED] font-bold">•</span>
+          <span className="text-[#2F80ED] font-bold w-6 text-right shrink-0">{listMarker(style, i)}</span>
           <input
             className={fieldCls}
             value={item}
@@ -872,6 +1220,156 @@ function ListBlockEditor({ items, onChange }: { items: string[]; onChange: (item
       >
         <Plus className="w-3.5 h-3.5" /> Add item
       </button>
+    </div>
+  );
+}
+
+// Grid editor for a table block: a header row + body rows, with add/remove for
+// both rows and columns. Columns stay aligned via a CSS grid whose last track
+// holds the per-row remove button.
+const TABLE_VARIANT_OPTIONS: { value: TableVariant; label: string }[] = [
+  { value: "lined", label: "Lined" },
+  { value: "striped", label: "Striped rows" },
+  { value: "bordered", label: "Bordered" },
+];
+
+function TableBlockEditor({
+  headers,
+  rows,
+  variant,
+  align,
+  onChange,
+}: {
+  headers: string[];
+  rows: string[][];
+  variant?: TableVariant;
+  align?: BlockAlign[];
+  onChange: (patch: {
+    headers?: string[];
+    rows?: string[][];
+    variant?: TableVariant;
+    align?: BlockAlign[];
+  }) => void;
+}) {
+  const cols = headers.length;
+  const cellCls =
+    "w-full rounded-md border border-[#e2e5ea] px-2.5 py-1.5 text-[13px] text-[#1f2937] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/30 focus:border-[#2F80ED] transition";
+  const gridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: `repeat(${cols}, minmax(120px, 1fr)) 30px`,
+    gap: "6px",
+    alignItems: "center",
+  };
+
+  const colAlign = (c: number): BlockAlign => (align && align[c]) || "left";
+  const setColAlign = (c: number, a: BlockAlign) =>
+    onChange({ align: Array.from({ length: cols }, (_, i) => (i === c ? a : colAlign(i))) });
+  const setHeader = (c: number, v: string) =>
+    onChange({ headers: headers.map((h, i) => (i === c ? v : h)) });
+  const setCell = (r: number, c: number, v: string) =>
+    onChange({ rows: rows.map((row, ri) => (ri === r ? row.map((cell, ci) => (ci === c ? v : cell)) : row)) });
+  const addColumn = () =>
+    onChange({
+      headers: [...headers, ""],
+      rows: rows.map((r) => [...r, ""]),
+      align: Array.from({ length: cols + 1 }, (_, i) => colAlign(i)),
+    });
+  const removeColumn = (c: number) => {
+    if (cols <= 1) return;
+    onChange({
+      headers: headers.filter((_, i) => i !== c),
+      rows: rows.map((r) => r.filter((_, i) => i !== c)),
+      align: Array.from({ length: cols }, (_, i) => colAlign(i)).filter((_, i) => i !== c),
+    });
+  };
+  const addRow = () => onChange({ rows: [...rows, Array.from({ length: cols }, () => "")] });
+  const removeRow = (r: number) => onChange({ rows: rows.filter((_, i) => i !== r) });
+
+  return (
+    <div className="space-y-2">
+      <div className="overflow-x-auto pb-1">
+        <div className="inline-block min-w-full space-y-1.5">
+          {/* Header row */}
+          <div style={gridStyle}>
+            {headers.map((h, c) => (
+              <div key={c} className="relative">
+                <input
+                  className={`${cellCls} pr-6 font-semibold bg-[#fafafa]`}
+                  value={h}
+                  onChange={(e) => setHeader(c, e.target.value)}
+                  placeholder={`Column ${c + 1}`}
+                />
+                {cols > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeColumn(c)}
+                    title="Remove column"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 text-[#b42318] hover:bg-[#fef3f2] rounded p-0.5"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            ))}
+            <div />
+          </div>
+          {/* Per-column alignment */}
+          <div style={gridStyle}>
+            {headers.map((_, c) => (
+              <div key={c} className="flex justify-center">
+                <AlignToggle value={colAlign(c)} onChange={(a) => setColAlign(c, a)} />
+              </div>
+            ))}
+            <div />
+          </div>
+          {/* Body rows */}
+          {rows.map((row, r) => (
+            <div key={r} style={gridStyle}>
+              {row.map((cell, c) => (
+                <input
+                  key={c}
+                  className={cellCls}
+                  value={cell}
+                  onChange={(e) => setCell(r, c, e.target.value)}
+                  placeholder="—"
+                />
+              ))}
+              <IconBtn onClick={() => removeRow(r)} title="Remove row" danger>
+                <X className="w-3.5 h-3.5" />
+              </IconBtn>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={addRow}
+          className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#2F80ED] hover:text-[#1E5FBC] transition"
+        >
+          <Plus className="w-3.5 h-3.5" /> Add row
+        </button>
+        <button
+          type="button"
+          onClick={addColumn}
+          className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#2F80ED] hover:text-[#1E5FBC] transition"
+        >
+          <Plus className="w-3.5 h-3.5" /> Add column
+        </button>
+        <span className="ml-auto flex items-center gap-2">
+          <span className="text-[11.5px] text-[#9aa1ac]">Style:</span>
+          <select
+            className="rounded-md border border-[#e2e5ea] px-2 py-1.5 text-[12.5px] text-[#374151] focus:outline-none"
+            value={variant ?? "lined"}
+            onChange={(e) => onChange({ variant: e.target.value as TableVariant })}
+          >
+            {TABLE_VARIANT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </span>
+      </div>
+      <p className="text-[11px] text-[#9aa1ac]">First row is the header. Cells support **bold**, *italic* and [links](url).</p>
     </div>
   );
 }

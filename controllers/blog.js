@@ -19,11 +19,13 @@ const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'blog');
 const MAX_TITLE_LEN = 200;
 const MAX_SLUG_LEN = 200;
 const MAX_BLOCKS = 400;
+const MAX_TABLE_ROWS = 200;
+const MAX_TABLE_COLS = 12;
 // Content blocks carry their own data; positional/structural blocks
 // (title/cover/author/divider) let the admin place the header pieces anywhere.
 const VALID_BLOCK_TYPES = new Set([
   'title', 'cover', 'author', 'divider',
-  'heading', 'paragraph', 'image', 'quote', 'list',
+  'heading', 'paragraph', 'image', 'quote', 'list', 'table',
 ]);
 
 // Slugs that would collide with real app routes now that posts live at the
@@ -58,6 +60,16 @@ const isSafeUrl = (url) => {
   return /^https?:\/\//i.test(u) || u.startsWith('/');
 };
 
+// A colour is safe if it's a hex value or a plain CSS colour name — never an
+// arbitrary string (which could smuggle CSS into an inline style).
+const isSafeColor = (c) =>
+  typeof c === 'string' && (/^#[0-9a-fA-F]{3,8}$/.test(c.trim()) || /^[a-zA-Z]{3,20}$/.test(c.trim()));
+
+const ALIGNS = new Set(['left', 'center', 'right']);
+const LIST_STYLES = new Set(['bullet', 'number', 'dash', 'check']);
+const TABLE_VARIANTS = new Set(['lined', 'striped', 'bordered']);
+const cleanAlign = (a) => (ALIGNS.has(a) ? a : undefined);
+
 // Validate + normalise the incoming block array. Unknown block types and
 // unsafe image URLs are dropped rather than trusted. Returns a clean array.
 const sanitizeBody = (body) => {
@@ -75,12 +87,14 @@ const sanitizeBody = (body) => {
       out.push({ type, ...(text ? { text } : {}) });
     } else if (type === 'cover') {
       // Full-width hero image. Own URL (optional — falls back to coverImage).
+      // `fit`: 'cover' (crop to fill, default) or 'contain' (show whole image).
       const url = String(raw.url || '').trim();
       const caption = String(raw.caption || '').trim();
       out.push({
         type,
         ...(url && isSafeUrl(url) ? { url } : {}),
         ...(caption ? { caption } : {}),
+        ...(raw.fit === 'contain' ? { fit: 'contain' } : {}),
       });
     } else if (type === 'author') {
       // Positional byline — renders the post's author + date + read time.
@@ -91,28 +105,64 @@ const sanitizeBody = (body) => {
       const text = String(raw.text || '').trim();
       if (!text) continue;
       const level = raw.level === 3 ? 3 : 2;
-      out.push({ type, level, text });
+      const align = cleanAlign(raw.align);
+      out.push({ type, level, text, ...(align ? { align } : {}) });
     } else if (type === 'paragraph') {
       const text = String(raw.text || '').trim();
       if (!text) continue;
-      out.push({ type, text });
+      const align = cleanAlign(raw.align);
+      out.push({ type, text, ...(align ? { align } : {}) });
     } else if (type === 'quote') {
       const text = String(raw.text || '').trim();
       if (!text) continue;
       const label = String(raw.label || '').trim();
-      out.push({ type, text, ...(label ? { label } : {}) });
+      out.push({
+        type, text,
+        ...(label ? { label } : {}),
+        ...(isSafeColor(raw.bg) ? { bg: raw.bg.trim() } : {}),
+      });
     } else if (type === 'image') {
       const url = String(raw.url || '').trim();
       if (!isSafeUrl(url)) continue;
       const caption = String(raw.caption || '').trim();
       const alt = String(raw.alt || '').trim();
-      out.push({ type, url, ...(caption ? { caption } : {}), ...(alt ? { alt } : {}) });
+      out.push({
+        type, url,
+        ...(caption ? { caption } : {}),
+        ...(alt ? { alt } : {}),
+        ...(raw.fit === 'contain' ? { fit: 'contain' } : {}),
+      });
     } else if (type === 'list') {
       const items = Array.isArray(raw.items)
         ? raw.items.map((i) => String(i || '').trim()).filter(Boolean)
         : [];
       if (!items.length) continue;
-      out.push({ type, items });
+      out.push({ type, items, ...(LIST_STYLES.has(raw.style) ? { style: raw.style } : {}) });
+    } else if (type === 'table') {
+      // Normalise to a rectangular grid: header row + body rows, every row
+      // padded/truncated to the column count. Drop an entirely-empty table.
+      const rawHeaders = Array.isArray(raw.headers) ? raw.headers : [];
+      const rawRows = Array.isArray(raw.rows) ? raw.rows : [];
+      const cols = Math.min(
+        MAX_TABLE_COLS,
+        Math.max(rawHeaders.length, ...(rawRows.map((r) => (Array.isArray(r) ? r.length : 0))), 0),
+      );
+      if (!cols) continue;
+      const headers = Array.from({ length: cols }, (_, i) => String(rawHeaders[i] ?? '').trim());
+      const rows = rawRows
+        .slice(0, MAX_TABLE_ROWS)
+        .map((r) => Array.from({ length: cols }, (_, i) => String((Array.isArray(r) ? r[i] : '') ?? '').trim()));
+      const anyContent = headers.some(Boolean) || rows.some((r) => r.some(Boolean));
+      if (!anyContent) continue;
+      const variant = TABLE_VARIANTS.has(raw.variant) ? raw.variant : undefined;
+      const align = Array.isArray(raw.align)
+        ? Array.from({ length: cols }, (_, i) => cleanAlign(raw.align[i]) || 'left')
+        : null;
+      out.push({
+        type, headers, rows,
+        ...(variant ? { variant } : {}),
+        ...(align && align.some((a) => a !== 'left') ? { align } : {}),
+      });
     }
   }
   return out;

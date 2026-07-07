@@ -855,7 +855,11 @@ const BookRoom = async (req, res) => {
             // inbox (best-effort — a mail failure must never break an
             // already-committed booking). Admin is always notified; sent as
             // separate messages so vendor and admin don't see each other.
-            const adminInbox = process.env.BOOKING_OPS_INBOX || process.env.SUPPORT_INBOX || process.env.EMAIL_FROM || null;
+            // Admin booking notification → the platform admin account
+            // (admin@admin.com by default; override with ADMIN_NOTIFY_EMAIL).
+            // Three separate emails go out per booking: guest confirmation
+            // (above), vendor/hotel notice, and this admin notice.
+            const adminInbox = process.env.ADMIN_NOTIFY_EMAIL || 'admin@admin.com';
             const staffRecipients = [...new Set([vendorEmailTo, adminInbox].filter(Boolean))];
             for (const to of staffRecipients) {
                 try {

@@ -1010,14 +1010,19 @@ export const adminService = {
 // article layout is reorderable.
 export type BlogBlock =
   | { type: 'title'; text?: string }
-  | { type: 'cover'; url?: string; caption?: string }
+  | { type: 'cover'; url?: string; caption?: string; fit?: 'cover' | 'contain' }
   | { type: 'author' }
   | { type: 'divider' }
-  | { type: 'heading'; level?: 2 | 3; text: string }
-  | { type: 'paragraph'; text: string }
-  | { type: 'quote'; text: string; label?: string }
-  | { type: 'image'; url: string; caption?: string; alt?: string }
-  | { type: 'list'; items: string[] };
+  | { type: 'heading'; level?: 2 | 3; text: string; align?: BlockAlign }
+  | { type: 'paragraph'; text: string; align?: BlockAlign }
+  | { type: 'quote'; text: string; label?: string; bg?: string }
+  | { type: 'image'; url: string; caption?: string; alt?: string; fit?: 'cover' | 'contain' }
+  | { type: 'list'; items: string[]; style?: ListStyle }
+  | { type: 'table'; headers: string[]; rows: string[][]; variant?: TableVariant; align?: BlockAlign[] };
+
+export type BlockAlign = 'left' | 'center' | 'right';
+export type ListStyle = 'bullet' | 'number' | 'dash' | 'check';
+export type TableVariant = 'lined' | 'striped' | 'bordered';
 
 export interface BlogAuthor {
   name: string;

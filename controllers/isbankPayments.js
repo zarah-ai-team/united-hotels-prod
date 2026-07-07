@@ -278,10 +278,12 @@ const handleCallback = async (req, res) => {
           console.error('[isbank] guest confirmation email failed:', e.message);
         }
       }
-      // Vendor / property notification AND admin/ops notification. The admin is
+      // Vendor / property notification AND admin notification. The admin is
       // always notified on a successful booking; sent as separate messages so
-      // vendor and admin don't see each other's address.
-      const adminInbox = process.env.BOOKING_OPS_INBOX || process.env.SUPPORT_INBOX || process.env.EMAIL_FROM || null;
+      // vendor and admin don't see each other's address. Admin → admin@admin.com
+      // by default (override with ADMIN_NOTIFY_EMAIL). Same 3-email flow as the
+      // non-card path: guest confirmation, vendor/hotel notice, admin notice.
+      const adminInbox = process.env.ADMIN_NOTIFY_EMAIL || 'admin@admin.com';
       const staffRecipients = [...new Set([n.vendorEmail, adminInbox].filter(Boolean))];
       for (const to of staffRecipients) {
         try {

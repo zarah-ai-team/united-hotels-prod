@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { ArrowLeft, Share2, Bookmark, Loader2, ArrowRight } from "lucide-react";
 import { Navigation } from "@/shared/components/Navigation";
+import { Footer } from "@/shared/components/Footer";
+import { ZarahBadge } from "@/shared/components/ZarahBadge";
 import { useSEO, breadcrumbLd } from "@/shared/hooks/useSEO";
 import { blogService, type BlogBlock, type BlogPost, type BlogPostSummary } from "@/shared/api/services";
 import { BlogBlocks } from "./components/BlogBlocks";
@@ -94,16 +96,19 @@ export function BlogArticlePage() {
             <ArrowLeft className="w-4 h-4" />
             Back to Travel Guides
           </Link>
-          {status === "ready" && (
-            <div className="flex items-center gap-3">
-              <button className="p-2.5 border border-[#eaeaea] rounded-lg hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors">
-                <Share2 className="w-4.5 h-4.5" />
-              </button>
-              <button className="p-2.5 border border-[#eaeaea] rounded-lg hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors">
-                <Bookmark className="w-4.5 h-4.5" />
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            <ZarahBadge className="hidden sm:inline-flex" />
+            {status === "ready" && (
+              <div className="flex items-center gap-3">
+                <button className="p-2.5 border border-[#eaeaea] rounded-lg hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors">
+                  <Share2 className="w-4.5 h-4.5" />
+                </button>
+                <button className="p-2.5 border border-[#eaeaea] rounded-lg hover:border-[#2F80ED] hover:text-[#2F80ED] transition-colors">
+                  <Bookmark className="w-4.5 h-4.5" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -193,6 +198,8 @@ export function BlogArticlePage() {
           </section>
         </>
       )}
+
+      <Footer />
     </div>
   );
 }

@@ -21,12 +21,18 @@ const poppins = Poppins({
   display: 'swap',
 });
 
-// Assemble the search-engine verification tags from env. Emits Google's
+// Google Search Console verification token for bookunitedhotels.com. It's a
+// PUBLIC value (rendered into every page's <head>), so it's safe to bake in as
+// the default — this guarantees the tag ships even if the build machine has no
+// NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION set. Env still overrides it.
+const GOOGLE_SITE_VERIFICATION = 'hw30gD-krTA61CXoPD-gzd3ncahDPor47-ABESAzt1A';
+
+// Assemble the search-engine verification tags. Emits Google's
 // `google-site-verification` and/or Bing's `msvalidate.01` meta tags only when
 // the corresponding token is configured. Returns undefined when neither is set
 // so we don't render an empty verification block.
 function buildVerification(): Metadata['verification'] {
-  const google = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+  const google = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || GOOGLE_SITE_VERIFICATION;
   const bing = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION;
   if (!google && !bing) return undefined;
   return {

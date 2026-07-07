@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Calendar, Clock, ArrowRight, Search } from "lucide-react";
 import { Navigation } from "@/shared/components/Navigation";
+import { Footer } from "@/shared/components/Footer";
+import { ZarahBadge } from "@/shared/components/ZarahBadge";
 import { useSEO, breadcrumbLd } from "@/shared/hooks/useSEO";
 import { blogService, type BlogPostSummary } from "@/shared/api/services";
 
@@ -206,6 +208,9 @@ export function BlogPage() {
       <section className="bg-white py-20 border-b border-[#eaeaea]">
         <div className="max-w-[1840px] mx-auto px-10">
           <div className="max-w-[800px] mx-auto text-center">
+            <div className="mb-6 flex justify-center">
+              <ZarahBadge />
+            </div>
             <h1 className="font-['Poppins:Bold',sans-serif] text-[56px] leading-[68px] text-[#3b3b3b] mb-6">
               Turkey Travel Guides
             </h1>
@@ -291,6 +296,8 @@ export function BlogPage() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
