@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, Linkedin } from "lucide-react";
 import type { ReactNode } from "react";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { activeSocials, type SocialKey } from "@/shared/config/social";
 
 // Email obfuscation. We never emit the literal address into the rendered
 // HTML — instead we store base64 + reassemble on click. Plain mailto: links
@@ -13,23 +14,16 @@ const handleObfuscatedMail = (e: React.MouseEvent<HTMLAnchorElement>) => {
   window.location.href = `mailto:${SUPPORT_EMAIL_USER}@${SUPPORT_EMAIL_DOMAIN}`;
 };
 
-// Social links are env-driven so we can add accounts as they get created
-// without redeploying code. Empty values are hidden — never render a dead
-// social icon.
-type SocialKey = "facebook" | "instagram" | "x" | "youtube" | "linkedin";
-const SOCIAL_ENV: Record<SocialKey, string | undefined> = {
-  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL as string | undefined,
-  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL as string | undefined,
-  x: process.env.NEXT_PUBLIC_X_URL as string | undefined,
-  youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL as string | undefined,
-  linkedin: process.env.NEXT_PUBLIC_LINKEDIN_URL as string | undefined,
-};
+// Icon + label per platform. URLs + which platforms are active come from
+// shared/config/social.ts (single source of truth). Only platforms with a URL
+// render — never a dead social icon.
 const SOCIAL_META: Record<SocialKey, { label: string; Icon: typeof Facebook | (() => ReactNode) }> = {
   facebook: { label: "Facebook", Icon: Facebook },
   instagram: { label: "Instagram", Icon: Instagram },
   x: { label: "X (Twitter)", Icon: () => <XIcon /> },
   youtube: { label: "YouTube", Icon: Youtube },
   linkedin: { label: "LinkedIn", Icon: Linkedin },
+  reddit: { label: "Reddit", Icon: () => <RedditIcon /> },
 };
 
 // X (Twitter) doesn't ship in lucide-react. Inline a minimal mark so we don't
@@ -38,6 +32,15 @@ function XIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+// Reddit isn't in lucide-react either — inline the Reddit alien mark.
+function RedditIcon() {
+  return (
+    <svg viewBox="0 0 512 512" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+      <path d="M440.3 203.5c-15 0-28.2 6.2-37.9 15.9-35.7-24.7-83.8-40.6-137.1-42.3l23.2-109.5 76.1 16.9c0 18.6 15.1 33.7 33.7 33.7 18.6 0 33.7-15.3 33.7-33.9s-15.1-33.9-33.7-33.9c-13.2 0-24.6 7.9-30 19.1L294 62.5c-2.3-.5-4.6.2-6.2 1.7-1.7 1.5-2.4 3.8-1.9 6l-25.9 121.7c-54.5 1.3-103.4 17.7-139.6 42.7-9.7-9.5-23-15.4-37.7-15.4-52.6 0-69.8 70.7-21.7 94.7-1.7 7.5-2.6 15.3-2.6 23.3 0 79.2 89.5 143.4 199.7 143.4s199.7-64.2 199.7-143.4c0-8-.9-15.9-2.7-23.5 47.3-24.2 30-94.5-22.4-94.5zM129.4 308.9c0-18.6 15.1-33.7 33.7-33.7 18.4 0 33.5 14.9 33.7 33.3-.2 18.4-15.3 33.5-33.7 33.5-18.6.2-33.7-14.9-33.7-33.1zm203.1 87c-30.8 30.9-116.4 30.9-147.2 0-3.4-3.4-3.4-8.8 0-12.2 3.4-3.4 8.8-3.4 12.2 0 23.7 24.1 100.4 24.5 124.5 0 3.4-3.4 8.8-3.4 12.2 0 3.6 3.4 3.6 8.8.3 12.2zm-3.4-53.5c-18.6 0-33.7-15.1-33.7-33.5.2-18.4 15.3-33.3 33.7-33.3 18.6 0 33.7 15.1 33.7 33.7-.1 18-15.2 33.1-33.7 33.1z" />
     </svg>
   );
 }
@@ -61,9 +64,7 @@ const scrollToTop = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" })
 
 export function Footer() {
   const { t } = useLanguage();
-  const socialEntries = (Object.keys(SOCIAL_META) as SocialKey[])
-    .map((k) => ({ key: k, url: SOCIAL_ENV[k], ...SOCIAL_META[k] }))
-    .filter((s) => s.url && s.url.length > 0) as Array<{ key: SocialKey; url: string; label: string; Icon: any }>;
+  const socialEntries = activeSocials().map((s) => ({ ...s, ...SOCIAL_META[s.key] }));
 
   return (
     <footer className="bg-[#3b3b3b] py-10 md:py-20" aria-label="Site footer">

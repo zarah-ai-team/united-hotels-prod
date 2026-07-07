@@ -31,14 +31,10 @@ export const SITE = {
   },
 };
 
-export const socialSameAs = (): string[] =>
-  [
-    process.env.NEXT_PUBLIC_FACEBOOK_URL,
-    process.env.NEXT_PUBLIC_INSTAGRAM_URL,
-    process.env.NEXT_PUBLIC_X_URL,
-    process.env.NEXT_PUBLIC_YOUTUBE_URL,
-    process.env.NEXT_PUBLIC_LINKEDIN_URL,
-  ].filter((v): v is string => typeof v === 'string' && v.length > 0);
+// Social profile URLs (Facebook / Instagram / Reddit / …) for schema.org sameAs.
+// Single source of truth lives in shared/config/social.ts.
+import { socialSameAs } from '@/shared/config/social';
+export { socialSameAs };
 
 export const abs = (path: string): string => {
   if (/^https?:\/\//i.test(path)) return path;

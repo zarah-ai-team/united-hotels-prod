@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { socialSameAs } from '@/shared/config/social';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tiny client-side SEO library.
@@ -193,16 +194,8 @@ export function useSEO(input: SEOInput) {
 
 export const siteUrl = SITE_URL;
 
-// Pull social URLs from Vite env at build time. Identity / sameAs is how
-// Google links the brand to its social profiles (Knowledge Panel).
-const socialSameAs = (): string[] =>
-  [
-    process.env.NEXT_PUBLIC_FACEBOOK_URL,
-    process.env.NEXT_PUBLIC_INSTAGRAM_URL,
-    process.env.NEXT_PUBLIC_X_URL,
-    process.env.NEXT_PUBLIC_YOUTUBE_URL,
-    process.env.NEXT_PUBLIC_LINKEDIN_URL,
-  ].filter((v): v is string => typeof v === 'string' && v.length > 0);
+// social sameAs (brand identity for Google's Knowledge Panel) — single source
+// of truth in shared/config/social.ts.
 
 export const organizationLd = () => ({
   '@context': 'https://schema.org',
