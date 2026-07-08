@@ -331,12 +331,12 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     {showHead ? (
-                      <thead className="bg-[#fafafa]">
+                      <thead className="bg-[#2F80ED]">
                         <tr>
                           {block.headers.map((h, j) => (
                             <th
                               key={j}
-                              className={`px-6 py-4 font-['Poppins:SemiBold',sans-serif] text-[15px] text-[#3b3b3b] ${colAlign(
+                              className={`px-6 py-4 font-['Poppins:SemiBold',sans-serif] text-[15px] text-white ${colAlign(
                                 j,
                               )} ${cellBorder}`}
                             >
