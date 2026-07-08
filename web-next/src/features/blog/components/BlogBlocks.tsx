@@ -375,7 +375,7 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
                                 key={c}
                                 className={`px-4 py-3 md:px-6 md:py-4 text-[14px] md:text-[15px] align-top ${colAlign(c)} ${cellBorder} ${
                                   cellBold
-                                    ? "font-['Inter:SemiBold',sans-serif] text-[#1f2937]"
+                                    ? "font-['Inter:Regular',sans-serif] font-bold text-[#1f2937]"
                                     : "font-['Inter:Regular',sans-serif] text-[#4b5563]"
                                 }`}
                               >
