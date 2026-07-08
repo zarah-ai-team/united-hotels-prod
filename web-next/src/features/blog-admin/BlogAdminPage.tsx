@@ -844,14 +844,25 @@ function AlignToggle({
 }
 
 // Small "B" toggle used in the table editor to bold a whole column or row.
-function CellBoldToggle({ active, onClick, title }: { active: boolean; onClick: () => void; title: string }) {
+function CellBoldToggle({
+  active,
+  onClick,
+  title,
+  disabled,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       title={title}
       aria-pressed={active}
-      className={`inline-flex items-center justify-center w-7 h-7 rounded-md transition ${
+      disabled={disabled}
+      className={`inline-flex items-center justify-center w-7 h-7 rounded-md transition disabled:cursor-not-allowed ${
         active ? "bg-[#2F80ED] text-white" : "text-[#6b7280] hover:bg-[#eef0f3]"
       }`}
     >
@@ -1410,7 +1421,12 @@ function TableBlockEditor({
             {headers.map((_, c) => (
               <div key={c} className="flex justify-center items-center gap-1">
                 <AlignToggle value={colAlign(c)} onChange={(a) => setColAlign(c, a)} />
-                <CellBoldToggle active={isColBold(c)} onClick={() => toggleColBold(c)} title="Bold this column" />
+                <CellBoldToggle
+                  active={c === 0 || isColBold(c)}
+                  disabled={c === 0}
+                  onClick={() => toggleColBold(c)}
+                  title={c === 0 ? "First column is always bold" : "Bold this column"}
+                />
               </div>
             ))}
             <div />
@@ -1466,8 +1482,8 @@ function TableBlockEditor({
         </span>
       </div>
       <p className="text-[11px] text-[#9aa1ac]">
-        First row is the header. Use the <span className="font-bold">B</span> toggles to bold a whole column or row.
-        Cells also support **bold**, *italic* and [links](url).
+        First row is the header and the first column is always bold. Use the <span className="font-bold">B</span> toggles
+        to bold any other whole column or row. Cells also support **bold**, *italic* and [links](url).
       </p>
     </div>
   );

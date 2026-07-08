@@ -342,9 +342,11 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
             const bordered = block.variant === "bordered";
             const cellBorder = bordered ? "border border-[#eaeaea]" : "";
             const colAlign = (c: number) => alignClass(block.align?.[c]);
-            // Whole-column / whole-row bold emphasis.
+            // The first column is always bold top-to-bottom (row-label column).
+            // Plus any explicitly bolded whole rows / columns.
             const boldCols = new Set(block.boldCols || []);
             const boldRows = new Set(block.boldRows || []);
+            const isColBold = (c: number) => c === 0 || boldCols.has(c);
             return (
               <div key={i} className="my-10 rounded-2xl border border-[#eaeaea] overflow-hidden">
                 <div className="overflow-x-auto">
@@ -357,7 +359,7 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
                               key={j}
                               className={`px-4 py-3 md:px-6 md:py-4 font-['Poppins:SemiBold',sans-serif] text-[14px] md:text-[15px] text-white ${colAlign(
                                 j,
-                              )} ${cellBorder} ${boldCols.has(j) ? "font-bold" : ""}`}
+                              )} ${cellBorder} ${isColBold(j) ? "font-bold" : ""}`}
                             >
                               {renderInline(h)}
                             </th>
@@ -369,7 +371,7 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
                       {block.rows.map((row, r) => (
                         <tr key={r} className={striped && r % 2 === 1 ? "bg-[#fafafa]" : ""}>
                           {row.map((cell, c) => {
-                            const cellBold = boldRows.has(r) || boldCols.has(c);
+                            const cellBold = boldRows.has(r) || isColBold(c);
                             return (
                               <td
                                 key={c}
