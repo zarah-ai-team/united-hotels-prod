@@ -1018,7 +1018,15 @@ export type BlogBlock =
   | { type: 'quote'; text: string; label?: string; bg?: string }
   | { type: 'image'; url: string; caption?: string; alt?: string; fit?: 'cover' | 'contain' }
   | { type: 'list'; items: string[]; style?: ListStyle }
-  | { type: 'table'; headers: string[]; rows: string[][]; variant?: TableVariant; align?: BlockAlign[] };
+  | {
+      type: 'table';
+      headers: string[];
+      rows: string[][];
+      variant?: TableVariant;
+      align?: BlockAlign[];
+      boldRows?: number[]; // body-row indices rendered bold
+      boldCols?: number[]; // column indices rendered bold (header + body)
+    };
 
 export type BlockAlign = 'left' | 'center' | 'right';
 export type ListStyle = 'bullet' | 'number' | 'dash' | 'check';

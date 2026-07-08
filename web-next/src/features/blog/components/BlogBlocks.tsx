@@ -326,6 +326,9 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
             const bordered = block.variant === "bordered";
             const cellBorder = bordered ? "border border-[#eaeaea]" : "";
             const colAlign = (c: number) => alignClass(block.align?.[c]);
+            // Whole-column / whole-row bold emphasis.
+            const boldCols = new Set(block.boldCols || []);
+            const boldRows = new Set(block.boldRows || []);
             return (
               <div key={i} className="my-10 rounded-2xl border border-[#eaeaea] overflow-hidden">
                 <div className="overflow-x-auto">
@@ -338,7 +341,7 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
                               key={j}
                               className={`px-6 py-4 font-['Poppins:SemiBold',sans-serif] text-[15px] text-white ${colAlign(
                                 j,
-                              )} ${cellBorder}`}
+                              )} ${cellBorder} ${boldCols.has(j) ? "font-bold" : ""}`}
                             >
                               {renderInline(h)}
                             </th>
@@ -349,16 +352,21 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
                     <tbody className={bordered ? "" : "divide-y divide-[#eaeaea]"}>
                       {block.rows.map((row, r) => (
                         <tr key={r} className={striped && r % 2 === 1 ? "bg-[#fafafa]" : ""}>
-                          {row.map((cell, c) => (
-                            <td
-                              key={c}
-                              className={`px-6 py-4 font-['Inter:Regular',sans-serif] text-[15px] text-[#4b5563] align-top ${colAlign(
-                                c,
-                              )} ${cellBorder}`}
-                            >
-                              {renderInline(cell)}
-                            </td>
-                          ))}
+                          {row.map((cell, c) => {
+                            const cellBold = boldRows.has(r) || boldCols.has(c);
+                            return (
+                              <td
+                                key={c}
+                                className={`px-6 py-4 text-[15px] align-top ${colAlign(c)} ${cellBorder} ${
+                                  cellBold
+                                    ? "font-['Inter:SemiBold',sans-serif] text-[#1f2937]"
+                                    : "font-['Inter:Regular',sans-serif] text-[#4b5563]"
+                                }`}
+                              >
+                                {renderInline(cell)}
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>

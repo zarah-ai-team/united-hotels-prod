@@ -158,10 +158,19 @@ const sanitizeBody = (body) => {
       const align = Array.isArray(raw.align)
         ? Array.from({ length: cols }, (_, i) => cleanAlign(raw.align[i]) || 'left')
         : null;
+      // Bold whole rows / columns: keep only unique, in-range integer indices.
+      const cleanIdx = (arr, max) =>
+        Array.isArray(arr)
+          ? [...new Set(arr.map(Number).filter((n) => Number.isInteger(n) && n >= 0 && n < max))].sort((a, b) => a - b)
+          : [];
+      const boldCols = cleanIdx(raw.boldCols, cols);
+      const boldRows = cleanIdx(raw.boldRows, rows.length);
       out.push({
         type, headers, rows,
         ...(variant ? { variant } : {}),
         ...(align && align.some((a) => a !== 'left') ? { align } : {}),
+        ...(boldCols.length ? { boldCols } : {}),
+        ...(boldRows.length ? { boldRows } : {}),
       });
     }
   }

@@ -839,6 +839,23 @@ function AlignToggle({
   );
 }
 
+// Small "B" toggle used in the table editor to bold a whole column or row.
+function CellBoldToggle({ active, onClick, title }: { active: boolean; onClick: () => void; title: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      aria-pressed={active}
+      className={`inline-flex items-center justify-center w-7 h-7 rounded-md transition ${
+        active ? "bg-[#2F80ED] text-white" : "text-[#6b7280] hover:bg-[#eef0f3]"
+      }`}
+    >
+      <Bold className="w-3.5 h-3.5" />
+    </button>
+  );
+}
+
 // Image display mode: Crop (object-cover — fills, may crop) vs Fit
 // (object-contain — the whole image shows, letterboxed).
 function FitToggle({
@@ -1146,6 +1163,8 @@ function BlockEditor({
           rows={block.rows}
           variant={block.variant}
           align={block.align}
+          boldRows={block.boldRows}
+          boldCols={block.boldCols}
           onChange={(patch) => onChange(patch)}
         />
       )}
@@ -1238,17 +1257,23 @@ function TableBlockEditor({
   rows,
   variant,
   align,
+  boldRows,
+  boldCols,
   onChange,
 }: {
   headers: string[];
   rows: string[][];
   variant?: TableVariant;
   align?: BlockAlign[];
+  boldRows?: number[];
+  boldCols?: number[];
   onChange: (patch: {
     headers?: string[];
     rows?: string[][];
     variant?: TableVariant;
     align?: BlockAlign[];
+    boldRows?: number[];
+    boldCols?: number[];
   }) => void;
 }) {
   const cols = headers.length;
@@ -1256,7 +1281,7 @@ function TableBlockEditor({
     "w-full rounded-md border border-[#e2e5ea] px-2.5 py-1.5 text-[13px] text-[#1f2937] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/30 focus:border-[#2F80ED] transition";
   const gridStyle: React.CSSProperties = {
     display: "grid",
-    gridTemplateColumns: `repeat(${cols}, minmax(120px, 1fr)) 30px`,
+    gridTemplateColumns: `repeat(${cols}, minmax(120px, 1fr)) 64px`,
     gap: "6px",
     alignItems: "center",
   };
@@ -1264,6 +1289,17 @@ function TableBlockEditor({
   const colAlign = (c: number): BlockAlign => (align && align[c]) || "left";
   const setColAlign = (c: number, a: BlockAlign) =>
     onChange({ align: Array.from({ length: cols }, (_, i) => (i === c ? a : colAlign(i))) });
+
+  // Whole-column / whole-row bold toggles.
+  const isColBold = (c: number) => (boldCols || []).includes(c);
+  const isRowBold = (r: number) => (boldRows || []).includes(r);
+  const toggleColBold = (c: number) =>
+    onChange({ boldCols: isColBold(c) ? (boldCols || []).filter((x) => x !== c) : [...(boldCols || []), c].sort((a, b) => a - b) });
+  const toggleRowBold = (r: number) =>
+    onChange({ boldRows: isRowBold(r) ? (boldRows || []).filter((x) => x !== r) : [...(boldRows || []), r].sort((a, b) => a - b) });
+  // When a row/column is deleted, drop its index and shift the higher ones down.
+  const remapDrop = (list: number[] | undefined, removed: number) =>
+    (list || []).filter((i) => i !== removed).map((i) => (i > removed ? i - 1 : i));
   const setHeader = (c: number, v: string) =>
     onChange({ headers: headers.map((h, i) => (i === c ? v : h)) });
   const setCell = (r: number, c: number, v: string) =>
@@ -1280,10 +1316,11 @@ function TableBlockEditor({
       headers: headers.filter((_, i) => i !== c),
       rows: rows.map((r) => r.filter((_, i) => i !== c)),
       align: Array.from({ length: cols }, (_, i) => colAlign(i)).filter((_, i) => i !== c),
+      boldCols: remapDrop(boldCols, c),
     });
   };
   const addRow = () => onChange({ rows: [...rows, Array.from({ length: cols }, () => "")] });
-  const removeRow = (r: number) => onChange({ rows: rows.filter((_, i) => i !== r) });
+  const removeRow = (r: number) => onChange({ rows: rows.filter((_, i) => i !== r), boldRows: remapDrop(boldRows, r) });
 
   return (
     <div className="space-y-2">
@@ -1313,11 +1350,12 @@ function TableBlockEditor({
             ))}
             <div />
           </div>
-          {/* Per-column alignment */}
+          {/* Per-column: alignment + bold-whole-column toggle */}
           <div style={gridStyle}>
             {headers.map((_, c) => (
-              <div key={c} className="flex justify-center">
+              <div key={c} className="flex justify-center items-center gap-1">
                 <AlignToggle value={colAlign(c)} onChange={(a) => setColAlign(c, a)} />
+                <CellBoldToggle active={isColBold(c)} onClick={() => toggleColBold(c)} title="Bold this column" />
               </div>
             ))}
             <div />
@@ -1334,9 +1372,12 @@ function TableBlockEditor({
                   placeholder="—"
                 />
               ))}
-              <IconBtn onClick={() => removeRow(r)} title="Remove row" danger>
-                <X className="w-3.5 h-3.5" />
-              </IconBtn>
+              <div className="flex items-center justify-end gap-0.5">
+                <CellBoldToggle active={isRowBold(r)} onClick={() => toggleRowBold(r)} title="Bold this row" />
+                <IconBtn onClick={() => removeRow(r)} title="Remove row" danger>
+                  <X className="w-3.5 h-3.5" />
+                </IconBtn>
+              </div>
             </div>
           ))}
         </div>
@@ -1369,7 +1410,10 @@ function TableBlockEditor({
           </select>
         </span>
       </div>
-      <p className="text-[11px] text-[#9aa1ac]">First row is the header. Cells support **bold**, *italic* and [links](url).</p>
+      <p className="text-[11px] text-[#9aa1ac]">
+        First row is the header. Use the <span className="font-bold">B</span> toggles to bold a whole column or row.
+        Cells also support **bold**, *italic* and [links](url).
+      </p>
     </div>
   );
 }
