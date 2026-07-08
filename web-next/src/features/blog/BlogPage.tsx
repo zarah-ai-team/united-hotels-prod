@@ -205,16 +205,16 @@ export function BlogPage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="bg-white py-20 border-b border-[#eaeaea]">
-        <div className="max-w-[1840px] mx-auto px-10">
+      <section className="bg-white py-12 md:py-20 border-b border-[#eaeaea]">
+        <div className="max-w-[1840px] mx-auto px-5 md:px-10">
           <div className="max-w-[800px] mx-auto text-center">
-            <div className="mb-6 flex justify-center">
+            <div className="mb-5 md:mb-6 flex justify-center">
               <ZarahBadge />
             </div>
-            <h1 className="font-['Poppins:Bold',sans-serif] text-[56px] leading-[68px] text-[#3b3b3b] mb-6">
+            <h1 className="font-['Poppins:Bold',sans-serif] text-[32px] leading-[40px] md:text-[56px] md:leading-[68px] text-[#3b3b3b] mb-4 md:mb-6">
               Turkey Travel Guides
             </h1>
-            <p className="font-['Inter:Regular',sans-serif] text-[20px] text-[#6b7280] leading-[32px] mb-10">
+            <p className="font-['Inter:Regular',sans-serif] text-[16px] leading-[26px] md:text-[20px] md:leading-[32px] text-[#6b7280] mb-8 md:mb-10">
               Expert insights, local tips, and comprehensive guides to help you experience Turkey like a local
             </p>
 
@@ -234,9 +234,9 @@ export function BlogPage() {
       </section>
 
       {/* Category Filter */}
-      <section className="bg-white py-6 border-b border-[#eaeaea] sticky top-[72px] z-40">
-        <div className="max-w-[1840px] mx-auto px-10">
-          <div className="flex items-center gap-3 overflow-x-auto">
+      <section className="bg-white py-4 md:py-6 border-b border-[#eaeaea] sticky top-[64px] md:top-[72px] z-40">
+        <div className="max-w-[1840px] mx-auto px-5 md:px-10">
+          <div className="flex items-center gap-2.5 md:gap-3 overflow-x-auto -mx-5 px-5 md:mx-0 md:px-0">
             {categories.map((category) => (
               <button
                 key={category}
@@ -255,9 +255,9 @@ export function BlogPage() {
       </section>
 
       {/* Articles Grid */}
-      <section className="py-16">
-        <div className="max-w-[1840px] mx-auto px-10">
-          <div className="grid grid-cols-3 gap-10">
+      <section className="py-10 md:py-16">
+        <div className="max-w-[1840px] mx-auto px-5 md:px-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
             {filteredArticles.map((article, index) => (
               <BlogCard key={index} {...article} />
             ))}
@@ -275,16 +275,16 @@ export function BlogPage() {
       </section>
 
       {/* Newsletter CTA */}
-      <section className="py-20 bg-white">
-        <div className="max-w-[800px] mx-auto px-10 text-center">
-          <h2 className="font-['Poppins:Bold',sans-serif] text-[40px] leading-[52px] text-[#3b3b3b] mb-4">
+      <section className="py-12 md:py-20 bg-white">
+        <div className="max-w-[800px] mx-auto px-5 md:px-10 text-center">
+          <h2 className="font-['Poppins:Bold',sans-serif] text-[28px] leading-[36px] md:text-[40px] md:leading-[52px] text-[#3b3b3b] mb-3 md:mb-4">
             Get Turkey Travel Tips
           </h2>
-          <p className="font-['Inter:Regular',sans-serif] text-[18px] text-[#6b7280] mb-8">
+          <p className="font-['Inter:Regular',sans-serif] text-[16px] md:text-[18px] text-[#6b7280] mb-6 md:mb-8">
             Subscribe to our newsletter for insider tips, hotel deals, and local recommendations
           </p>
-          
-          <div className="flex gap-3 max-w-[500px] mx-auto">
+
+          <div className="flex flex-col sm:flex-row gap-3 max-w-[500px] mx-auto">
             <input
               type="email"
               placeholder="Enter your email"

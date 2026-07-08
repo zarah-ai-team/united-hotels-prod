@@ -88,7 +88,7 @@ export function BlogArticlePage() {
 
       {/* Back Button */}
       <div className="bg-white border-b border-[#eaeaea]">
-        <div className="max-w-[1840px] mx-auto px-10 py-4 flex items-center justify-between">
+        <div className="max-w-[1840px] mx-auto px-5 md:px-10 py-3 md:py-4 flex items-center justify-between gap-3">
           <Link
             to="/blog"
             className="inline-flex items-center gap-2 text-[#2F80ED] hover:text-[#1E5FBC] transition-colors font-['Inter:SemiBold',sans-serif] text-[14px]"
@@ -139,18 +139,18 @@ export function BlogArticlePage() {
       {status === "ready" && post && (
         <>
           <article className="bg-white">
-            <div className="max-w-[1200px] mx-auto px-10 py-16">
+            <div className="max-w-[1200px] mx-auto px-5 md:px-10 py-8 md:py-16">
               <BlogBlocks blocks={renderBlocks} post={post} />
             </div>
           </article>
 
           {related.length > 0 && (
-            <section className="py-16 bg-[#fafafa]">
-              <div className="max-w-[1840px] mx-auto px-10">
-                <h2 className="font-['Poppins:Bold',sans-serif] text-[36px] text-[#3b3b3b] mb-10">
+            <section className="py-10 md:py-16 bg-[#fafafa]">
+              <div className="max-w-[1840px] mx-auto px-5 md:px-10">
+                <h2 className="font-['Poppins:Bold',sans-serif] text-[26px] md:text-[36px] text-[#3b3b3b] mb-6 md:mb-10">
                   Related Articles
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                   {related.map((article) => (
                     <Link
                       key={article.id}
@@ -180,17 +180,17 @@ export function BlogArticlePage() {
             </section>
           )}
 
-          <section className="py-20 bg-[#2F80ED]">
-            <div className="max-w-[800px] mx-auto px-10 text-center">
-              <h2 className="font-['Poppins:Bold',sans-serif] text-[40px] leading-[52px] text-white mb-6">
+          <section className="py-12 md:py-20 bg-[#2F80ED]">
+            <div className="max-w-[800px] mx-auto px-5 md:px-10 text-center">
+              <h2 className="font-['Poppins:Bold',sans-serif] text-[26px] leading-[34px] md:text-[40px] md:leading-[52px] text-white mb-4 md:mb-6">
                 Ready to Book Your Turkey Hotel?
               </h2>
-              <p className="font-['Inter:Regular',sans-serif] text-[18px] text-white/95 mb-8">
+              <p className="font-['Inter:Regular',sans-serif] text-[16px] md:text-[18px] text-white/95 mb-6 md:mb-8">
                 Find the perfect hotel in your chosen neighborhood with our direct rates
               </p>
               <Link
                 to="/listing"
-                className="inline-block bg-white text-[#2F80ED] px-10 py-4 rounded-xl hover:shadow-2xl transition-all font-['Inter:Bold',sans-serif] text-[16px]"
+                className="inline-block bg-white text-[#2F80ED] px-8 py-3.5 md:px-10 md:py-4 rounded-xl hover:shadow-2xl transition-all font-['Inter:Bold',sans-serif] text-[15px] md:text-[16px]"
               >
                 Browse Hotels in Turkey
               </Link>

@@ -95,15 +95,15 @@ function renderInline(text: string, keyPrefix = "i"): ReactNode {
 
 function TitleBlock({ text, category }: { text: string; category?: string }) {
   return (
-    <div className="mb-6">
+    <div className="mb-5 md:mb-6">
       {category ? (
-        <div className="mb-6">
-          <span className="bg-[#2F80ED] text-white px-4 py-2 rounded-lg font-['Inter:SemiBold',sans-serif] text-[14px]">
+        <div className="mb-4 md:mb-6">
+          <span className="bg-[#2F80ED] text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-['Inter:SemiBold',sans-serif] text-[12px] md:text-[14px]">
             {category}
           </span>
         </div>
       ) : null}
-      <h1 className="font-['Poppins:Bold',sans-serif] text-[56px] leading-[68px] text-[#3b3b3b]">
+      <h1 className="font-['Poppins:Bold',sans-serif] text-[30px] leading-[38px] md:text-[56px] md:leading-[68px] text-[#3b3b3b]">
         {text}
       </h1>
     </div>
@@ -128,7 +128,7 @@ function CoverBlock({
         <img
           src={url}
           alt={alt}
-          className={`w-full h-[500px] ${fit === "contain" ? "object-contain" : "object-cover"}`}
+          className={`w-full h-[240px] md:h-[500px] ${fit === "contain" ? "object-contain" : "object-cover"}`}
         />
       </div>
       {caption ? (
@@ -232,14 +232,14 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
             return block.level === 3 ? (
               <h3
                 key={i}
-                className={`font-['Poppins:SemiBold',sans-serif] text-[24px] text-[#3b3b3b] mt-8 mb-4 ${cls}`}
+                className={`font-['Poppins:SemiBold',sans-serif] text-[20px] md:text-[24px] text-[#3b3b3b] mt-6 md:mt-8 mb-3 md:mb-4 ${cls}`}
               >
                 {renderInline(block.text)}
               </h3>
             ) : (
               <h2
                 key={i}
-                className={`font-['Poppins:Bold',sans-serif] text-[36px] leading-[48px] text-[#3b3b3b] mt-12 mb-6 ${cls}`}
+                className={`font-['Poppins:Bold',sans-serif] text-[24px] leading-[32px] md:text-[36px] md:leading-[48px] text-[#3b3b3b] mt-8 md:mt-12 mb-4 md:mb-6 ${cls}`}
               >
                 {renderInline(block.text)}
               </h2>
@@ -266,7 +266,7 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
               <div
                 key={i}
                 style={style}
-                className={`border-l-4 border-[#2F80ED] p-6 rounded-r-xl mb-8 ${bgOk ? "" : "bg-[#f0fdf4]"}`}
+                className={`border-l-4 border-[#2F80ED] p-4 md:p-6 rounded-r-xl mb-6 md:mb-8 ${bgOk ? "" : "bg-[#f0fdf4]"}`}
               >
                 {block.label ? (
                   <p className="font-['Inter:SemiBold',sans-serif] text-[16px] text-[#2F80ED] mb-2">
@@ -339,7 +339,7 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
                           {block.headers.map((h, j) => (
                             <th
                               key={j}
-                              className={`px-6 py-4 font-['Poppins:SemiBold',sans-serif] text-[15px] text-white ${colAlign(
+                              className={`px-4 py-3 md:px-6 md:py-4 font-['Poppins:SemiBold',sans-serif] text-[14px] md:text-[15px] text-white ${colAlign(
                                 j,
                               )} ${cellBorder} ${boldCols.has(j) ? "font-bold" : ""}`}
                             >
@@ -357,7 +357,7 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
                             return (
                               <td
                                 key={c}
-                                className={`px-6 py-4 text-[15px] align-top ${colAlign(c)} ${cellBorder} ${
+                                className={`px-4 py-3 md:px-6 md:py-4 text-[14px] md:text-[15px] align-top ${colAlign(c)} ${cellBorder} ${
                                   cellBold
                                     ? "font-['Inter:SemiBold',sans-serif] text-[#1f2937]"
                                     : "font-['Inter:Regular',sans-serif] text-[#4b5563]"
