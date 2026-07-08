@@ -103,9 +103,9 @@ function GroupsHero() {
             {/* Trust strip — quick credibility cues */}
             <ul className="space-y-2 mb-2">
               {[
-                "Direct hotel agreements across 8 Turkish cities",
-                "Dedicated group desk — offers usually within 2-3 hours",
-                "Single point of contact from quote to checkout",
+                "Save up to 25% through direct hotel contracts.",
+                "One travel expert manages your project from quotation to checkout",
+                "Offers usually within 2-3 hours",
               ].map((item) => (
                 <li
                   key={item}
