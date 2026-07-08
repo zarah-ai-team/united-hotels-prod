@@ -21,6 +21,7 @@ const MAX_SLUG_LEN = 200;
 const MAX_BLOCKS = 400;
 const MAX_TABLE_ROWS = 200;
 const MAX_TABLE_COLS = 12;
+const MAX_FAQ_ITEMS = 100;
 // Content blocks carry their own data; positional/structural blocks
 // (title/cover/author/divider) let the admin place the header pieces anywhere.
 const VALID_BLOCK_TYPES = new Set([
@@ -138,6 +139,16 @@ const sanitizeBody = (body) => {
         : [];
       if (!items.length) continue;
       out.push({ type, items, ...(LIST_STYLES.has(raw.style) ? { style: raw.style } : {}) });
+    } else if (type === 'faq') {
+      // Q&A pairs — question renders bold, answer as normal text. Drop empties.
+      const items = Array.isArray(raw.items)
+        ? raw.items
+            .map((it) => ({ q: String(it && it.q ? it.q : '').trim(), a: String(it && it.a ? it.a : '').trim() }))
+            .filter((it) => it.q || it.a)
+            .slice(0, MAX_FAQ_ITEMS)
+        : [];
+      if (!items.length) continue;
+      out.push({ type, items });
     } else if (type === 'table') {
       // Normalise to a rectangular grid: header row + body rows, every row
       // padded/truncated to the column count. Drop an entirely-empty table.

@@ -1018,6 +1018,7 @@ export type BlogBlock =
   | { type: 'quote'; text: string; label?: string; bg?: string }
   | { type: 'image'; url: string; caption?: string; alt?: string; fit?: 'cover' | 'contain' }
   | { type: 'list'; items: string[]; style?: ListStyle }
+  | { type: 'faq'; items: { q: string; a: string }[] } // bold question + normal answer
   | {
       type: 'table';
       headers: string[];

@@ -320,6 +320,22 @@ export function BlogBlocks({ blocks, post = {} }: { blocks: BlogBlock[]; post?: 
             );
           }
 
+          case "faq":
+            return (
+              <div key={i} className="my-8 space-y-5 md:space-y-6">
+                {block.items.map((item, j) => (
+                  <div key={j}>
+                    <p className="font-['Poppins:SemiBold',sans-serif] text-[17px] md:text-[18px] font-semibold text-[#1f2937] mb-1.5 md:mb-2">
+                      {renderInline(item.q)}
+                    </p>
+                    <p className="font-['Inter:Regular',sans-serif] text-[16px] md:text-[17px] text-[#4b5563] leading-[28px]">
+                      {renderInline(item.a)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            );
+
           case "table": {
             const showHead = block.headers.some((h) => h && h.trim());
             const striped = block.variant === "striped";

@@ -5,7 +5,7 @@ import {
   Send, FileText, Image as ImageIcon, Quote, List as ListIcon, Heading,
   LogOut, ExternalLink, AlertCircle, CheckCircle2, X, Upload,
   Type, User, Minus, Bold, Italic, Link as LinkIcon, GripVertical,
-  Table as TableIcon, Underline, Palette, AlignLeft, AlignCenter, AlignRight,
+  Table as TableIcon, Underline, Palette, AlignLeft, AlignCenter, AlignRight, HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/shared/context/AuthContext";
 import {
@@ -88,6 +88,8 @@ const newBlock = (type: BlogBlock["type"]): BlogBlock => {
       return { type: "image", url: "", caption: "", alt: "" };
     case "list":
       return { type: "list", items: [""] };
+    case "faq":
+      return { type: "faq", items: [{ q: "", a: "" }] };
     case "table":
       return { type: "table", headers: ["Column 1", "Column 2"], rows: [["", ""], ["", ""]] };
     default:
@@ -110,6 +112,7 @@ const BLOCK_LABELS: Record<string, string> = {
   quote: "Tip",
   image: "Image",
   list: "List",
+  faq: "FAQ",
   table: "Table",
 };
 
@@ -652,6 +655,7 @@ export function BlogAdminPage() {
                     <AddBtn icon={<ImageIcon className="w-3.5 h-3.5" />} label="Image" onClick={() => addBlock("image")} />
                     <AddBtn icon={<Quote className="w-3.5 h-3.5" />} label="Tip" onClick={() => addBlock("quote")} />
                     <AddBtn icon={<ListIcon className="w-3.5 h-3.5" />} label="List" onClick={() => addBlock("list")} />
+                    <AddBtn icon={<HelpCircle className="w-3.5 h-3.5" />} label="FAQ" onClick={() => addBlock("faq")} />
                     <AddBtn icon={<TableIcon className="w-3.5 h-3.5" />} label="Table" onClick={() => addBlock("table")} />
                     <AddBtn icon={<Minus className="w-3.5 h-3.5" />} label="Divider" onClick={() => addBlock("divider")} />
                   </div>
@@ -1157,6 +1161,10 @@ function BlockEditor({
         />
       )}
 
+      {block.type === "faq" && (
+        <FaqBlockEditor items={block.items} onChange={(items) => onChange({ items })} />
+      )}
+
       {block.type === "table" && (
         <TableBlockEditor
           headers={block.headers}
@@ -1238,6 +1246,53 @@ function ListBlockEditor({
         className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#2F80ED] hover:text-[#1E5FBC] transition"
       >
         <Plus className="w-3.5 h-3.5" /> Add item
+      </button>
+    </div>
+  );
+}
+
+// FAQ block: a list of question/answer pairs. The question renders bold and the
+// answer as normal text in the published article.
+function FaqBlockEditor({
+  items,
+  onChange,
+}: {
+  items: { q: string; a: string }[];
+  onChange: (items: { q: string; a: string }[]) => void;
+}) {
+  const fieldCls =
+    "w-full rounded-md border border-[#e2e5ea] px-3 py-2 text-[14px] text-[#1f2937] focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/30 focus:border-[#2F80ED] transition";
+  const patch = (i: number, key: "q" | "a", v: string) =>
+    onChange(items.map((it, j) => (j === i ? { ...it, [key]: v } : it)));
+  return (
+    <div className="space-y-3">
+      {items.map((item, i) => (
+        <div key={i} className="rounded-lg border border-[#eceef1] p-3 space-y-2 bg-[#fbfbfc]">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold text-[#9aa1ac] shrink-0">Q{i + 1}</span>
+            <input
+              className={`${fieldCls} font-semibold`}
+              value={item.q}
+              onChange={(e) => patch(i, "q", e.target.value)}
+              placeholder="Question (shown in bold)"
+            />
+            <IconBtn onClick={() => onChange(items.filter((_, j) => j !== i))} title="Remove Q&A" danger>
+              <X className="w-3.5 h-3.5" />
+            </IconBtn>
+          </div>
+          <textarea
+            className={`${fieldCls} min-h-[60px] resize-y`}
+            value={item.a}
+            onChange={(e) => patch(i, "a", e.target.value)}
+            placeholder="Answer (normal text — supports **bold**, *italic*, [links](url))"
+          />
+        </div>
+      ))}
+      <button
+        onClick={() => onChange([...items, { q: "", a: "" }])}
+        className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[#2F80ED] hover:text-[#1E5FBC] transition"
+      >
+        <Plus className="w-3.5 h-3.5" /> Add question
       </button>
     </div>
   );
