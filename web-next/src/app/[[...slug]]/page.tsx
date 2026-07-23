@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
+import { cache } from 'react';
+import { notFound } from 'next/navigation';
 import ClientApp from './ClientApp';
 import SeoContent from './SeoContent';
+import BlogArticleServer from '@/features/blog/components/BlogArticleServer';
 import { SITE, getRouteSeo, slugToPath, abs, isKnownRouteHead } from '@/shared/lib/seo';
-import { fetchPostBySlug } from '@/shared/server/blog';
+import { getBlogPost, fetchRelatedPosts, type BlogPostResult } from '@/shared/server/blog';
 
 interface PageProps {
   params: { slug?: string[] };
@@ -10,7 +13,7 @@ interface PageProps {
 
 // A single-segment path that matches no real app route is a candidate blog
 // permalink (posts live at /<slug>). We only hit the backend for those, so home
-// and every known route keep their static, synchronous metadata.
+// and every known route keep their static, synchronous handling.
 function candidateBlogSlug(slug?: string[]): string | null {
   if (!slug || slug.length !== 1) return null;
   const seg = slug[0];
@@ -18,12 +21,18 @@ function candidateBlogSlug(slug?: string[]): string | null {
   return seg;
 }
 
-// Metadata for a blog permalink — real per-post title/description/canonical so
-// posts stop inheriting the generic homepage tags. Falls back to null when the
-// slug isn't a published post (the caller then uses the default route SEO).
+// Fetch the post ONCE per request. React's cache() memoises the call, so
+// generateMetadata and the page render share a single backend round-trip
+// (no metadata→render fetch waterfall).
+const loadPost = cache((slug: string): Promise<BlogPostResult> => getBlogPost(slug));
+
+// Metadata for a blog permalink — real per-post title/description/canonical/OG
+// so posts stop inheriting the generic homepage tags. Null when the slug isn't a
+// published post (caller then uses the default route SEO).
 async function blogMetadata(slug: string): Promise<Metadata | null> {
-  const post = await fetchPostBySlug(slug);
-  if (!post) return null;
+  const r = await loadPost(slug);
+  if (r.status !== 'ok') return null;
+  const post = r.post;
   const canonical = abs(`/${post.slug}`);
   const title = `${post.title} | Book United Hotels`;
   const description =
@@ -51,11 +60,10 @@ async function blogMetadata(slug: string): Promise<Metadata | null> {
   };
 }
 
-// Per-route metadata, rendered server-side into the initial HTML so crawlers
-// and social/AI unfurlers get a unique title, description, canonical, Open
-// Graph and Twitter tags for every route — not the generic shell.
+// Per-route metadata, rendered server-side into the initial HTML so crawlers and
+// social/AI unfurlers get a unique title, description, canonical, Open Graph and
+// Twitter tags for every route — not the generic shell.
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  // Blog permalinks (/<slug>) get real per-post metadata when the post exists.
   const maybeSlug = candidateBlogSlug(params.slug);
   if (maybeSlug) {
     const meta = await blogMetadata(maybeSlug);
@@ -67,8 +75,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const canonical = abs(seo.path);
 
   return {
-    // `absolute` bypasses the layout title template — each route's title is
-    // already authored with the right branding and kept under ~60 chars.
     title: { absolute: seo.title },
     description: seo.description,
     keywords: seo.keywords,
@@ -92,9 +98,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-// Optional catch-all: every path renders server SEO content first, then the
-// client SPA takes over (routing lives entirely in <App />).
-export default function CatchAllPage({ params }: PageProps) {
+// Optional catch-all. Blog permalinks (/<slug>) are FULLY SERVER-RENDERED — the
+// article HTML ships in the initial response with no client fetch, so crawlers
+// index real content (no Soft 404). Every other path renders the server SEO
+// shell, then the client SPA takes over.
+export default async function CatchAllPage({ params }: PageProps) {
+  const slug = candidateBlogSlug(params.slug);
+  if (slug) {
+    const r = await loadPost(slug);
+    if (r.status === 'ok') {
+      const related = await fetchRelatedPosts(slug, 3);
+      return <BlogArticleServer post={r.post} related={related} />;
+    }
+    // Genuine "no such post" → a real 404 (not a soft one). A transient backend
+    // error falls through to the SPA shell, which retries client-side — so an
+    // outage never hard-404s a post that actually exists.
+    if (r.status === 'notfound') notFound();
+  }
+
   const pathname = slugToPath(params.slug);
   return <ClientApp fallback={<SeoContent pathname={pathname} />} />;
 }

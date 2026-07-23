@@ -516,6 +516,45 @@ export const faqLd = (items: FaqItem[]) => ({
   })),
 });
 
+export interface BlogPostingLdInput {
+  slug: string;
+  title: string;
+  excerpt?: string;
+  coverImage?: string;
+  authorName?: string;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+  section?: string;
+}
+
+// Article/BlogPosting structured data for a single post, emitted server-side in
+// the article HTML. Dates are omitted rather than fabricated. The author is a
+// Person when a byline exists, else the Organization.
+export const blogPostingLd = (p: BlogPostingLdInput) => {
+  const url = abs(`/${p.slug}`);
+  const published = p.publishedAt || p.createdAt || undefined;
+  const modified = p.updatedAt || published || undefined;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': `${url}#article`,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    url,
+    headline: p.title.slice(0, 110),
+    ...(p.excerpt ? { description: p.excerpt } : {}),
+    image: [abs(p.coverImage || '/opengraph-image')],
+    ...(published ? { datePublished: published } : {}),
+    ...(modified ? { dateModified: modified } : {}),
+    author: p.authorName
+      ? { '@type': 'Person', name: p.authorName }
+      : { '@id': `${SITE.url}/#organization`, '@type': 'Organization', name: SITE.name },
+    publisher: { '@id': `${SITE.url}/#organization` },
+    ...(p.section ? { articleSection: p.section } : {}),
+    inLanguage: 'en',
+  };
+};
+
 export interface HotelLdInput {
   name: string;
   description?: string;
