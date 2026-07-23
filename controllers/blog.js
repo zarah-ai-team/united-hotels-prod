@@ -26,7 +26,7 @@ const MAX_FAQ_ITEMS = 100;
 // (title/cover/author/divider) let the admin place the header pieces anywhere.
 const VALID_BLOCK_TYPES = new Set([
   'title', 'cover', 'author', 'divider',
-  'heading', 'paragraph', 'image', 'quote', 'list', 'table',
+  'heading', 'paragraph', 'image', 'quote', 'list', 'faq', 'table',
 ]);
 
 // Slugs that would collide with real app routes now that posts live at the

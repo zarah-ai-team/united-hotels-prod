@@ -124,6 +124,7 @@ export default function DestinationContent({
                 <a href={`/destinations/${d.slug}`}>{d.h1}</a>
               </li>
             ))}
+            <li><a href="/budget-hotels-in-turkey">Budget hotels in Turkey</a></li>
             <li><a href="/listing">Browse all hotels in Turkey</a></li>
           </ul>
         </nav>

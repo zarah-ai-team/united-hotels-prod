@@ -62,6 +62,20 @@ const BUSINESS_NAP = {
 // `window.scrollTo` pattern used elsewhere in the app.
 const scrollToTop = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
+// Server-rendered SEO landing routes (Next pages, NOT react-router routes —
+// must be plain <a> so the browser does a full navigation). Linking them from
+// every page gives crawlers a sitewide path to the indexable destination and
+// keyword landing pages, which otherwise only exist in the sitemap.
+const DESTINATION_LINKS: { href: string; label: string }[] = [
+  { href: "/destinations/istanbul", label: "Hotels in Istanbul" },
+  { href: "/destinations/sultanahmet", label: "Sultanahmet hotels" },
+  { href: "/destinations/taksim", label: "Hotels near Taksim" },
+  { href: "/destinations/beyoglu", label: "Beyoğlu hotels" },
+  { href: "/destinations/galata", label: "Galata & Karaköy hotels" },
+  { href: "/destinations/sirkeci", label: "Sirkeci hotels" },
+  { href: "/budget-hotels-in-turkey", label: "Budget hotels in Turkey" },
+];
+
 export function Footer() {
   const { t } = useLanguage();
   const socialEntries = activeSocials().map((s) => ({ ...s, ...SOCIAL_META[s.key] }));
@@ -69,8 +83,8 @@ export function Footer() {
   return (
     <footer className="bg-[#3b3b3b] py-10 md:py-20" aria-label="Site footer">
       <div className="max-w-[1224px] mx-auto px-5 md:px-10">
-        {/* 3-column grid: 1 col on mobile (centered), 3 cols from md+ (left-aligned). */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-7 md:gap-12 mb-8 md:mb-16 text-center md:text-left">
+        {/* 4-column grid: 1 col on mobile (centered), 4 cols from md+ (left-aligned). */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-7 md:gap-12 mb-8 md:mb-16 text-center md:text-left">
           {/* Company Info */}
           <div>
             <h3 className="font-['Poppins:Bold',sans-serif] text-[18px] md:text-[20px] text-white mb-3 md:mb-5">
@@ -129,6 +143,24 @@ export function Footer() {
                   {t("My Bookings")}
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Destinations — sitewide links to the server-rendered SEO landing
+              pages. Plain <a> (full navigation) — these live outside the SPA
+              router. */}
+          <div>
+            <h4 className="font-['Poppins:SemiBold',sans-serif] text-[16px] md:text-[17px] text-white mb-3 md:mb-5">
+              {t("Destinations")}
+            </h4>
+            <ul className="space-y-2 md:space-y-3">
+              {DESTINATION_LINKS.map(({ href, label }) => (
+                <li key={href}>
+                  <a href={href} className="font-['Inter:Regular',sans-serif] text-[14px] md:text-[15px] text-white/70 hover:text-white transition-colors">
+                    {t(label)}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 

@@ -79,11 +79,18 @@ export interface RouteSeo {
 
 // Internal links shown on most indexable pages — passes link equity to the
 // highest-value commercial routes and gives crawlers a real link graph.
+// Point at the INDEXABLE landing routes (/destinations/*, /budget-hotels-*),
+// never at /listing?destination= filters — those canonicalise back to /listing,
+// so linking them passes no equity to a rankable URL.
 const PRIMARY_LINKS: InternalLink[] = [
   { href: '/listing', label: 'Browse all hotels in Turkey' },
-  { href: '/listing?destination=Istanbul', label: 'Hotels in Istanbul' },
-  { href: '/listing?destination=Sultanahmet', label: 'Boutique hotels in Sultanahmet' },
-  { href: '/listing?destination=Taksim', label: 'Hotels near Taksim Square' },
+  { href: '/destinations/istanbul', label: 'Hotels in Istanbul' },
+  { href: '/destinations/sultanahmet', label: 'Boutique hotels in Sultanahmet' },
+  { href: '/destinations/taksim', label: 'Hotels near Taksim Square' },
+  { href: '/destinations/beyoglu', label: 'Hotels in Beyoğlu' },
+  { href: '/destinations/galata', label: 'Hotels in Galata & Karaköy' },
+  { href: '/destinations/sirkeci', label: 'Hotels in Sirkeci' },
+  { href: '/budget-hotels-in-turkey', label: 'Budget hotels in Turkey' },
   { href: '/groups', label: 'Group & corporate bookings' },
   { href: '/blog', label: 'Turkey travel guides' },
   { href: '/support', label: 'Support & contact' },
@@ -396,6 +403,25 @@ const ROUTES: Record<string, RouteSeo> = {
   admin: noindexRoute('/admin', 'Admin'),
   vendor: noindexRoute('/vendor', 'Vendor portal'),
 };
+
+// First path segments that belong to a real app route (static routes above,
+// plus the sibling app-router pages that live outside this catch-all). A
+// single-segment path whose head is NOT here is treated as a blog permalink.
+const KNOWN_ROUTE_HEADS = new Set<string>([
+  ...Object.keys(ROUTES).filter(Boolean),
+  'destinations',
+  'budget-hotels-in-turkey',
+  'blog-admin',
+  'payment',
+  'sitemap.xml',
+  'robots.txt',
+  'ads.txt',
+]);
+
+/** True when the first path segment maps to a real route (not a blog slug). */
+export function isKnownRouteHead(head: string): boolean {
+  return KNOWN_ROUTE_HEADS.has(String(head || '').toLowerCase());
+}
 
 /** Resolve a pathname (e.g. "/hotel/217") to its SEO content. */
 export function getRouteSeo(pathname: string): RouteSeo {

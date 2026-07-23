@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { SITE } from '@/shared/lib/seo';
 import { allLandingSlugs } from '@/shared/lib/landing';
 import { allDestinationSlugs } from '@/shared/lib/destinations';
+import { fetchPublishedPosts } from '@/shared/server/blog';
 
 // Regenerate at most hourly so new/updated hotels appear without a redeploy.
 export const revalidate = 3600;
@@ -68,6 +69,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
+  // Published blog posts live at the site root (/<slug>). Fail-soft (an empty
+  // list on a backend hiccup) so the sitemap never 500s or drops other URLs.
+  const posts = await fetchPublishedPosts();
+  const blogRoutes: MetadataRoute.Sitemap = posts.map((p) => {
+    const last = p.updatedAt || p.publishedAt || p.createdAt;
+    return {
+      url: `${SITE.url}/${p.slug}`,
+      lastModified: last ? new Date(last) : now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    };
+  });
+
   const hotels = await fetchHotelEntries();
-  return [...staticRoutes, ...landingRoutes, ...destinationRoutes, ...hotels];
+  return [...staticRoutes, ...landingRoutes, ...destinationRoutes, ...blogRoutes, ...hotels];
 }

@@ -29,10 +29,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
   return {
     title: { absolute: dest.title },
     description: dest.description,
-    alternates: {
-      canonical,
-      languages: { en: canonical, tr: canonical, 'x-default': canonical },
-    },
+    alternates: { canonical },
     robots: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
     openGraph: {
       type: 'website',

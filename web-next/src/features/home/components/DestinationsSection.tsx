@@ -18,6 +18,29 @@ interface Destination {
 
 const STATIC_IMAGES = [imgImageSultanahmetFatih, imgImageTaksimBeyoglu, imgImageKadikoyAsianSide];
 
+// Cities that have a dedicated server-rendered landing page under
+// /destinations/<slug>. Cards for these link there (indexable page with its
+// own copy + hotel grid) instead of the /listing filter, which canonicalises
+// back to /listing and can't rank. Keys are lowercased card titles.
+const DESTINATION_PAGE_SLUGS: Record<string, string> = {
+  istanbul: "istanbul",
+  sultanahmet: "sultanahmet",
+  sirkeci: "sirkeci",
+  "eminönü": "sirkeci",
+  eminonu: "sirkeci",
+  "beyoğlu": "beyoglu",
+  beyoglu: "beyoglu",
+  taksim: "taksim",
+  galata: "galata",
+  "karaköy": "galata",
+  karakoy: "galata",
+};
+
+const destinationPageHref = (title: string): string | null => {
+  const slug = DESTINATION_PAGE_SLUGS[title.trim().toLowerCase()];
+  return slug ? `/destinations/${slug}` : null;
+};
+
 const cityFromHotel = (hotel: PublicHotel): string => {
   const raw = (hotel.location || hotel.location_raw || "").trim();
   if (!raw) return "Turkey";
@@ -48,11 +71,10 @@ interface DestinationCardProps {
 }
 
 function DestinationCard({ destination, format, t }: DestinationCardProps) {
-  return (
-    <Link
-      to={`/listing?destination=${encodeURIComponent(destination.title)}`}
-      className="group glass-card is-interactive rounded-2xl overflow-hidden block"
-    >
+  const seoHref = destinationPageHref(destination.title);
+  const cardClass = "group glass-card is-interactive rounded-2xl overflow-hidden block";
+  const inner = (
+    <>
       <div className="relative overflow-hidden aspect-[4/3]">
         <img
           src={destination.image}
@@ -101,6 +123,21 @@ function DestinationCard({ destination, format, t }: DestinationCardProps) {
           </div>
         </div>
       </div>
+    </>
+  );
+
+  // Cities with a dedicated /destinations page get a plain <a> (the route is a
+  // Next server page outside the SPA router — react-router would 404 it).
+  if (seoHref) {
+    return (
+      <a href={seoHref} className={cardClass}>
+        {inner}
+      </a>
+    );
+  }
+  return (
+    <Link to={`/listing?destination=${encodeURIComponent(destination.title)}`} className={cardClass}>
+      {inner}
     </Link>
   );
 }

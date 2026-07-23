@@ -1,0 +1,96 @@
+name: Deploy to production
+
+# Every push to main builds the frontend on the runner (the 512MB droplet OOMs
+# on `next build`), ships the standalone bundle to the droplet, updates the
+# backend/pricing source, and reloads all three PM2 apps. The droplet-side
+# script (deploy/deploy-remote.sh) health-checks and auto-rolls-back on failure.
+#
+# One-time setup lives in deploy/CICD.md (SSH deploy key + repo secrets).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Serialize deploys — a second push waits for the first to finish instead of
+# racing it. Never cancel an in-flight production deploy midway.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web-next/package-lock.json
+
+      - name: Build web-next standalone bundle
+        working-directory: web-next
+        env:
+          # PUBLIC, build-time-inlined values. Set them under
+          # Settings → Secrets and variables → Actions → **Variables**
+          # (not Secrets — these ship to the browser). Empty is fine; the
+          # related feature just stays hidden. Google verification has a
+          # baked-in default in layout.tsx, so it's optional here.
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_PRICING_URL: ${{ vars.NEXT_PUBLIC_PRICING_URL }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_GA_ID: ${{ vars.NEXT_PUBLIC_GA_ID }}
+          NEXT_PUBLIC_FACEBOOK_PIXEL_ID: ${{ vars.NEXT_PUBLIC_FACEBOOK_PIXEL_ID }}
+          NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}
+          NEXT_PUBLIC_BING_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_BING_SITE_VERIFICATION }}
+          NEXT_PUBLIC_FACEBOOK_URL: ${{ vars.NEXT_PUBLIC_FACEBOOK_URL }}
+          NEXT_PUBLIC_INSTAGRAM_URL: ${{ vars.NEXT_PUBLIC_INSTAGRAM_URL }}
+          NEXT_PUBLIC_X_URL: ${{ vars.NEXT_PUBLIC_X_URL }}
+          NEXT_PUBLIC_YOUTUBE_URL: ${{ vars.NEXT_PUBLIC_YOUTUBE_URL }}
+          NEXT_PUBLIC_LINKEDIN_URL: ${{ vars.NEXT_PUBLIC_LINKEDIN_URL }}
+          NEXT_PUBLIC_IMAGEKIT_ENDPOINT: ${{ vars.NEXT_PUBLIC_IMAGEKIT_ENDPOINT }}
+          NEXT_PUBLIC_IMAGEKIT_FOLDER: ${{ vars.NEXT_PUBLIC_IMAGEKIT_FOLDER }}
+          NEXT_PUBLIC_ISBANK_ENABLED: ${{ vars.NEXT_PUBLIC_ISBANK_ENABLED }}
+          NEXT_PUBLIC_SUPPORT_PHONE: ${{ vars.NEXT_PUBLIC_SUPPORT_PHONE }}
+          NEXT_PUBLIC_SUPPORT_WHATSAPP: ${{ vars.NEXT_PUBLIC_SUPPORT_WHATSAPP }}
+          NEXT_PUBLIC_ADDRESS_STREET: ${{ vars.NEXT_PUBLIC_ADDRESS_STREET }}
+          NEXT_PUBLIC_ADDRESS_CITY: ${{ vars.NEXT_PUBLIC_ADDRESS_CITY }}
+          NEXT_PUBLIC_ADDRESS_REGION: ${{ vars.NEXT_PUBLIC_ADDRESS_REGION }}
+          NEXT_PUBLIC_ADDRESS_POSTAL: ${{ vars.NEXT_PUBLIC_ADDRESS_POSTAL }}
+        run: |
+          set -euo pipefail
+          npm ci
+          rm -rf .next
+          npx next build
+          test -d .next/standalone || { echo "::error::standalone output missing — is output:'standalone' set in next.config?"; exit 1; }
+          # Assemble the bundle exactly like scripts/package-web-next.ps1 does.
+          rm -rf .next/standalone/public && cp -r public .next/standalone/public
+          rm -rf .next/standalone/.next/static && cp -r .next/static .next/standalone/.next/static
+          tar -czf web-next-standalone.tar.gz -C .next/standalone .
+          ls -lh web-next-standalone.tar.gz
+
+      - name: Ship to droplet and run remote deploy
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_KEY" || { echo "::error::DEPLOY_SSH_KEY secret is not set"; exit 1; }
+          test -n "$HOST"    || { echo "::error::DEPLOY_HOST secret is not set"; exit 1; }
+          test -n "$SSH_USER" || { echo "::error::DEPLOY_USER secret is not set"; exit 1; }
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          SSHOPTS="-i $HOME/.ssh/deploy_key -o StrictHostKeyChecking=yes"
+          scp $SSHOPTS \
+            web-next/web-next-standalone.tar.gz \
+            deploy/ecosystem.config.cjs \
+            deploy/deploy-remote.sh \
+            "$SSH_USER@$HOST:/tmp/"
+          ssh $SSHOPTS "$SSH_USER@$HOST" "bash /tmp/deploy-remote.sh"

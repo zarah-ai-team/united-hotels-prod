@@ -45,8 +45,13 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.urlencoded({extended: false}));
-app.use(express.json());
+// Body limit is 5mb (not Express's 100kb default): blog CMS posts carry an
+// ordered array of content blocks — long articles with many sections, tables
+// and image URLs easily exceed 100kb, and a too-small limit makes Express
+// reject the whole save with a 413 (the post appears to "lose" its later
+// sections). 5mb is generous for JSON text while still bounding abuse.
+app.use(express.urlencoded({extended: false, limit: '5mb'}));
+app.use(express.json({limit: '5mb'}));
 
 // Lightweight request logger so we can see exactly what the frontend hits.
 app.use((req, _res, next) => {
@@ -228,8 +233,13 @@ app.listen(port, ()=>{
 // card bookings that were never paid (guest left the bank's page) are cancelled
 // and their inventory restored after PENDING_BOOKING_TTL_MINUTES. Runs in-process
 // on an interval; unref so it never keeps the process alive on its own.
+//
+// Interval defaults to 15 min (not 5) on purpose: a serverless Postgres like Neon
+// auto-suspends its compute after ~5 min idle, so a 5-min poll would keep the DB
+// awake 24/7 and burn compute-hours even with no traffic. 15 min lets it sleep
+// between sweeps; abandoned holds just clear a little later.
 const { expireStalePendingBookings } = require('./jobs/expireStalePendingBookings');
-const sweepMs = Math.max(60_000, Number(process.env.PENDING_BOOKING_SWEEP_MS || 5 * 60 * 1000));
+const sweepMs = Math.max(60_000, Number(process.env.PENDING_BOOKING_SWEEP_MS || 15 * 60 * 1000));
 const runSweep = () => expireStalePendingBookings().catch((e) => console.error('[cleanup] sweep failed:', e.message));
-setTimeout(runSweep, 30_000).unref?.();           // once shortly after boot
+setTimeout(runSweep, 120_000).unref?.();          // once ~2 min after boot
 setInterval(runSweep, sweepMs).unref?.();         // then every sweepMs

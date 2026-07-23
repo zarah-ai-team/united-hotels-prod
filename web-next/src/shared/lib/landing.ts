@@ -113,9 +113,10 @@ const BUDGET_HOTELS_TURKEY: LandingPageConfig = {
     { href: '/listing?destination=Istanbul', label: 'See cheap hotels in Istanbul' },
   ],
   related: [
-    { href: '/listing?destination=Istanbul', label: 'Hotels in Istanbul' },
-    { href: '/listing?destination=Antalya', label: 'Hotels in Antalya' },
-    { href: '/listing?destination=Cappadocia', label: 'Cappadocia cave hotels' },
+    { href: '/destinations/istanbul', label: 'Hotels in Istanbul' },
+    { href: '/destinations/sultanahmet', label: 'Boutique hotels in Sultanahmet' },
+    { href: '/destinations/taksim', label: 'Hotels near Taksim Square' },
+    { href: '/destinations/beyoglu', label: 'Hotels in Beyoğlu' },
     { href: '/groups', label: 'Group & corporate rates' },
     { href: '/blog', label: 'Turkey travel guides' },
   ],

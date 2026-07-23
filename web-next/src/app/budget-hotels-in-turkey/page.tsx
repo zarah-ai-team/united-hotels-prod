@@ -12,10 +12,7 @@ export function generateMetadata(): Metadata {
     title: { absolute: lp.title },
     description: lp.description,
     keywords: lp.keywords,
-    alternates: {
-      canonical,
-      languages: { en: canonical, tr: canonical, 'x-default': canonical },
-    },
+    alternates: { canonical },
     robots: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
     openGraph: {
       type: 'website',
