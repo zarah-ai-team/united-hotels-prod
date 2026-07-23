@@ -66,8 +66,9 @@ export default function DestinationContent({
           borderBottom: '1px solid #e6e9ef',
         }}
       >
-        <a href="/" style={{ textDecoration: 'none', color: '#13233f' }}>
-          <strong style={{ fontSize: 18 }}>United Hotels</strong>
+        <a href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/united-hotels-logo.png" alt="United Hotels - bookunitedhotels.com" width={851} height={392} style={{ height: 34, width: 'auto' }} />
         </a>
         <a
           href={searchHref}

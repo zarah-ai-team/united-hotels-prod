@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import svgPaths from "@/shared/imports/svg-nkrjt6kvoj";
 import {
   ChevronDown,
   Globe,
@@ -168,19 +167,18 @@ export function Navigation() {
       <nav className={`uh-nav ${showFrosted ? "is-scrolled" : ""}`}>
         <div className="max-w-[1840px] mx-auto px-4 md:px-10">
           <div className="flex items-center justify-between h-16 md:h-[68px]">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-              <div className="h-[22px] w-[24px] md:h-[26px] md:w-[28px]">
-                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28 26">
-                  <mask fill="white" id="path-1-inside-1_20_512">
-                    <path d={svgPaths.p32095b00} />
-                  </mask>
-                  <path d={svgPaths.p32095b00} fill="#2F80ED" mask="url(#path-1-inside-1_20_512)" stroke="#2F80ED" strokeWidth="0.4" />
-                </svg>
-              </div>
-              <span className="uh-logo-mark font-['Poppins:SemiBold',sans-serif] text-[16px] md:text-[18px] tracking-[-0.01em]">
-                United Hotels
-              </span>
+            {/* Logo — full brand lockup (mark + wordmark). Solid nav in both
+                themes keeps the blue logo legible; slight brightness lift in
+                dark mode. */}
+            <Link to="/" className="flex items-center hover:opacity-90 transition-opacity" aria-label="United Hotels — home">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/united-hotels-logo.png"
+                alt="United Hotels - bookunitedhotels.com"
+                width={851}
+                height={392}
+                className="uh-logo-mark h-8 md:h-9 w-auto"
+              />
             </Link>
 
             {/* Desktop links */}

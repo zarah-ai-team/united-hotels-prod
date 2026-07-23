@@ -1625,6 +1625,12 @@ html.dark {
 .uh-logo-mark {
   position: relative;
 }
+/* The brand logo is a fixed blue-on-transparent PNG. In dark mode the near-black
+   nav lowers contrast on the thin strokes / tagline, so lift its brightness a
+   touch. Light mode renders it unchanged. */
+.dark .uh-logo-mark {
+  filter: brightness(1.35) saturate(1.05);
+}
 
 /* Nav link — refined hover pill, no jarring color shift.
    Default state is regular weight + smaller size to reduce density;

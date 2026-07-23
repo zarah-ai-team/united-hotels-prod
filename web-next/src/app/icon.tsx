@@ -1,13 +1,22 @@
 import { ImageResponse } from 'next/og';
-import svgPaths from '@/shared/imports/svg-nkrjt6kvoj';
+import { logoDataUrl, LOGO_W, LOGO_H, MONOGRAM, BRAND } from '@/shared/server/brandAssets';
 
-// Favicon (/icon) — the United Hotels logo mark from the navbar, brand blue on
-// white. Generated at build time, no binary asset needed. Next wires the
-// <link rel="icon"> automatically.
+// Favicon (/icon) — the United Hotels U/H monogram cropped from the brand logo.
+// The full wordmark is illegible at 32px, so we show just the monogram on white.
+// Generated at build time; Next wires <link rel="icon"> automatically.
 export const size = { width: 32, height: 32 };
 export const contentType = 'image/png';
 
 export default function Icon() {
+  // Scale the logo so the monogram fills ~28px of the 32px tile, then offset it
+  // so the monogram sits centred (overflow on the tile clips the wordmark away).
+  const target = 28;
+  const scale = target / MONOGRAM.h;
+  const imgW = LOGO_W * scale;
+  const imgH = LOGO_H * scale;
+  const left = (size.width - MONOGRAM.w * scale) / 2 - MONOGRAM.x * scale;
+  const top = (size.height - MONOGRAM.h * scale) / 2 - MONOGRAM.y * scale;
+
   return new ImageResponse(
     (
       <div
@@ -15,15 +24,20 @@ export default function Icon() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#ffffff',
+          position: 'relative',
+          overflow: 'hidden',
+          background: BRAND.white,
           borderRadius: 6,
         }}
       >
-        <svg width="22" height="20" viewBox="0 0 28 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d={svgPaths.p32095b00} fill="#2F80ED" />
-        </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoDataUrl()}
+          width={imgW}
+          height={imgH}
+          alt="United Hotels"
+          style={{ position: 'absolute', left, top }}
+        />
       </div>
     ),
     { ...size },

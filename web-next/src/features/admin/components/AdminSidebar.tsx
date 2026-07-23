@@ -20,7 +20,6 @@ import { useEffect, useState } from 'react';
 import { useRole } from '@/features/admin/components/RoleSwitcher';
 import { useAuth } from '@/shared/context/AuthContext';
 import { useTheme } from '@/shared/context/ThemeContext';
-import svgPaths from '@/shared/imports/svg-nkrjt6kvoj';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin', roles: ['admin', 'vendor'] },
@@ -39,24 +38,31 @@ const COLLAPSED_KEY = 'uh_admin_sidebar_collapsed';
 // content area can offset itself by the right amount when state changes.
 export const SIDEBAR_WIDTH = { expanded: 220, collapsed: 64 };
 
-const UnitedHotelsLogo = ({ withWordmark = true }: { withWordmark?: boolean }) => (
-  <div className="flex items-center gap-2 min-w-0">
-    <div className="h-[22px] w-[24px] shrink-0">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28 26">
-        <mask fill="white" id="uh-admin-logo-mask">
-          <path d={svgPaths.p32095b00} />
-        </mask>
-        <path d={svgPaths.p32095b00} fill="#2F80ED" mask="url(#uh-admin-logo-mask)" stroke="#2F80ED" strokeWidth="0.4" />
-      </svg>
-    </div>
-    {withWordmark && (
-      <span
-        className="font-['Poppins:SemiBold',sans-serif] text-[15px] tracking-[-0.01em] text-white truncate"
-      >
-        United Hotels
-      </span>
-    )}
-  </div>
+const UnitedHotelsLogo = ({ withWordmark = true }: { withWordmark?: boolean }) =>
+  withWordmark ? (
+    // Full brand lockup. Brightened slightly for the dark sidebar surface.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/united-hotels-logo.png"
+      alt="United Hotels - bookunitedhotels.com"
+      width={851}
+      height={392}
+      className="h-6 w-auto shrink-0"
+      style={{ filter: 'brightness(1.4) saturate(1.05)' }}
+    />
+  ) : (
+    // Collapsed rail — show just the U/H monogram, cropped from the logo.
+    <div
+      aria-label="United Hotels"
+      className="h-6 w-6 shrink-0"
+      style={{
+        backgroundImage: 'url(/united-hotels-logo.png)',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '148px auto',
+        backgroundPosition: '-53px -4px',
+        filter: 'brightness(1.4) saturate(1.05)',
+      }}
+    />
 );
 
 export function AdminSidebar() {

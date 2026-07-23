@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router";
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle, Loader } from "lucide-react";
-import svgPaths from "@/shared/imports/svg-nnzqmx1xjq";
 import { authService, RegisterRequest, LoginRequest } from "@/shared/api/services";
 import { useAuth } from "@/shared/context/AuthContext";
 import { useSEO } from "@/shared/hooks/useSEO";
@@ -158,18 +157,9 @@ export function AuthPage() {
       <div className="flex-1 flex items-center justify-center p-4 md:p-6 overflow-y-auto">
         <div className="w-full max-w-[440px]">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 mb-4">
-            <div className="h-[24px] w-[26px]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 28 26">
-                <mask fill="white" id="path-1-inside-1_20_512">
-                  <path d={svgPaths.p32095b00} />
-                </mask>
-                <path d={svgPaths.p32095b00} fill="#2F80ED" mask="url(#path-1-inside-1_20_512)" stroke="#2F80ED" strokeWidth="0.4" />
-              </svg>
-            </div>
-            <span className="font-['Poppins:SemiBold',sans-serif] text-[18px] text-[#2F80ED]">
-              United Hotels
-            </span>
+          <Link to="/" className="flex items-center mb-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/united-hotels-logo.png" alt="United Hotels - bookunitedhotels.com" width={851} height={392} className="h-9 w-auto" />
           </Link>
 
           {/* Header */}

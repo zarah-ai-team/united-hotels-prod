@@ -1,15 +1,17 @@
 import { ImageResponse } from 'next/og';
 import { logoDataUrl, LOGO_W, LOGO_H, BRAND } from '@/shared/server/brandAssets';
 
-// /apple-icon (180×180) for iOS home-screen / Safari — the full United Hotels
-// logo centred on white with clear space around the mark.
-export const size = { width: 180, height: 180 };
-export const contentType = 'image/png';
-
-export default function AppleIcon() {
-  // Fit the whole logo within a padded square (contain).
-  const maxW = 148;
-  const scale = maxW / LOGO_W;
+/**
+ * Build a square PNG app icon of the given size with the full United Hotels
+ * logo centred on white (contain). Used by the PWA manifest icon routes
+ * (/icon-192.png, /icon-512.png, /icon-maskable-512.png).
+ *
+ * `maskable` shrinks the logo into the ~80% safe zone so Android's maskable
+ * crop (which can clip up to 10% on each edge) never cuts into the mark.
+ */
+export function buildSquareIcon(px: number, opts: { maskable?: boolean } = {}): ImageResponse {
+  const usable = px * (opts.maskable ? 0.62 : 0.8);
+  const scale = usable / LOGO_W;
   return new ImageResponse(
     (
       <div
@@ -26,6 +28,6 @@ export default function AppleIcon() {
         <img src={logoDataUrl()} width={LOGO_W * scale} height={LOGO_H * scale} alt="United Hotels" />
       </div>
     ),
-    { ...size },
+    { width: px, height: px },
   );
 }

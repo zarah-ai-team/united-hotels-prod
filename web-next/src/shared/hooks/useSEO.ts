@@ -18,7 +18,7 @@ const SITE_NAME = 'Book United Hotels';
 const SITE_URL =
   (typeof window !== 'undefined' && window.location && window.location.origin) ||
   'https://bookunitedhotels.com';
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/opengraph-image`;
 
 export interface SEOInput {
   title?: string;
@@ -202,7 +202,7 @@ export const organizationLd = () => ({
   '@type': 'Organization',
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/logo-512.png`,
+  logo: `${SITE_URL}/united-hotels-logo.png`,
   sameAs: socialSameAs(),
 });
 
@@ -230,8 +230,8 @@ export const localBusinessLd = (b: LocalBusinessLdInput) => ({
   '@type': 'TravelAgency',
   name: b.name || SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/logo-512.png`,
-  image: `${SITE_URL}/og-default.jpg`,
+  logo: `${SITE_URL}/united-hotels-logo.png`,
+  image: `${SITE_URL}/opengraph-image`,
   telephone: b.telephone,
   ...(b.email ? { email: b.email } : {}),
   ...(b.priceRange ? { priceRange: b.priceRange } : {}),
