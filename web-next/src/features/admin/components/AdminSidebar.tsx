@@ -97,7 +97,7 @@ export function AdminSidebar() {
   };
 
   const SidebarContent = () => (
-    <div className="relative flex h-full flex-col text-white bg-[#1f2937] border-r border-white/8">
+    <div className="relative flex h-full min-h-0 flex-col text-white bg-[#1f2937] border-r border-white/8">
       {/* subtle teal accent shimmer along the top */}
       <div
         aria-hidden
@@ -108,7 +108,7 @@ export function AdminSidebar() {
       />
 
       {/* Logo + collapse toggle */}
-      <div className={`flex h-14 items-center border-b border-white/8 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+      <div className={`flex h-14 shrink-0 items-center border-b border-white/8 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
         <Link to="/admin" className="hover:opacity-90 transition-opacity" onClick={() => setMobileOpen(false)}>
           <UnitedHotelsLogo withWordmark={!collapsed} />
         </Link>
@@ -145,7 +145,7 @@ export function AdminSidebar() {
 
       {/* Navigation. Collapsed mode uses bigger icons + chunky 40x40 hit
           targets so the vertical strip looks industry-grade, not cramped. */}
-      <nav className={`flex-1 overflow-y-auto ${collapsed ? 'space-y-1.5 px-2 py-3' : 'space-y-0.5 px-2.5 py-3'}`}>
+      <nav className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain ${collapsed ? 'space-y-1.5 px-2 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' : 'space-y-0.5 px-2.5 py-3 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.18)_transparent]'}`}>
         {navItems
           .filter((item) => currentRole && item.roles.includes(currentRole))
           .map((item) => {
@@ -158,7 +158,7 @@ export function AdminSidebar() {
                 to={item.path}
                 onClick={() => setMobileOpen(false)}
                 title={collapsed ? item.label : undefined}
-                className={`group relative flex items-center rounded-lg text-[13px] font-medium transition-all ${
+                className={`group relative flex min-w-0 items-center rounded-lg text-[13px] font-medium transition-all ${
                   collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-2.5 py-2'
                 } ${
                   isActive
@@ -183,19 +183,19 @@ export function AdminSidebar() {
           target="_blank"
           rel="noopener noreferrer"
           title={collapsed ? 'View Live Site' : undefined}
-          className={`flex items-center rounded-lg text-[13px] font-medium text-white/55 transition-all hover:bg-white/[0.06] hover:text-white ${
+          className={`flex min-w-0 items-center rounded-lg text-[13px] font-medium text-white/55 transition-all hover:bg-white/[0.06] hover:text-white ${
             collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-2.5 py-2'
           }`}
           style={{ fontFamily: 'Inter, sans-serif' }}
         >
           <ExternalLink className={collapsed ? 'h-[18px] w-[18px] shrink-0' : 'h-[15px] w-[15px] shrink-0'} strokeWidth={1.85} />
-          {!collapsed && <span>View Live Site</span>}
+          {!collapsed && <span className="truncate">View Live Site</span>}
         </a>
       </nav>
 
       {/* Theme toggle — segmented Light / Dark when expanded, single icon
           button when collapsed. Persists via the existing ThemeContext. */}
-      <div className={`border-t border-white/8 ${collapsed ? 'px-2 py-2' : 'px-3 py-2.5'}`}>
+      <div className={`shrink-0 border-t border-white/8 ${collapsed ? 'px-2 py-2' : 'px-3 py-2.5'}`}>
         {collapsed ? (
           <button
             onClick={toggleTheme}
@@ -236,7 +236,7 @@ export function AdminSidebar() {
       </div>
 
       {/* User Section */}
-      <div className={`border-t border-white/8 ${collapsed ? 'px-2 py-3' : 'px-3 py-3'}`}>
+      <div className={`shrink-0 border-t border-white/8 ${collapsed ? 'px-2 py-3' : 'px-3 py-3'}`}>
         <div className={`flex items-center rounded-lg ${collapsed ? 'flex-col gap-2 py-1' : 'gap-2.5 px-1.5 py-1'}`}>
           <div
             className="flex h-8 w-8 items-center justify-center rounded-full text-white text-[11px] font-semibold shrink-0"
@@ -294,7 +294,7 @@ export function AdminSidebar() {
 
       {/* Desktop Sidebar — width animates between expanded + collapsed */}
       <aside
-        className="hidden lg:block fixed left-0 top-0 h-screen z-40 transition-[width] duration-200 ease-out"
+        className="hidden lg:block fixed left-0 top-0 h-screen h-[100dvh] z-40 transition-[width] duration-200 ease-out"
         style={{ width: collapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded }}
       >
         <SidebarContent />
@@ -307,7 +307,7 @@ export function AdminSidebar() {
             className="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm lg:hidden"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="fixed left-0 top-0 z-50 h-screen w-[220px] lg:hidden">
+          <aside className="fixed left-0 top-0 z-50 h-screen h-[100dvh] w-[220px] max-w-[85vw] lg:hidden">
             <SidebarContent />
           </aside>
         </>
