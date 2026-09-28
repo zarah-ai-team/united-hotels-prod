@@ -166,6 +166,7 @@ function resolveHotelGallery(hotel, count = 3) {
 
 module.exports = {
   isImageKitConfigured,
+  resolveSlug,
   resolveHotelImage,
   resolveHotelGallery,
   hotelSlug

@@ -15,6 +15,7 @@ import {
   Sun,
   Moon,
   Handshake,
+  Bell,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRole } from '@/features/admin/components/RoleSwitcher';
@@ -24,6 +25,7 @@ import { useTheme } from '@/shared/context/ThemeContext';
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin', roles: ['admin', 'vendor'] },
   { icon: CalendarCheck, label: 'Bookings', path: '/admin/bookings', roles: ['admin', 'vendor'] },
+  { icon: Bell, label: 'Notifications', path: '/admin/notifications', roles: ['admin', 'vendor'] },
   { icon: Building2, label: 'Hotels & Rooms', path: '/admin/hotels', roles: ['admin', 'vendor'] },
   { icon: Users, label: 'Users', path: '/admin/users', roles: ['admin'] },
   { icon: BarChart3, label: 'Analytics', path: '/admin/analytics', roles: ['admin', 'vendor'] },

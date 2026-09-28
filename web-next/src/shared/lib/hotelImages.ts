@@ -138,12 +138,30 @@ export function pickLocalFallback(hotel: HotelImageInput): string {
 // swap to the deterministic Picsum URL for this hotel so the user always
 // sees a real photo instead of a broken-image icon. Falls back to a soft
 // transparent + gradient if even Picsum can't load.
+// Database copy of an ImageKit image, served by the backend when ImageKit
+// can't deliver (e.g. monthly bandwidth exhausted). null for non-ImageKit URLs.
+export function databaseFallbackUrl(src: string | null | undefined): string | null {
+  if (!src || !src.startsWith("https://ik.imagekit.io/")) return null;
+  const clean = src.split("?")[0];
+  return `/api/hotels/media/fallback?url=${encodeURIComponent(clean)}`;
+}
+
 export function makeImageFallback(hotel: HotelImageInput) {
   return (event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
     const stage = img.dataset.fallback || "";
     if (stage === "final") return;
+    // 1) ImageKit failed: try the copy kept in our database.
     if (stage === "" || stage === "primary") {
+      const dbCopy = databaseFallbackUrl(img.currentSrc || img.src);
+      if (dbCopy) {
+        img.dataset.fallback = "db";
+        img.src = dbCopy;
+        return;
+      }
+    }
+    // 2) No copy either: previous behaviour.
+    if (stage === "" || stage === "primary" || stage === "db") {
       img.dataset.fallback = "picsum";
       img.src = picsumImage(hotel, 1);
       return;

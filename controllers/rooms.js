@@ -1,4 +1,6 @@
 const pool = require('../db');
+const { stripImageKitTransform } = require('../utils/imageUpload');
+const { cleanupRemovedImages } = require('../utils/mediaFiles');
 
 const roomColumnsCache = { cols: null };
 
@@ -15,6 +17,31 @@ const getRoomColumns = async () => {
 };
 
 const pickColumn = (columns, names) => names.find((name) => columns.has(name)) || null;
+
+// rooms.images is jsonb in current schemas but a Postgres array on some legacy
+// databases. node-pg serializes a JS array as an array literal ("{a,b}"),
+// which jsonb rejects, so bind the right shape for the actual column type.
+let roomImagesTypeCache = null;
+const getRoomImagesColumnType = async (column) => {
+  if (roomImagesTypeCache && roomImagesTypeCache.column === column) return roomImagesTypeCache.type;
+  const result = await pool.query(
+    `SELECT data_type FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'rooms' AND column_name = $1`,
+    [column]
+  );
+  roomImagesTypeCache = { column, type: result.rows[0]?.data_type || 'jsonb' };
+  return roomImagesTypeCache.type;
+};
+
+const sanitizeRoomImages = (value) => {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set();
+  return value
+    .map((item) => (typeof item === 'string' ? stripImageKitTransform(item.trim()) : ''))
+    .filter((url) => url && (/^https?:\/\//i.test(url) || url.startsWith('/api/hotels/media/')))
+    .filter((url) => (seen.has(url) ? false : (seen.add(url), true)))
+    .slice(0, 30);
+};
 
 const toInt = (value) => {
   const parsed = parseInt(value, 10);
@@ -335,9 +362,26 @@ const adminUpdateRoom = async (req, res) => {
       values.push(counts.availableRooms);
       updates.push(`"${availableRoomsCol}" = $${values.length}`);
     }
+    let previousImages = [];
+    let nextImages = null;
     if (imagesCol && typeof images !== 'undefined') {
-      values.push(Array.isArray(images) ? images : []);
-      updates.push(`"${imagesCol}" = $${values.length}`);
+      const list = sanitizeRoomImages(images);
+      nextImages = list;
+      const prev = await pool.query(`SELECT "${imagesCol}" AS images FROM rooms WHERE id = $1`, [toInt(id)]);
+      let prevList = prev.rows[0]?.images;
+      if (typeof prevList === 'string') { try { prevList = JSON.parse(prevList); } catch (_e) { prevList = []; } }
+      previousImages = sanitizeRoomImages(Array.isArray(prevList) ? prevList : []);
+      const colType = await getRoomImagesColumnType(imagesCol);
+      if (colType === 'ARRAY') {
+        values.push(list);
+        updates.push(`"${imagesCol}" = $${values.length}`);
+      } else if (colType === 'jsonb' || colType === 'json') {
+        values.push(JSON.stringify(list));
+        updates.push(`"${imagesCol}" = $${values.length}::${colType}`);
+      } else {
+        values.push(JSON.stringify(list));
+        updates.push(`"${imagesCol}" = $${values.length}`);
+      }
     }
     if (roomNumberCol && typeof (room_number || name) !== 'undefined') {
       values.push(room_number || name);
@@ -357,6 +401,16 @@ const adminUpdateRoom = async (req, res) => {
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Room not found' });
+    }
+
+    // Room photo/price changes should reach the public hotel list immediately.
+    try { require('./hotels').invalidatePriceCaches(); } catch (_e) { /* non-fatal */ }
+
+    // Remove deleted admin-uploaded photos from ImageKit (after the response).
+    if (nextImages && previousImages.length) {
+      const kept = new Set(nextImages);
+      const removed = previousImages.filter((url) => !kept.has(url));
+      if (removed.length) setImmediate(() => cleanupRemovedImages(removed));
     }
 
     return res.json({ message: 'Room updated successfully', room: result.rows[0] });

@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import {
   ArrowLeft, Star, MapPin, Phone, Mail, BedDouble, DollarSign, Plus,
   Pencil, Save, XCircle, Sliders, ExternalLink, CalendarRange, Trash2, AlertTriangle,
+  Images, Map as MapIcon,
 } from 'lucide-react';
 import { AdminLayout } from '@/features/admin/components/AdminLayout';
 import { useRole } from '@/features/admin/components/RoleSwitcher';
@@ -11,6 +12,10 @@ import {
   type PublicHotel, type PublicHotelRoom,
 } from '@/shared/api/services';
 import { pickHotelGallery, pickHotelImage } from '@/shared/lib/hotelImages';
+import { ImageGalleryEditor } from '@/features/admin/components/ImageGalleryEditor';
+
+const cleanImageList = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((u): u is string => typeof u === 'string' && u.length > 0) : [];
 
 const fmtUsd = (n: number) => `$${Math.round(Number(n) || 0).toLocaleString()}`;
 const fmtDate = (d: string | null | undefined) => (d ? String(d).slice(0, 10) : '—');
@@ -36,7 +41,9 @@ type RoomBookingRow = {
 type HotelEdit = {
   name: string;
   location: string;
+  district: string;
   address: string;
+  googleMapsLink: string;
   description: string;
   contact: string;
   email: string;
@@ -47,7 +54,9 @@ type HotelEdit = {
 const toEditState = (h: PublicHotel | null): HotelEdit => ({
   name: h?.hotel_name || h?.name || '',
   location: h?.location_raw || h?.location || '',
+  district: h?.district || '',
   address: h?.address || '',
+  googleMapsLink: h?.google_maps_link || h?.googleMapsLink || '',
   description: h?.hotel_description || h?.description || '',
   contact: String((h as any)?.contact_phone ?? (h as any)?.contactPhone ?? (h as any)?.contact ?? ''),
   email: h?.email || '',
@@ -75,6 +84,16 @@ export function AdminHotelDetailPage() {
   const [savingHotel, setSavingHotel] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deletingHotel, setDeletingHotel] = useState(false);
+
+  // Hotel photo gallery (first image = cover)
+  const [gallery, setGallery] = useState<string[]>([]);
+  const [galleryDirty, setGalleryDirty] = useState(false);
+  const [savingGallery, setSavingGallery] = useState(false);
+
+  // Per room-category photos
+  const [photoRoomId, setPhotoRoomId] = useState<number | null>(null);
+  const [roomPhotos, setRoomPhotos] = useState<string[]>([]);
+  const [savingRoomPhotos, setSavingRoomPhotos] = useState(false);
 
   // Add-room
   const [showAddRoom, setShowAddRoom] = useState(false);
@@ -106,6 +125,8 @@ export function AdminHotelDetailPage() {
         }
         setHotel(found);
         setHotelEdit(toEditState(found));
+        setGallery(cleanImageList(found.images));
+        setGalleryDirty(false);
         setRooms(Array.isArray(found.rooms) ? found.rooms : []);
 
         try {
@@ -153,7 +174,9 @@ export function AdminHotelDetailPage() {
       await hotelService.update(String(hotel.id), {
         name: hotelEdit.name.trim(),
         location: hotelEdit.location.trim(),
+        district: hotelEdit.district.trim(),
         address: hotelEdit.address.trim(),
+        google_maps_link: hotelEdit.googleMapsLink.trim(),
         description: hotelEdit.description.trim(),
         contact: hotelEdit.contact.trim(),
         contact_phone: hotelEdit.contact.trim(),
@@ -181,6 +204,59 @@ export function AdminHotelDetailPage() {
     } catch (e: any) {
       setFlash({ kind: 'err', text: e?.data?.error || e?.message || 'Failed to delete hotel' });
       setDeletingHotel(false);
+    }
+  };
+
+  // ─── Photos ───────────────────────────────────────────────────────────
+  const updateGallery = (next: string[]) => {
+    setGallery(next);
+    setGalleryDirty(true);
+  };
+
+  const saveGallery = async () => {
+    if (!hotel?.id) return;
+    if (gallery.length === 0) {
+      setFlash({ kind: 'err', text: 'Add at least one photo. The first photo is used as the cover.' });
+      return;
+    }
+    setSavingGallery(true);
+    setFlash(null);
+    try {
+      await hotelService.update(String(hotel.id), { images: gallery });
+      setFlash({ kind: 'ok', text: 'Hotel photos saved.' });
+      setRefreshKey((k) => k + 1);
+    } catch (e: any) {
+      setFlash({ kind: 'err', text: e?.data?.error || e?.message || 'Failed to save photos' });
+    } finally {
+      setSavingGallery(false);
+    }
+  };
+
+  const toggleRoomPhotos = (room: PublicHotelRoom) => {
+    const roomId = room.id != null ? Number(room.id) : null;
+    if (roomId == null) return;
+    if (photoRoomId === roomId) {
+      setPhotoRoomId(null);
+      return;
+    }
+    setPhotoRoomId(roomId);
+    setRoomPhotos(cleanImageList(room.images));
+    setFlash(null);
+  };
+
+  const saveRoomPhotos = async () => {
+    if (photoRoomId == null) return;
+    setSavingRoomPhotos(true);
+    setFlash(null);
+    try {
+      await roomService.adminUpdate(photoRoomId, { images: roomPhotos });
+      setFlash({ kind: 'ok', text: 'Room photos saved.' });
+      setPhotoRoomId(null);
+      setRefreshKey((k) => k + 1);
+    } catch (e: any) {
+      setFlash({ kind: 'err', text: e?.data?.error || e?.message || 'Failed to save room photos' });
+    } finally {
+      setSavingRoomPhotos(false);
     }
   };
 
@@ -389,16 +465,35 @@ export function AdminHotelDetailPage() {
                   className="w-full rounded-md border border-[#eaeaea] px-3 py-2"
                 />
               </Field>
-              <Field label="Location">
+              <Field label="Location (area, city)">
                 <input
                   value={hotelEdit.location}
+                  placeholder="e.g. Sultanahmet, Istanbul"
                   onChange={(e) => setHotelEdit({ ...hotelEdit, location: e.target.value })}
                   className="w-full rounded-md border border-[#eaeaea] px-3 py-2"
                 />
               </Field>
-              <Field label="Address" className="md:col-span-2">
+              <Field label="District">
+                <input
+                  value={hotelEdit.district}
+                  placeholder="e.g. Fatih"
+                  onChange={(e) => setHotelEdit({ ...hotelEdit, district: e.target.value })}
+                  className="w-full rounded-md border border-[#eaeaea] px-3 py-2"
+                />
+              </Field>
+              <Field label="Google Maps link">
+                <input
+                  type="url"
+                  value={hotelEdit.googleMapsLink}
+                  placeholder="https://maps.app.goo.gl/..."
+                  onChange={(e) => setHotelEdit({ ...hotelEdit, googleMapsLink: e.target.value })}
+                  className="w-full rounded-md border border-[#eaeaea] px-3 py-2"
+                />
+              </Field>
+              <Field label="Full address" className="md:col-span-2">
                 <input
                   value={hotelEdit.address}
+                  placeholder="Street, number, postcode, district/city"
                   onChange={(e) => setHotelEdit({ ...hotelEdit, address: e.target.value })}
                   className="w-full rounded-md border border-[#eaeaea] px-3 py-2"
                 />
@@ -450,7 +545,51 @@ export function AdminHotelDetailPage() {
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-[#6b7280]">
               {hotelEdit.contact && <span className="inline-flex items-center gap-2"><Phone className="w-4 h-4" /> {hotelEdit.contact}</span>}
               {hotelEdit.email && <span className="inline-flex items-center gap-2"><Mail className="w-4 h-4" /> {hotelEdit.email}</span>}
+              {/^https?:\/\//i.test(hotelEdit.googleMapsLink.trim()) && (
+                <a href={hotelEdit.googleMapsLink.trim()} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-[#2F80ED] hover:text-[#1E5FBC]">
+                  <MapIcon className="w-4 h-4" /> Open in Google Maps <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
             </div>
+          </section>
+        )}
+
+        {/* Hotel photos (admin only) */}
+        {isAdmin && (
+          <section className="bg-white rounded-xl border border-[#eaeaea] p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
+              <h2 className="text-base font-semibold text-[#3b3b3b] flex items-center gap-2">
+                <Images className="w-4 h-4 text-[#2F80ED]" /> Hotel photos ({gallery.length})
+              </h2>
+              <div className="flex items-center gap-2">
+                {galleryDirty && (
+                  <button
+                    onClick={() => { setGallery(cleanImageList(hotel.images)); setGalleryDirty(false); }}
+                    disabled={savingGallery}
+                    className="rounded-lg border border-[#eaeaea] bg-white text-[#3b3b3b] hover:bg-[#fafafa] text-sm font-semibold px-3 py-1.5"
+                  >
+                    Discard
+                  </button>
+                )}
+                <button
+                  onClick={saveGallery}
+                  disabled={savingGallery || !galleryDirty}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-sm font-semibold px-3 py-1.5 disabled:opacity-60"
+                >
+                  <Save className="w-4 h-4" /> {savingGallery ? 'Saving…' : 'Save photos'}
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-[#8c8c8c] mb-4">
+              The first photo is the cover shown on listings and the hotel page.
+              {hotel.images_source !== 'custom' && ' These are the current default photos. Saving stores your own set for this hotel.'}
+            </p>
+            <ImageGalleryEditor
+              images={gallery}
+              onChange={updateGallery}
+              disabled={savingGallery}
+              target={{ hotelId: hotel.id }}
+            />
           </section>
         )}
 
@@ -535,8 +674,11 @@ export function AdminHotelDetailPage() {
                     const isDeleting = roomId != null && deletingRoomId === roomId;
                     const total = Number((r as any).total_rooms ?? 0);
                     const avail = Number((r as any).available_rooms ?? total);
+                    const photoCount = cleanImageList(r.images).length;
+                    const showingPhotos = roomId != null && photoRoomId === roomId;
                     return (
-                      <tr key={r.id ?? i}>
+                      <Fragment key={r.id ?? i}>
+                      <tr>
                         <td className="px-4 py-3 text-[#3b3b3b] font-medium">{r.room_name || `Room ${i + 1}`}</td>
                         <td className="px-4 py-3 text-[#6b7280] capitalize">{r.room_category || 'standard'}</td>
                         <td className="px-4 py-3 text-[#6b7280] capitalize">{r.occupancy_type || '—'}</td>
@@ -595,6 +737,14 @@ export function AdminHotelDetailPage() {
                                 </button>
                                 {isAdmin && roomId != null && (
                                   <button
+                                    onClick={() => toggleRoomPhotos(r)}
+                                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#2F80ED] hover:text-[#1E5FBC]"
+                                  >
+                                    <Images className="w-3 h-3" /> {showingPhotos ? 'Close' : 'Photos (' + photoCount + ')'}
+                                  </button>
+                                )}
+                                {isAdmin && roomId != null && (
+                                  <button
                                     onClick={() => deleteRoom(roomId)}
                                     disabled={isDeleting}
                                     className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-800 disabled:opacity-50"
@@ -607,6 +757,43 @@ export function AdminHotelDetailPage() {
                           </>
                         )}
                       </tr>
+                      {showingPhotos && (
+                        <tr className="bg-[#fafcff]">
+                          <td colSpan={8} className="px-4 py-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                              <p className="text-xs text-[#6b7280]">
+                                Photos for <strong className="text-[#3b3b3b]">{r.room_name || 'this room'}</strong>
+                                <span className="capitalize"> ({r.room_category || 'standard'})</span>. The first photo is shown on the room card.
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setPhotoRoomId(null)}
+                                  disabled={savingRoomPhotos}
+                                  className="inline-flex items-center gap-1 text-xs text-[#6b7280] hover:text-[#3b3b3b]"
+                                >
+                                  <XCircle className="w-3.5 h-3.5" /> Cancel
+                                </button>
+                                <button
+                                  onClick={saveRoomPhotos}
+                                  disabled={savingRoomPhotos}
+                                  className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-xs font-semibold px-2.5 py-1.5 disabled:opacity-60"
+                                >
+                                  <Save className="w-3.5 h-3.5" /> {savingRoomPhotos ? 'Saving…' : 'Save room photos'}
+                                </button>
+                              </div>
+                            </div>
+                            <ImageGalleryEditor
+                              images={roomPhotos}
+                              onChange={setRoomPhotos}
+                              primaryLabel="Main"
+                              disabled={savingRoomPhotos}
+                              compact
+                              target={{ hotelId: hotel.id, roomId }}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     );
                   })}
                 </tbody>

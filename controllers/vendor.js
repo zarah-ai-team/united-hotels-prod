@@ -167,8 +167,8 @@ const getMyBookings = async (req, res) => {
               r.name AS room_name, r.category AS room_category,
               h.id AS hotel_id, h.name AS hotel_name, h.location AS hotel_location
          FROM bookings b
-         LEFT JOIN users u ON u.id::text = b.userid
-         LEFT JOIN rooms r ON r.id::text = b.roomid
+         LEFT JOIN users u ON u.id::text = b.userid::text
+         LEFT JOIN rooms r ON r.id::text = b.roomid::text
          LEFT JOIN hotels h ON h.id = r.hotel_id
         ${where}
         ORDER BY b."createdAt" DESC NULLS LAST
@@ -203,7 +203,7 @@ const getVendorStats = async (req, res, next) => {
       pool.query(
         `SELECT COUNT(*)::int AS count
            FROM bookings b
-           JOIN rooms r ON r.id::text = b.roomid
+           JOIN rooms r ON r.id::text = b.roomid::text
            JOIN hotels h ON h.id = r.hotel_id
           ${scopeFilter}`,
         scopeParams,
@@ -211,7 +211,7 @@ const getVendorStats = async (req, res, next) => {
       pool.query(
         `SELECT COALESCE(SUM(b.totalamount), 0)::numeric AS total
            FROM bookings b
-           JOIN rooms r ON r.id::text = b.roomid
+           JOIN rooms r ON r.id::text = b.roomid::text
            JOIN hotels h ON h.id = r.hotel_id
           ${scopeFilter}`,
         scopeParams,
@@ -222,7 +222,7 @@ const getVendorStats = async (req, res, next) => {
                 COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
            FROM hotels h
            LEFT JOIN rooms r ON r.hotel_id = h.id
-           LEFT JOIN bookings b ON b.roomid = r.id::text
+           LEFT JOIN bookings b ON b.roomid::text = r.id::text
           ${scopeFilter}
           GROUP BY h.id, h.name, h.location
           ORDER BY bookings DESC, h.name ASC
@@ -234,8 +234,8 @@ const getVendorStats = async (req, res, next) => {
                 u.name AS user_name, u.email AS user_email,
                 h.name AS hotel_name
            FROM bookings b
-           LEFT JOIN users u ON u.id::text = b.userid
-           LEFT JOIN rooms r ON r.id::text = b.roomid
+           LEFT JOIN users u ON u.id::text = b.userid::text
+           LEFT JOIN rooms r ON r.id::text = b.roomid::text
            LEFT JOIN hotels h ON h.id = r.hotel_id
           ${scopeFilter}
           ORDER BY b."createdAt" DESC NULLS LAST
@@ -302,7 +302,7 @@ const getVendorAnalytics = async (req, res, next) => {
                 COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
            FROM days s
            LEFT JOIN bookings b ON b."createdAt"::date = s.day
-           LEFT JOIN rooms r ON r.id::text = b.roomid
+           LEFT JOIN rooms r ON r.id::text = b.roomid::text
            LEFT JOIN hotels h ON h.id = r.hotel_id AND h.vendor_id = $2
           GROUP BY s.day
           ORDER BY s.day ASC`,
@@ -322,7 +322,7 @@ const getVendorAnalytics = async (req, res, next) => {
                 0::numeric AS ota
            FROM days s
            LEFT JOIN bookings b ON b."createdAt"::date = s.day
-           LEFT JOIN rooms r ON r.id::text = b.roomid
+           LEFT JOIN rooms r ON r.id::text = b.roomid::text
            LEFT JOIN hotels h ON h.id = r.hotel_id AND h.vendor_id = $2
           GROUP BY s.day
           ORDER BY s.day ASC`,
@@ -335,7 +335,7 @@ const getVendorAnalytics = async (req, res, next) => {
                 COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
            FROM hotels h
            LEFT JOIN rooms r ON r.hotel_id = h.id
-           LEFT JOIN bookings b ON b.roomid = r.id::text
+           LEFT JOIN bookings b ON b.roomid::text = r.id::text
           WHERE h.vendor_id = $1
           GROUP BY h.id
           ORDER BY revenue DESC, h.name ASC
@@ -346,7 +346,7 @@ const getVendorAnalytics = async (req, res, next) => {
       pool.query(
         `SELECT COALESCE(status, 'unknown') AS status, COUNT(*)::int AS count
            FROM bookings b
-           JOIN rooms r ON r.id::text = b.roomid
+           JOIN rooms r ON r.id::text = b.roomid::text
            JOIN hotels h ON h.id = r.hotel_id
           WHERE h.vendor_id = $1
           GROUP BY status
@@ -360,7 +360,7 @@ const getVendorAnalytics = async (req, res, next) => {
                 COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
            FROM hotels h
            LEFT JOIN rooms r ON r.hotel_id = h.id
-           LEFT JOIN bookings b ON b.roomid = r.id::text
+           LEFT JOIN bookings b ON b.roomid::text = r.id::text
           WHERE h.vendor_id = $1
           GROUP BY h.district
           ORDER BY revenue DESC`,
@@ -371,7 +371,7 @@ const getVendorAnalytics = async (req, res, next) => {
         `SELECT COALESCE(AVG(b.totalamount), 0)::numeric AS value,
                 COUNT(*)::int AS sample_size
            FROM bookings b
-           JOIN rooms r ON r.id::text = b.roomid
+           JOIN rooms r ON r.id::text = b.roomid::text
            JOIN hotels h ON h.id = r.hotel_id
           WHERE h.vendor_id = $1`,
         [userId],

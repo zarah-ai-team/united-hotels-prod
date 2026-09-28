@@ -45,6 +45,7 @@ const AdminUsersPage = page(() => import('@/features/admin/AdminUsersPage'), 'Ad
 const AdminHotelDetailPage = page(() => import('@/features/admin/AdminHotelDetailPage'), 'AdminHotelDetailPage');
 const AdminEmailLogsPage = page(() => import('@/features/admin/AdminEmailLogsPage'), 'AdminEmailLogsPage');
 const AdminGroupRequestsPage = page(() => import('@/features/admin/AdminGroupRequestsPage'), 'AdminGroupRequestsPage');
+const AdminNotificationsPage = page(() => import('@/features/admin/AdminNotificationsPage'), 'AdminNotificationsPage');
 const VendorPortalPage = page(() => import('@/features/vendor/VendorPortalPage'), 'VendorPortalPage');
 const VendorLoginPage = page(() => import('@/features/vendor/VendorLoginPage'), 'VendorLoginPage');
 const BlogAdminPage = page(() => import('@/features/blog-admin/BlogAdminPage'), 'BlogAdminPage');
@@ -227,6 +228,11 @@ export const router = createBrowserRouter([
   {
     path: '/admin/group-requests',
     element: guarded(AdminGroupRequestsPage),
+    errorElement,
+  },
+  {
+    path: '/admin/notifications',
+    element: guarded(AdminNotificationsPage),
     errorElement,
   },
   // Standalone Blog Studio — a separate editor used by the content team.

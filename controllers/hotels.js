@@ -1,9 +1,64 @@
 const pool = require('../db');
 const { resolveHotelImage, resolveHotelGallery } = require('../utils/imageKit');
 const pricingV2 = require('../utils/pricingV2Client');
+const {
+  folderFor,
+  uploadToImageKit,
+  isImageKitUploadConfigured,
+  stripImageKitTransform,
+  withDisplayTransform
+} = require('../utils/imageUpload');
+const {
+  recordImageKitUpload,
+  saveImageToDatabase,
+  readMediaById,
+  readMediaByUrl,
+  cleanupRemovedImages
+} = require('../utils/mediaFiles');
 
+// Keep only plausible image URLs: absolute http(s) or our own uploaded media
+// path. Drops blanks/duplicates and caps the list so a bad payload can't bloat
+// the row.
+const MAX_GALLERY_IMAGES = 30;
+const sanitizeImageList = (value) => {
+  let list = value;
+  if (typeof list === 'string') {
+    try { list = JSON.parse(list); } catch (_e) { list = [list]; }
+  }
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  const out = [];
+  for (const item of list) {
+    // Store clean URLs; display sizing (?tr=) is re-added when served.
+    const url = typeof item === 'string' ? stripImageKitTransform(item.trim()) : '';
+    if (!url || seen.has(url)) continue;
+    if (!/^https?:\/\//i.test(url) && !url.startsWith('/api/hotels/media/')) continue;
+    seen.add(url);
+    out.push(url);
+    if (out.length >= MAX_GALLERY_IMAGES) break;
+  }
+  return out;
+};
+
+// Hotel imagery: an admin-managed gallery (hotels.images, first = cover) wins.
+// Hotels without one keep the ImageKit folder convention / Picsum fallback.
 const attachImageKitUrls = (hotel) => {
   if (!hotel) return hotel;
+  // Room-category photos are stored clean too; add display sizing on the way out.
+  if (Array.isArray(hotel.rooms)) {
+    hotel.rooms = hotel.rooms.map((room) => (
+      room && Array.isArray(room.images)
+        ? { ...room, images: room.images.map(withDisplayTransform) }
+        : room
+    ));
+  }
+  const custom = sanitizeImageList(hotel.images).map(withDisplayTransform);
+  if (custom.length) {
+    hotel.image_url = custom[0];
+    hotel.images = custom;
+    hotel.images_source = 'custom';
+    return hotel;
+  }
   const id = hotel.id ?? hotel.hotel_id;
   const name = hotel.name || hotel.hotel_name;
   const key = { id, name, hotel_name: hotel.hotel_name };
@@ -11,7 +66,17 @@ const attachImageKitUrls = (hotel) => {
   const gallery = resolveHotelGallery(key, 3);
   hotel.image_url = cover || null;
   hotel.images = gallery.length ? gallery : (cover ? [cover] : []);
+  hotel.images_source = 'default';
   return hotel;
+};
+
+// hotels.images (jsonb gallery) is not in older schemas; add it on first write.
+let hotelImagesColumnEnsured = false;
+const ensureHotelImagesColumn = async () => {
+  if (hotelImagesColumnEnsured) return;
+  await pool.query(`ALTER TABLE hotels ADD COLUMN IF NOT EXISTS images jsonb DEFAULT '[]'::jsonb`);
+  clearTableColumnsCache('hotels');
+  hotelImagesColumnEnsured = true;
 };
 
 const tableColumnsCache = new Map();
@@ -1003,6 +1068,9 @@ const normalizeHotelInput = (source = {}) => {
     managerId: pickValue(source, ['manager_id', 'managerId']),
     name: pickValue(source, ['name', 'displayName', 'hotel_name', 'HOTEL NAMES', 'HOTEL NAME']),
     address: pickValue(source, ['address', 'location', 'LOCATION', 'location_raw']),
+    // Short area label ("Sultanahmet, Istanbul"), distinct from the full address.
+    location: pickValue(source, ['location', 'LOCATION', 'location_raw']),
+    district: pickValue(source, ['district', 'DISTRICT']),
     description: pickValue(source, ['description', 'HOTEL DESCRIPTON', 'HOTEL DESCRIPTION', 'hotel_description']),
     googleMapsLink: pickValue(source, ['googleMapsLink', 'google_maps_link', 'GOOGLE MAPS LINK']),
     contact,
@@ -1149,6 +1217,9 @@ const getHotelMeta = async () => {
   const nameCol = pickColumn(hotelCols, ['name', 'hotel_name']);
   const addressCol = pickColumn(hotelCols, ['address', 'location_raw']);
   const locationCol = pickColumn(hotelCols, ['location', 'location_raw']);
+  const districtCol = pickColumn(hotelCols, ['district']);
+  const imageCol = pickColumn(hotelCols, ['image', 'image_url']);
+  const imagesCol = pickColumn(hotelCols, ['images']);
   const descriptionCol = pickColumn(hotelCols, ['description', 'information', 'hotel_description']);
   const informationRawCol = pickColumn(hotelCols, ['information_raw', 'information']);
   const totalRoomsCol = pickColumn(hotelCols, ['total_rooms', 'totalRooms']);
@@ -1212,6 +1283,9 @@ const getHotelMeta = async () => {
     nameCol,
     addressCol,
     locationCol,
+    districtCol,
+    imageCol,
+    imagesCol,
     descriptionCol,
     informationRawCol,
     totalRoomsCol,
@@ -1833,14 +1907,26 @@ const adminCreateHotel = async (req, res) => {
 const adminUpdateHotel = async (req, res) => {
   try {
     const { id } = req.params;
+    const body = req.body || {};
+    const hasOwn = (key) => Object.prototype.hasOwnProperty.call(body, key);
+    // Only touch a column when the caller actually sent that field. The
+    // normalizer returns null for absent keys, and writing that null used to
+    // wipe the name/description/policies on partial saves (e.g. photos only).
+    const sent = (...keys) => keys.some(hasOwn);
+    const galleryProvided = Array.isArray(body.images);
+    if (galleryProvided) {
+      await ensureHotelImagesColumn();
+    }
     const meta = await getHotelMeta();
-    const normalized = normalizeHotelInput(req.body);
+    const normalized = normalizeHotelInput(body);
     const {
       hotelId,
       status,
       managerId,
       name,
       address,
+      location,
+      district,
       description,
       totalRooms,
       googleMapsLink,
@@ -1881,22 +1967,49 @@ const adminUpdateHotel = async (req, res) => {
       updates.push(`"${meta.managerCol}" = $${values.length}`);
     }
 
-    if (meta.nameCol && typeof name !== 'undefined') {
+    if (meta.nameCol && name) {
       values.push(name);
       updates.push(`"${meta.nameCol}" = $${values.length}`);
     }
 
-    if (meta.addressCol && typeof address !== 'undefined' && address !== null) {
-      values.push(address);
+    // When the caller sends an explicit address, never substitute the location
+    // for it (pickValue would fall back to `location` on an empty address).
+    const resolvedAddress = hasOwn('address')
+      ? (typeof body.address === 'string' ? body.address.trim() : body.address) || null
+      : address;
+    if (meta.addressCol && resolvedAddress) {
+      values.push(resolvedAddress);
       updates.push(`"${meta.addressCol}" = $${values.length}`);
     }
 
-    if (meta.locationCol && typeof address !== 'undefined' && address !== null) {
-      values.push(address);
+    // Location is the short area label. Only fall back to the address when the
+    // caller sent no location at all (legacy single-field clients), so saving
+    // the admin form no longer overwrites "Sultanahmet, Istanbul" with the
+    // full street address.
+    const resolvedLocation = location ?? (hasOwn('location') ? null : address);
+    if (meta.locationCol && meta.locationCol !== meta.addressCol && resolvedLocation) {
+      values.push(resolvedLocation);
       updates.push(`"${meta.locationCol}" = $${values.length}`);
     }
 
-    if (meta.descriptionCol && typeof description !== 'undefined') {
+    if (meta.districtCol && hasOwn('district')) {
+      values.push(district || null);
+      updates.push(`"${meta.districtCol}" = $${values.length}`);
+    }
+
+    // Gallery: ordered list, first image is the cover. Also mirror the cover
+    // into hotels.image for consumers that only read that column.
+    if (galleryProvided && meta.imagesCol) {
+      const gallery = sanitizeImageList(body.images);
+      values.push(JSON.stringify(gallery));
+      updates.push(`"${meta.imagesCol}" = $${values.length}::jsonb`);
+      if (meta.imageCol && gallery.length) {
+        values.push(gallery[0]);
+        updates.push(`"${meta.imageCol}" = $${values.length}`);
+      }
+    }
+
+    if (meta.descriptionCol && sent('description', 'hotel_description', 'HOTEL DESCRIPTION', 'HOTEL DESCRIPTON')) {
       values.push(description);
       updates.push(`"${meta.descriptionCol}" = $${values.length}`);
     }
@@ -1914,6 +2027,9 @@ const adminUpdateHotel = async (req, res) => {
     if (meta.googleMapsLinkCol && googleMapsLink) {
       values.push(googleMapsLink);
       updates.push(`"${meta.googleMapsLinkCol}" = $${values.length}`);
+    } else if (meta.googleMapsLinkCol && (hasOwn('google_maps_link') || hasOwn('googleMapsLink'))) {
+      // Explicit empty value from the admin form clears the link.
+      updates.push(`"${meta.googleMapsLinkCol}" = NULL`);
     }
 
     if (meta.contactRawCol && typeof (contactRaw || contact) !== 'undefined' && (contactRaw || contact) !== null) {
@@ -1946,7 +2062,7 @@ const adminUpdateHotel = async (req, res) => {
       updates.push(`"${meta.starRatingCol}" = $${values.length}`);
     }
 
-    if (meta.propertyLabelRawCol && typeof propertyLabelRaw !== 'undefined') {
+    if (meta.propertyLabelRawCol && sent('property_label_raw', 'propertyLabelRaw')) {
       values.push(propertyLabelRaw);
       updates.push(`"${meta.propertyLabelRawCol}" = $${values.length}`);
     }
@@ -1966,22 +2082,22 @@ const adminUpdateHotel = async (req, res) => {
       updates.push(`"${meta.checkOutTimeCol}" = $${values.length}`);
     }
 
-    if (meta.childPolicyCol && typeof childPolicy !== 'undefined') {
+    if (meta.childPolicyCol && sent('child_policy', 'childPolicy')) {
       values.push(childPolicy);
       updates.push(`"${meta.childPolicyCol}" = $${values.length}`);
     }
 
-    if (meta.petPolicyCol && typeof petPolicy !== 'undefined') {
+    if (meta.petPolicyCol && sent('pet_policy', 'petPolicy')) {
       values.push(petPolicy);
       updates.push(`"${meta.petPolicyCol}" = $${values.length}`);
     }
 
-    if (meta.smokingPolicyCol && typeof smokingPolicy !== 'undefined') {
+    if (meta.smokingPolicyCol && sent('smoking_policy', 'smokingPolicy')) {
       values.push(smokingPolicy);
       updates.push(`"${meta.smokingPolicyCol}" = $${values.length}`);
     }
 
-    if (meta.cancellationPolicyCol && typeof cancellationPolicy !== 'undefined') {
+    if (meta.cancellationPolicyCol && sent('cancellation_policy', 'cancellationPolicy', 'CANCELLATION POLICY')) {
       values.push(cancellationPolicy);
       updates.push(`"${meta.cancellationPolicyCol}" = $${values.length}`);
     }
@@ -1998,8 +2114,13 @@ const adminUpdateHotel = async (req, res) => {
     const client = await pool.connect();
     let result;
     let savedRoomCategories = null;
+    let previousGallery = [];
     try {
       await client.query('BEGIN');
+      if (galleryProvided && meta.imagesCol) {
+        const prev = await client.query(`SELECT "${meta.imagesCol}" AS images FROM hotels WHERE id = $1`, [toInt(id)]);
+        previousGallery = sanitizeImageList(prev.rows[0]?.images);
+      }
       values.push(toInt(id));
       const updateSql = `UPDATE hotels SET ${updates.join(', ')} WHERE id = $${values.length} RETURNING *`;
       result = await client.query(updateSql, values);
@@ -2025,10 +2146,24 @@ const adminUpdateHotel = async (req, res) => {
       client.release();
     }
 
+    // Photos/location changes should show on the public site right away,
+    // not after the 60s list cache expires.
+    invalidatePriceCaches();
+
+    // Delete photos the admin removed from ImageKit (admin uploads only,
+    // and only if nothing else still uses them). Runs after the response.
+    if (previousGallery.length) {
+      const kept = new Set(sanitizeImageList(body.images));
+      const removed = previousGallery.filter((url) => !kept.has(url));
+      if (removed.length) setImmediate(() => cleanupRemovedImages(removed));
+    }
+
     const hotel = mapHotelRecord(result.rows[0], meta);
     if (savedRoomCategories) {
       hotel.roomCategories = savedRoomCategories;
     }
+    hotel.district = meta.districtCol ? result.rows[0][meta.districtCol] ?? null : null;
+    attachImageKitUrls(Object.assign(hotel, { images: result.rows[0].images }));
     return res.json({ message: 'Hotel updated successfully', hotel });
   } catch (error) {
     console.error('Error updating hotel:', error);
@@ -2052,6 +2187,115 @@ const adminDeleteHotel = async (req, res) => {
   }
 };
 
+// Stores each uploaded image in ImageKit (primary) with a copy in Postgres
+// (fallback). Folder: /hotels/<id>-<slug>/ or .../rooms/<roomId>-<category>/.
+// If ImageKit is not configured or the upload fails (quota, auth, network),
+// the image is stored in Postgres only and served from /api/hotels/media/db/<id>.
+// Query/body: hotelId (for tidy folders), roomId (optional).
+const uploadHotelImages = async (req, res) => {
+  const files = Array.isArray(req.uploadedFiles) ? req.uploadedFiles : [];
+  if (!files.length) {
+    return res.status(400).json({ error: 'No image was uploaded' });
+  }
+
+  try {
+    const hotelId = toInt(req.query?.hotelId ?? req.body?.hotelId);
+    const roomId = toInt(req.query?.roomId ?? req.body?.roomId);
+
+    let hotelName = null;
+    let roomLabel = null;
+    if (hotelId) {
+      const h = await pool.query('SELECT name FROM hotels WHERE id = $1', [hotelId]);
+      hotelName = h.rows[0]?.name || null;
+    }
+    if (roomId) {
+      const r = await pool.query('SELECT * FROM rooms WHERE id = $1', [roomId]);
+      const room = r.rows[0] || {};
+      roomLabel = room.category || room.type || room.name || null;
+    }
+
+    const folder = folderFor({ hotelId, hotelName, roomId, roomLabel });
+    const imageKitReady = isImageKitUploadConfigured();
+    let imageKitError = imageKitReady ? null : 'IMAGEKIT_PRIVATE_KEY is not set';
+    const uploaded = [];
+
+    for (const file of files) {
+      let stored = null;
+      // Once ImageKit fails in this request, don't retry it for every file.
+      if (imageKitReady && !imageKitError) {
+        try {
+          const ik = await uploadToImageKit(file, folder);
+          await recordImageKitUpload({
+            ...ik, hotelId, roomId, buffer: file.buffer, mimeType: file.mimetype
+          });
+          stored = { ...ik, storage: 'imagekit' };
+        } catch (err) {
+          imageKitError = err.message;
+          console.error('[upload] ImageKit failed, storing in database instead:', err.message);
+        }
+      }
+      if (!stored) {
+        const db = await saveImageToDatabase({ buffer: file.buffer, mimeType: file.mimetype, hotelId, roomId });
+        stored = { ...db, storage: 'database' };
+      }
+      uploaded.push({ ...stored, size: file.size });
+    }
+
+    const fellBack = uploaded.some((u) => u.storage === 'database');
+    return res.status(201).json({
+      folder: uploaded.some((u) => u.storage === 'imagekit') ? folder : null,
+      files: uploaded.map(({ url, fileId, size, storage }) => ({ url, fileId, size, storage })),
+      urls: uploaded.map((u) => u.url),
+      warning: fellBack
+        ? `Saved to the database because ImageKit was unavailable (${imageKitError}).`
+        : null
+    });
+  } catch (error) {
+    console.error('[upload] failed:', error.message);
+    return res.status(500).json({ error: 'Image upload failed. Please try again.' });
+  }
+};
+
+// Stream an image stored in Postgres.
+const sendStoredImage = (res, row, maxAgeSeconds) => {
+  res.set('Content-Type', row.mime_type || 'application/octet-stream');
+  res.set('Cache-Control', `public, max-age=${maxAgeSeconds}`);
+  res.set('X-Content-Type-Options', 'nosniff');
+  return res.send(row.data);
+};
+
+// GET /hotels/media/db/:id — images stored only in Postgres. Immutable.
+const serveDbImage = async (req, res) => {
+  try {
+    const id = toInt(req.params.id);
+    if (!id) return res.status(404).end();
+    const row = await readMediaById(id);
+    if (!row) return res.status(404).end();
+    return sendStoredImage(res, row, 31536000);
+  } catch (error) {
+    console.error('[media] db image failed:', error.message);
+    return res.status(404).end();
+  }
+};
+
+// GET /hotels/media/fallback?url=<imagekit url> — the Postgres copy of an
+// ImageKit image, used by the frontend when ImageKit fails to deliver.
+const serveFallbackImage = async (req, res) => {
+  try {
+    const url = String(req.query.url || '');
+    if (!url) return res.status(404).end();
+    const row = await readMediaByUrl(url);
+    if (!row) {
+      res.set('Cache-Control', 'public, max-age=300');
+      return res.status(404).end();
+    }
+    return sendStoredImage(res, row, 86400);
+  } catch (error) {
+    console.error('[media] fallback image failed:', error.message);
+    return res.status(404).end();
+  }
+};
+
 module.exports = {
   getPublicHotels,
   getPublicHotelById,
@@ -2060,5 +2304,8 @@ module.exports = {
   adminCreateHotel,
   adminUpdateHotel,
   adminDeleteHotel,
+  uploadHotelImages,
+  serveDbImage,
+  serveFallbackImage,
   invalidatePriceCaches
 };

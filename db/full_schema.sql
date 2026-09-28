@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS hotels (
   cancellation_policy text,
   hotel_link          text,
   google_maps_link    text,
+  images              jsonb DEFAULT '[]'::jsonb,   -- admin-managed gallery, first = cover
   "createdAt"         timestamptz NOT NULL DEFAULT now(),
   "updatedAt"         timestamptz NOT NULL DEFAULT now()
 );
@@ -163,6 +164,24 @@ CREATE TABLE IF NOT EXISTS group_requests (
   status      text NOT NULL DEFAULT 'new',
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
+);
+
+-- ── media_files ──────────────────────────────────────────────────────────────
+-- Images uploaded through the admin: ImageKit url + fileId, plus a copy of the
+-- bytes (data) served if ImageKit fails. storage = 'imagekit' | 'db'. Also
+-- created automatically on first upload.
+CREATE TABLE IF NOT EXISTS media_files (
+  id         serial PRIMARY KEY,
+  url        text NOT NULL UNIQUE,
+  file_id    text,
+  file_path  text,
+  hotel_id   integer,
+  room_id    integer,
+  storage    text NOT NULL DEFAULT 'imagekit',
+  mime_type  text,
+  byte_size  integer,
+  data       bytea,
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
 -- Blog tables live in db/blog_schema.sql — run that too, or `node scripts/initBlog.js`.

@@ -116,6 +116,11 @@ export interface PublicHotel {
   pet_policy?: string | null;
   smoking_policy?: string | null;
   total_rooms?: number | null;
+  // Imagery resolved by the backend. images[0] is the cover. images_source is
+  // 'custom' when an admin uploaded a gallery, 'default' for the CDN fallback.
+  image_url?: string | null;
+  images?: string[];
+  images_source?: 'custom' | 'default';
   // Deprecated/legacy fields
   district?: string | null;
   rating?: number | null;
@@ -494,6 +499,38 @@ export const hotelService = {
       token
     );
   },
+
+  // Upload hotel or room photos (admin). The backend forwards them to ImageKit
+  // into the hotel's (or room's) folder. Multipart, so we skip apiCall's JSON
+  // Content-Type and let the browser set the boundary. Returns URLs to save
+  // onto a hotel gallery or a room's images.
+  async uploadImages(
+    files: File[],
+    target: { hotelId?: number | string | null; roomId?: number | string | null } = {},
+  ): Promise<{ urls: string[]; warning: string | null }> {
+    const token = getStoredToken();
+    const form = new FormData();
+    files.forEach((file) => form.append('files', file));
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const qs = new URLSearchParams();
+    if (target.hotelId != null) qs.set('hotelId', String(target.hotelId));
+    if (target.roomId != null) qs.set('roomId', String(target.roomId));
+    const query = qs.toString();
+    const res = await fetch(joinUrl(API_BASE_URL, `${API_ENDPOINTS.HOTELS.UPLOAD}${query ? `?${query}` : ''}`), {
+      method: 'POST',
+      body: form,
+      headers,
+    });
+    if (!res.ok) {
+      let data: any = null;
+      try { data = await res.json(); } catch { /* not json */ }
+      throw { message: data?.error || `Upload failed (HTTP ${res.status})`, status: res.status, data } as ApiError;
+    }
+    const data = await res.json();
+    return { urls: Array.isArray(data?.urls) ? data.urls : [], warning: data?.warning || null };
+  },
 };
 
 // ─────────────────────────────────────────────
@@ -544,6 +581,19 @@ export const roomService = {
     return apiCall(
       API_ENDPOINTS.ROOMS.DELETE(id),
       { method: 'DELETE' },
+      token
+    );
+  },
+
+  // Admin-only room update (e.g. a room category's photo gallery).
+  async adminUpdate(id: string | number, data: { images?: string[]; [key: string]: any }): Promise<any> {
+    const token = getStoredToken();
+    return apiCall(
+      API_ENDPOINTS.ROOMS.ADMIN_UPDATE(String(id)),
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      },
       token
     );
   },
@@ -1226,6 +1276,26 @@ export const vendorService = {
   }> {
     const token = getStoredToken() || undefined;
     return apiCall(API_ENDPOINTS.VENDOR.BOOKINGS, { method: 'GET' }, token);
+  },
+};
+
+// ─────────────────────────────────────────────
+// Notifications (admin/vendor bell feed)
+// ─────────────────────────────────────────────
+
+export interface AdminNotification {
+  id: string;
+  type: string;
+  title: string;
+  detail: string | null;
+  link: string;
+  createdAt: string;
+}
+
+export const notificationService = {
+  async list(limit = 30): Promise<{ notifications: AdminNotification[]; count: number; scope: 'admin' | 'vendor'; serverTime: string }> {
+    const token = getStoredToken() || undefined;
+    return apiCall(`${API_ENDPOINTS.VENDOR.NOTIFICATIONS}?limit=${limit}`, { method: 'GET' }, token);
   },
 };
 

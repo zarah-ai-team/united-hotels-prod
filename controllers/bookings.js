@@ -214,7 +214,7 @@ const fetchBookingsEnriched = async (whereSql, params, userIdCol, orderCol) => {
                     h.address  AS address,
                     h.image    AS hotel_image
                FROM bookings b
-               LEFT JOIN hotels h ON h.id = b.hotelid${where}
+               LEFT JOIN hotels h ON h.id::text = b.hotelid::text${where}
               ORDER BY b.${orderCol} DESC`,
             params
         );

@@ -59,7 +59,7 @@ const getDashboardStats = async (_req, res, next) => {
           COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
         FROM hotels h
         LEFT JOIN rooms r ON r.hotel_id = h.id
-        LEFT JOIN bookings b ON b.roomid = r.id::text
+        LEFT JOIN bookings b ON b.roomid::text = r.id::text
         GROUP BY h.id, h.name, h.location
         ORDER BY bookings_count DESC, h.name ASC
         LIMIT 25
@@ -69,8 +69,8 @@ const getDashboardStats = async (_req, res, next) => {
                u.name AS user_name, u.email AS user_email,
                h.name AS hotel_name
         FROM bookings b
-        LEFT JOIN users u ON u.id::text = b.userid
-        LEFT JOIN rooms r ON r.id::text = b.roomid
+        LEFT JOIN users u ON u.id::text = b.userid::text
+        LEFT JOIN rooms r ON r.id::text = b.roomid::text
         LEFT JOIN hotels h ON h.id = r.hotel_id
         ORDER BY b."createdAt" DESC NULLS LAST
         LIMIT 10
@@ -176,7 +176,7 @@ const getAnalytics = async (req, res, next) => {
                COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
           FROM hotels h
           LEFT JOIN rooms r ON r.hotel_id = h.id
-          LEFT JOIN bookings b ON b.roomid = r.id::text
+          LEFT JOIN bookings b ON b.roomid::text = r.id::text
          GROUP BY h.id, h.name, h.location
          ORDER BY bookings DESC, revenue DESC
          LIMIT 10
@@ -202,7 +202,7 @@ const getAnalytics = async (req, res, next) => {
                COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
           FROM hotels h
           LEFT JOIN rooms r ON r.hotel_id = h.id
-          LEFT JOIN bookings b ON b.roomid = r.id::text
+          LEFT JOIN bookings b ON b.roomid::text = r.id::text
          GROUP BY 1
          ORDER BY revenue DESC
          LIMIT 10
@@ -276,7 +276,7 @@ const getBookingsByCountry = async (_req, res, next) => {
              COUNT(*)::int AS bookings,
              COALESCE(SUM(b.totalamount), 0)::numeric AS revenue
         FROM bookings b
-        LEFT JOIN users u ON u.id::text = b.userid
+        LEFT JOIN users u ON u.id::text = b.userid::text
        GROUP BY 1
        ORDER BY bookings DESC, country ASC
        LIMIT 50

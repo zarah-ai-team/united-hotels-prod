@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
     CREATE: '/hotels/admin/create',
     UPDATE: (id: string) => `/hotels/admin/${id}/update`,
     DELETE: (id: string) => `/hotels/admin/${id}/delete`,
+    UPLOAD: '/hotels/admin/upload',
   },
 
   ROOMS: {
@@ -57,6 +58,7 @@ export const API_ENDPOINTS = {
     CREATE: '/rooms',
     UPDATE: (id: string) => `/rooms/${id}`,
     DELETE: (id: string) => `/rooms/${id}`,
+    ADMIN_UPDATE: (id: string) => `/rooms/admin/${id}/update`,
   },
 
   ITINERARIES: {
@@ -111,6 +113,7 @@ export const API_ENDPOINTS = {
     ROOMS: '/vendor/rooms',
     ROOM_PRICE_BAND: (id: string) => `/vendor/rooms/${id}/price-band`,
     BOOKINGS: '/vendor/bookings',
+    NOTIFICATIONS: '/vendor/notifications',
   },
 
   BLOG: {

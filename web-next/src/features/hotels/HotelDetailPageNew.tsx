@@ -143,7 +143,17 @@ const groupRoomsByTier = (rooms: PublicHotelRoom[], hotel: PublicHotel): Grouped
 // card shows a real photo of the property. If the backend returned no images,
 // the empty string flows through to the <img> element and the onError fallback
 // in `makeImageFallback` paints a soft placeholder gradient instead.
-const pickRoomImage = (hotel: PublicHotel, index: number): string => {
+const pickRoomImage = (hotel: PublicHotel, index: number, room?: { images?: unknown }): string => {
+  // A room category's own photos (set from the admin portal) win. Seeded rows
+  // carry guessed ImageKit "picture-N.png" URLs that may not exist, so those
+  // keep using the hotel gallery as before.
+  const isSeededGuess = (u: string) => /\/hotels\/[^/]+\/picture-\d+\.png/i.test(u);
+  const own = Array.isArray(room?.images)
+    ? (room!.images as unknown[]).find(
+        (u): u is string => typeof u === "string" && u.length > 0 && !isSeededGuess(u),
+      )
+    : undefined;
+  if (own) return own;
   const gallery = pickHotelGallery(hotel, 6);
   if (gallery.length === 0) return "";
   return gallery[index % gallery.length];
@@ -1094,7 +1104,7 @@ export function HotelDetailPageNew() {
                               key={cardKey}
                               room={room}
                               index={index}
-                              image={pickRoomImage(hotel, index)}
+                              image={pickRoomImage(hotel, index, room)}
                               onImageError={makeImageFallback({ id: hotel.id, name: hotel.name || hotel.hotel_name })}
                               recommendation={rec}
                               isSelected={isSelected}

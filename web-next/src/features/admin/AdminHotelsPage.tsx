@@ -4,6 +4,7 @@ import { Plus, Star, MapPin, BedDouble, DollarSign, Search, Tag, ExternalLink, P
 import { AdminLayout } from '@/features/admin/components/AdminLayout';
 import { AddHotelWizard } from '@/features/admin/components/AddHotelWizard';
 import { adminService, hotelService, vendorService, type PublicHotel, type PublicHotelRoom } from '@/shared/api/services';
+
 import { pickHotelImage } from '@/shared/lib/hotelImages';
 import { useRole } from '@/features/admin/components/RoleSwitcher';
 
@@ -22,6 +23,8 @@ interface HotelRow {
   minPrice: number;
   maxPrice: number;
   image: string;
+  address: string;
+  googleMapsLink: string;
 }
 
 const mapHotel = (h: PublicHotel): HotelRow => {
@@ -46,6 +49,8 @@ const mapHotel = (h: PublicHotel): HotelRow => {
     // attachImageKitUrls). Pass it through so pickHotelImage finds it
     // instead of falling back to the empty string.
     image: pickHotelImage(h as any),
+    address: h.address || '',
+    googleMapsLink: h.google_maps_link || h.googleMapsLink || '',
   };
 };
 
@@ -220,6 +225,44 @@ export function AdminHotelsPage() {
     }
   };
 
+  // ─── Location (admin) ───────────────────────────────────────
+  const [panelTab, setPanelTab] = useState<'rooms' | 'location'>('rooms');
+  const [locDraft, setLocDraft] = useState({ location: '', district: '', address: '', googleMapsLink: '' });
+  const [savingLoc, setSavingLoc] = useState(false);
+
+  const activeHotel = useMemo(() => hotels.find((h) => h.id === activeId) || null, [hotels, activeId]);
+
+  // Reset the editors whenever another hotel is selected or data reloads.
+  useEffect(() => {
+    if (!activeHotel) return;
+    setLocDraft({
+      location: activeHotel.location === 'Turkey' ? '' : activeHotel.location,
+      district: activeHotel.district || '',
+      address: activeHotel.address,
+      googleMapsLink: activeHotel.googleMapsLink,
+    });
+  }, [activeHotel]);
+
+  const saveLocation = async () => {
+    if (activeId == null) return;
+    setSavingLoc(true);
+    setFlash(null);
+    try {
+      await hotelService.update(String(activeId), {
+        location: locDraft.location.trim(),
+        district: locDraft.district.trim(),
+        address: locDraft.address.trim(),
+        google_maps_link: locDraft.googleMapsLink.trim(),
+      });
+      setFlash({ kind: 'ok', text: 'Location saved.' });
+      setRefreshKey((k) => k + 1);
+    } catch (e: any) {
+      setFlash({ kind: 'err', text: e?.data?.error || e?.message || 'Failed to save location' });
+    } finally {
+      setSavingLoc(false);
+    }
+  };
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return hotels;
@@ -373,7 +416,7 @@ export function AdminHotelsPage() {
                           onClick={(e) => { e.stopPropagation(); navigate(`/admin/hotels/${h.id}`); }}
                           className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED]/10 hover:bg-[#2F80ED] hover:text-white text-[#1E5FBC] dark:text-[#5DA0F8] dark:hover:text-white text-[11px] font-semibold px-2 py-1.5 transition-colors"
                         >
-                          Open <ChevronRight className="w-3 h-3" />
+                          <Pencil className="w-3 h-3" /> Edit
                         </button>
                       </div>
                     </div>
@@ -410,8 +453,75 @@ export function AdminHotelsPage() {
                     >
                       View public page <ExternalLink className="w-3 h-3" />
                     </a>
+                    {!isVendor && (
+                      <button
+                        onClick={() => navigate(`/admin/hotels/${active.id}`)}
+                        className="mt-2 ml-4 inline-flex items-center gap-1 text-xs text-[#2F80ED] hover:text-[#1E5FBC]"
+                      >
+                        <Pencil className="w-3 h-3" /> Edit all hotel details
+                      </button>
+                    )}
                   </div>
 
+                  {!isVendor && (
+                    <div className="flex items-center gap-1 rounded-lg bg-[#2F80ED]/[0.08] dark:bg-white/[0.06] ring-1 ring-[#2F80ED]/15 dark:ring-white/10 p-1 text-xs font-semibold">
+                      {([
+                        ['rooms', 'Rooms & prices'],
+                        ['location', 'Location'],
+                      ] as const).map(([key, label]) => (
+                        <button
+                          key={key}
+                          onClick={() => { setPanelTab(key); setFlash(null); }}
+                          className={`flex-1 rounded-md px-2 py-1.5 transition-colors ${panelTab === key ? 'bg-[#2F80ED] text-white shadow-[0_4px_10px_-4px_rgba(47,128,237,0.6)]' : 'text-[#1E5FBC]/80 dark:text-white/60 hover:bg-[#2F80ED]/[0.10] hover:text-[#1E5FBC] dark:hover:bg-white/[0.06] dark:hover:text-white'}`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {flash && panelTab !== 'rooms' && (
+                    <div className={`rounded-md px-3 py-2 text-xs ${flash.kind === 'ok' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                      {flash.text}
+                    </div>
+                  )}
+
+                  {!isVendor && panelTab === 'location' && (
+                    <div className="space-y-2 text-sm">
+                      {([
+                        ['location', 'Location (area, city)', 'e.g. Sultanahmet, Istanbul'],
+                        ['district', 'District', 'e.g. Fatih'],
+                        ['address', 'Full address', 'Street, number, postcode, city'],
+                        ['googleMapsLink', 'Google Maps link', 'https://maps.app.goo.gl/...'],
+                      ] as const).map(([key, label, placeholder]) => (
+                        <label key={key} className="block">
+                          <span className="text-[11px] uppercase tracking-wider text-[#8c8c8c] dark:text-white/50">{label}</span>
+                          <input
+                            value={locDraft[key]}
+                            placeholder={placeholder}
+                            onChange={(e) => setLocDraft({ ...locDraft, [key]: e.target.value })}
+                            className="w-full rounded-md border border-[#eaeaea] dark:border-white/10 bg-white dark:bg-[#11151a] dark:text-white dark:placeholder-white/40 px-2 py-1.5 mt-0.5 focus:outline-none focus:ring-2 focus:ring-[#2F80ED]/25 focus:border-[#2F80ED]"
+                          />
+                        </label>
+                      ))}
+                      {/^https?:\/\//i.test(locDraft.googleMapsLink.trim()) && (
+                        <a href={locDraft.googleMapsLink.trim()} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-[#2F80ED] hover:text-[#1E5FBC]">
+                          <MapPin className="w-3 h-3" /> Open in Google Maps <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                      <div className="flex justify-end pt-1">
+                        <button
+                          onClick={saveLocation}
+                          disabled={savingLoc}
+                          className="inline-flex items-center gap-1 rounded-md bg-[#2F80ED] hover:bg-[#1E5FBC] text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-60"
+                        >
+                          <Save className="w-3.5 h-3.5" /> {savingLoc ? 'Saving…' : 'Save location'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {(isVendor || panelTab === 'rooms') && (
                   <div className="border-t border-[#eaeaea] pt-4">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-sm font-semibold text-[#3b3b3b] flex items-center gap-1">
@@ -570,12 +680,14 @@ export function AdminHotelsPage() {
                                   </div>
                                 </div>
                               )}
+
                             </div>
                           );
                         })}
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
               )}
             </aside>
