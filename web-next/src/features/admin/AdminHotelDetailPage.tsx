@@ -11,7 +11,7 @@ import {
   adminService, vendorService, hotelService, roomService,
   type PublicHotel, type PublicHotelRoom,
 } from '@/shared/api/services';
-import { pickHotelGallery, pickHotelImage } from '@/shared/lib/hotelImages';
+import { pickHotelGallery, pickHotelImage, makeImageFallback } from '@/shared/lib/hotelImages';
 import { ImageGalleryEditor } from '@/features/admin/components/ImageGalleryEditor';
 
 const cleanImageList = (value: unknown): string[] =>
@@ -151,7 +151,7 @@ export function AdminHotelDetailPage() {
 
   const hotelName = hotel?.hotel_name || hotel?.name || 'Hotel';
   const heroImages = useMemo(
-    () => pickHotelGallery((hotel || { id: undefined, name: hotelName }) as any, 4),
+    () => pickHotelGallery((hotel || { id: undefined, name: hotelName }) as any, 5),
     [hotel, hotelName],
   );
   const heroImage = pickHotelImage((hotel || { id: undefined, name: hotelName }) as any);
@@ -405,10 +405,24 @@ export function AdminHotelDetailPage() {
 
         {/* Hero */}
         <div className="rounded-2xl overflow-hidden bg-white border border-[#eaeaea]">
-          <div className="grid grid-cols-2 gap-1.5 h-[300px]">
-            <img src={heroImage} alt={hotelName} className="row-span-2 w-full h-full object-cover" />
-            {heroImages.slice(1, 4).map((url, i) => (
-              <img key={i} src={url} alt="" className="w-full h-full object-cover" />
+          {/* Cover on the left (2×2), up to four thumbnails on the right. Fixed
+              2-row grid so extra photos can't spill over the details below. */}
+          <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-1.5 h-[220px] md:h-[300px] overflow-hidden">
+            <img
+              src={heroImage}
+              alt={hotelName}
+              onError={makeImageFallback({ id: hotel.id, name: hotelName })}
+              className="col-span-2 row-span-2 w-full h-full min-h-0 object-cover"
+            />
+            {heroImages.filter((url) => url !== heroImage).slice(0, 4).map((url) => (
+              <img
+                key={url}
+                src={url}
+                alt=""
+                loading="lazy"
+                onError={makeImageFallback({ id: hotel.id, name: hotelName })}
+                className="hidden md:block w-full h-full min-h-0 object-cover"
+              />
             ))}
           </div>
           <div className="p-6">

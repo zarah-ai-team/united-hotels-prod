@@ -93,10 +93,30 @@ const fromAddress = () => {
   return FROM_DEFAULT;
 };
 
+// The table is missing on databases built from older schemas; create it once
+// so the log never silently stays empty.
+let logTableEnsured = false;
+const ensureLogTable = async () => {
+  if (logTableEnsured) return;
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS email_logs (
+      id            serial PRIMARY KEY,
+      type          text NOT NULL,
+      recipient     text NOT NULL,
+      subject       text,
+      status        text NOT NULL DEFAULT 'pending',
+      provider_id   text,
+      error_message text,
+      created_at    timestamptz NOT NULL DEFAULT now()
+    )`);
+  logTableEnsured = true;
+};
+
 // Best-effort audit logger. Never let a logging failure poison the email
 // flow — the catch swallows everything.
 const logEmail = async ({ type, recipient, subject, status, providerId, errorMessage }) => {
   try {
+    await ensureLogTable();
     await pool.query(
       `INSERT INTO email_logs (type, recipient, subject, status, provider_id, error_message)
        VALUES ($1, $2, $3, $4, $5, $6)`,

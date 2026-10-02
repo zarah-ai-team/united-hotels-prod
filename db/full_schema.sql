@@ -166,6 +166,21 @@ CREATE TABLE IF NOT EXISTS group_requests (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 
+-- ── email_logs ───────────────────────────────────────────────────────────────
+-- One row per outgoing email (utils/emails/client.js), shown in Admin → Email
+-- logs. Also created automatically on the first send.
+CREATE TABLE IF NOT EXISTS email_logs (
+  id            serial PRIMARY KEY,
+  type          text NOT NULL,
+  recipient     text NOT NULL,
+  subject       text,
+  status        text NOT NULL DEFAULT 'pending',
+  provider_id   text,
+  error_message text,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_email_logs_created_at ON email_logs (created_at DESC);
+
 -- ── media_files ──────────────────────────────────────────────────────────────
 -- Images uploaded through the admin: ImageKit url + fileId, plus a copy of the
 -- bytes (data) served if ImageKit fails. storage = 'imagekit' | 'db'. Also

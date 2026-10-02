@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { Navigation } from "@/shared/components/Navigation";
 import { Footer } from "@/shared/components/Footer";
@@ -10,7 +11,7 @@ import { useScrollProgress } from "@/shared/hooks/useScrollProgress";
 import { useSEO, hotelLd, breadcrumbLd } from "@/shared/hooks/useSEO";
 import { extractAmenityNames, capitalizeAmenity } from "@/shared/lib/amenities";
 import { pickAmenityIcon } from "@/shared/lib/amenityIcons";
-import { pickHotelImage, pickHotelGallery, makeImageFallback } from "@/shared/lib/hotelImages";
+import { pickHotelImage, pickHotelGallery, allHotelImages, heroImageUrl, makeImageFallback } from "@/shared/lib/hotelImages";
 import { ArrowRight } from "lucide-react";
 import {
   MapPin,
@@ -18,6 +19,9 @@ import {
   Calendar,
   Users,
   ChevronLeft,
+  ChevronRight,
+  X,
+  Images,
   Globe,
   ExternalLink,
   // Aliased: lucide's `Map` icon would shadow the global Map constructor that
@@ -182,25 +186,177 @@ function HotelHero({ hotel, image }: HotelHeroProps) {
       return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : null;
     })();
 
+  // Carousel over every hotel + room photo; the cover leads.
+  const photos = useMemo(() => {
+    const all = allHotelImages(hotel);
+    return all.length ? all : image ? [image] : [];
+  }, [hotel, image]);
+  const [index, setIndex] = useState(0);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [touchX, setTouchX] = useState<number | null>(null);
+  // Slides whose image may load: the current one and its neighbours, plus any
+  // already shown — so the first paint fetches 2–3 photos, not all of them.
+  const [primed, setPrimed] = useState<Set<number>>(() => new Set([0, 1]));
+  // Natural width of each loaded photo, to decide between a full-bleed crop
+  // and a "contained" layout for photos too small to fill the hero sharply.
+  const [natural, setNatural] = useState<Record<number, number>>({});
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [frameWidth, setFrameWidth] = useState(0);
+  const many = photos.length > 1;
+  const go = (delta: number) => setIndex((i) => (i + delta + photos.length) % photos.length);
+
+  useEffect(() => { setIndex(0); setNatural({}); setPrimed(new Set([0, 1])); }, [photos]);
+
+  useEffect(() => {
+    setPrimed((prev) => {
+      const next = new Set(prev);
+      [index - 1, index, index + 1].forEach((i) => next.add((i + photos.length) % photos.length));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [index, photos.length]);
+
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setFrameWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Gentle autoplay; stops on hover/focus, while the viewer is open, and for
+  // visitors who prefer reduced motion.
+  useEffect(() => {
+    if (!many || paused || viewerOpen) return;
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = window.setTimeout(() => go(1), 6500);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, many, paused, viewerOpen]);
+
+  const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+  // A photo is "too small" when it would be upscaled by more than ~35%.
+  const isSmall = (i: number) =>
+    natural[i] !== undefined && frameWidth > 0 && natural[i] < (frameWidth * dpr) / 1.35;
+
   return (
-    <div className="relative h-[260px] md:h-[420px] rounded-2xl overflow-hidden mb-6">
-      <img
-        src={image}
-        alt={name}
-        onError={makeImageFallback({ id: hotel.id, name })}
-        className="w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/30 to-transparent" />
+    <div
+      ref={frameRef}
+      className="group/hero relative h-[260px] md:h-[440px] rounded-2xl overflow-hidden mb-6 bg-[#0f172a] isolate"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+      onTouchStart={(e) => { setPaused(true); setTouchX(e.touches[0].clientX); }}
+      onTouchEnd={(e) => {
+        if (touchX === null || !many) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+        setTouchX(null);
+      }}
+    >
+      {photos.map((raw, i) => {
+        const active = i === index;
+        const src = primed.has(i) ? heroImageUrl(raw) : undefined;
+        const small = isSmall(i);
+        return (
+          <div
+            key={raw}
+            aria-hidden={!active}
+            className={`absolute inset-0 transition-opacity duration-[1100ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none ${active ? "opacity-100 z-[1]" : "opacity-0 z-0"}`}
+          >
+            {src && small && (
+              // Blurred, dimmed fill behind a photo that's too small to crop.
+              <img
+                src={src}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl brightness-[0.55] saturate-125"
+                draggable={false}
+              />
+            )}
+            {src && (
+              <img
+                src={src}
+                alt={`${name} ${i + 1}`}
+                decoding="async"
+                fetchPriority={i === 0 ? "high" : "auto"}
+                onLoad={(e) => {
+                  const w = e.currentTarget.naturalWidth;
+                  setNatural((prev) => (prev[i] === w ? prev : { ...prev, [i]: w }));
+                }}
+                onError={makeImageFallback({ id: hotel.id, name })}
+                onClick={() => setViewerOpen(true)}
+                draggable={false}
+                className={`relative w-full h-full cursor-zoom-in will-change-transform transition-transform duration-[7000ms] ease-out motion-reduce:transition-none motion-reduce:scale-100 ${
+                  small ? "object-contain" : "object-cover"
+                } ${active ? "scale-100" : "scale-[1.06]"}`}
+              />
+            )}
+          </div>
+        );
+      })}
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-linear-to-t from-black/75 via-black/25 to-transparent" />
+
+      {many && (
+        <>
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/35 hover:bg-black/55 backdrop-blur-sm text-white hidden md:flex items-center justify-center md:opacity-0 md:group-hover/hero:opacity-100 focus-visible:opacity-100 transition-opacity"
+            aria-label={t("Previous photo")}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/35 hover:bg-black/55 backdrop-blur-sm text-white hidden md:flex items-center justify-center md:opacity-0 md:group-hover/hero:opacity-100 focus-visible:opacity-100 transition-opacity"
+            aria-label={t("Next photo")}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewerOpen(true)}
+            className="absolute top-4 right-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm px-3 py-1.5 text-[12px] font-semibold text-white"
+            aria-label={t("View all photos")}
+          >
+            <Images className="w-3.5 h-3.5" /> {index + 1} / {photos.length}
+          </button>
+          <div className="absolute bottom-4 right-4 md:right-6 z-10 flex gap-1.5">
+            {photos.slice(0, 12).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIndex(i)}
+                className={`h-1.5 rounded-full transition-all ${i === index ? "w-5 bg-white" : "w-1.5 bg-white/55 hover:bg-white/80"}`}
+                aria-label={`${t("Photo")} ${i + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {viewerOpen && (
+        <PhotoViewer
+          photos={photos}
+          index={index}
+          name={name}
+          onIndex={setIndex}
+          onClose={() => setViewerOpen(false)}
+        />
+      )}
 
       {starCount > 0 && (
-        <div className="absolute top-4 left-4 flex gap-0.5">
+        <div className="absolute top-4 left-4 z-[3] flex gap-0.5">
           {Array.from({ length: starCount }).map((_, i) => (
             <Star key={i} className="w-5 h-5 fill-[#FFA500] text-[#FFA500] drop-shadow" />
           ))}
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-[3] p-6 md:p-8 pb-9 md:pb-10">
         <h1 className="font-['Poppins:Bold',sans-serif] text-[28px] md:text-[42px] leading-tight text-white mb-2 drop-shadow-lg">
           {t(name)}
         </h1>
@@ -210,7 +366,7 @@ function HotelHero({ hotel, image }: HotelHeroProps) {
             <span>{t(address)}</span>
           </div>
         )}
-        <div className="flex flex-wrap gap-3 mt-4">
+        <div className="pointer-events-auto flex flex-wrap gap-3 mt-4">
           {websiteUrl && (
             <a
               href={websiteUrl}
@@ -234,6 +390,96 @@ function HotelHero({ hotel, image }: HotelHeroProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── PhotoViewer ───────────────────────────────────────────────────────────
+// Full-screen photo viewer opened from the hero carousel. Arrow keys / Esc /
+// swipe; rendered into <body> so no transformed ancestor can clip it.
+
+interface PhotoViewerProps {
+  photos: string[];
+  index: number;
+  name: string;
+  onIndex: (i: number) => void;
+  onClose: () => void;
+}
+
+function PhotoViewer({ photos, index, name, onIndex, onClose }: PhotoViewerProps) {
+  const { t } = useLanguage();
+  const [touchX, setTouchX] = useState<number | null>(null);
+  const step = (delta: number) => onIndex((index + delta + photos.length) % photos.length);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowRight") step(1);
+      else if (e.key === "ArrowLeft") step(-1);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, photos.length]);
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={name}
+      className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
+      onClick={onClose}
+      onTouchStart={(e) => setTouchX(e.touches[0].clientX)}
+      onTouchEnd={(e) => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+        setTouchX(null);
+      }}
+    >
+      <img
+        src={heroImageUrl(photos[index])}
+        alt={`${name} ${index + 1}`}
+        onClick={(e) => e.stopPropagation()}
+        className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+      />
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+        aria-label={t("Close")}
+      >
+        <X className="w-5 h-5" />
+      </button>
+      {photos.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); step(-1); }}
+            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+            aria-label={t("Previous photo")}
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); step(1); }}
+            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+            aria-label={t("Next photo")}
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-[13px]">
+            {index + 1} / {photos.length}
+          </div>
+        </>
+      )}
+    </div>,
+    document.body,
   );
 }
 

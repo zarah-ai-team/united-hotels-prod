@@ -172,6 +172,21 @@ export function makeImageFallback(hotel: HotelImageInput) {
   };
 }
 
+// Large rendition for the full-width hotel hero. ImageKit URLs are re-requested
+// at up to 2400px (never upscaled — c-at_max) instead of the 1200px card size;
+// other URLs (our own /api/hotels/media files) are already full size.
+export function heroImageUrl(url: string): string {
+  if (!url || !url.includes("ik.imagekit.io")) return url;
+  const tr = "tr=w-2400,c-at_max,q-85";
+  if (/[?&]tr=/.test(url)) return url.replace(/tr=[^&]*/, tr);
+  return url + (url.includes("?") ? "&" : "?") + tr;
+}
+
+// Every real photo the API returned for the hotel (no Picsum padding).
+export function allHotelImages(hotel: HotelImageInput): string[] {
+  return [...new Set(readApiGallery(hotel))];
+}
+
 export function pickHotelGallery(hotel: HotelImageInput, count = 4): string[] {
   const gallery = readApiGallery(hotel);
   if (gallery.length >= count) return gallery.slice(0, count);
